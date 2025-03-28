@@ -8,7 +8,7 @@
                     <input type="text" value="" id="codigo" name="codigo" class="form-control">
                 </div>
                 <div class="form-reversion">
-                    <label for="codigo">Saldo del Prestamo:</label>
+                    <label for="codigo">Saldo del Préstamo:</label>
                     <input type="text" value="" id="codigo" name="codigo" class="form-control">
                 </div>
             </div>
