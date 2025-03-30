@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CentroController;
+use App\Http\Controllers\GruposController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +20,7 @@ Route::middleware('auth','prevent.back.history')->group(function () {
     Route::get('/asesores',[AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
     Route::get('/reversiones',[AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
     Route::post('/centros/guardar',[CentroController::class, 'store'])->name('centros.store');
-
+    Route::post('7grupos/guardar',[GruposController::class, 'savegroup'])->name('grupos.savegroup');
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');

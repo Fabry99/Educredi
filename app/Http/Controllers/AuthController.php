@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Centros;
+use App\Models\Grupos;
 use App\Models\UserSessions;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -112,21 +113,21 @@ class AuthController extends Controller
     {
         // Obtener la sesión activa del usuario
         $session = UserSessions::where('user_id', Auth::id())
-                              ->whereNull('ended_at')
-                              ->first();
-    
+            ->whereNull('ended_at')
+            ->first();
+
         // Si hay una sesión activa, actualizar la hora de fin
         if ($session) {
             $session->update([
                 'ended_at' => now(),
             ]);
         }
-    
+
         // Cerrar sesión y redirigir al login
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect()->route('login');
     }
 
@@ -159,7 +160,11 @@ class AuthController extends Controller
 
         // Si el rol es 'contador', cargar la vista
         $centros = Centros::orderBy('id', 'DESC')->get();
-        return view('modules.dashboard.grupos', compact('rol', 'centros'));
+        $gruposPorCentro = Grupos::select('id_centros', DB::raw('count(*) as cantidad_grupos'))
+            ->with('centro')  // Cargar la relación con el centro
+            ->groupBy('id_centros')
+            ->get();
+        return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro'));
     }
 
     public function mantenimientoAsesores()

@@ -1,24 +1,32 @@
 <!-- El Modal -->
-<div id="modalnuevocentro" class="modal">
+<div id="modalnuevogrupo" class="modal">
     <!-- Contenido del Modal -->
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2>Agregar Centros</h2>
-        <form action="{{route('centros.store')}}" method="POST">
+        <h2>Agregar Grupos</h2>
+        <form action="{{ route('grupos.savegroup') }}" method="POST">
             @csrf
             <div class="modal-ge">
                 <div class="input-group">
-                    <label for="nombre" class="nombre">Nombre del Centro:
-                    </label>
-                    <input type="nombre" id="nombre" name="nombre" required>
+            
+                    <input type="nombre" id="nombre" name="nombre" placeholder="Nombre del Grupo:" required>
 
                 </div>
-            
+                <div class="input-group">
+                    <select class="select-centro" id="id_centros" name="id_centros" required>
+                        <option value="" disabled selected>Selecciona un Centro</option>
+                        @foreach($centros as $centro)
+                            <option value="{{ $centro->id }}">{{ $centro->nombre }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
             </div>
             <div class="botones">
-                <button type="submit" class="btn-aceptar"><img src="{{asset('img/aceptar.svg')}}" alt=""></button>
+                <button type="submit" class="btn-aceptar"><img src="{{ asset('img/aceptar.svg') }}"
+                        alt=""></button>
             </div>
-            
+
         </form>
     </div>
 </div>
@@ -36,7 +44,7 @@
         --borde: #ccc;
         --background-inputs: #f7f7f7;
         --font-personal: #8d0808;
-        --azul:#385E89;
+        --azul: #385E89;
     }
 
     h2 {
@@ -47,6 +55,7 @@
         display: flex;
         width: 100%;
         margin-top: 10px;
+        justify-content: center;
     }
 
     .input-group {
@@ -61,17 +70,22 @@
         background: none;
         width: 100%;
         font-size: 16px;
-        padding: 10px;
+        padding: 10px 25px;
         margin-left: 10px;
     }
+
     .input-group select {
-        border: none;
-        background: none;
+        border: 2px solid var(--borde);
+        border-radius: 6px;
+        background: var(--background-inputs);
+        padding: 10px 10px;
+        margin-right: 10px;
         outline: none;
         width: 100%;
         font-size: 16px;
-        
+
     }
+
     .input-group .label1 {
         display: flex;
         align-items: center;
@@ -87,18 +101,20 @@
         justify-self: center;
     }
 
-  .nombre{
-    display: flex;
-    width: 75%;
-    justify-content: center;
-    align-items: center;
-  }
-    .botones{
+    .nombre {
+        display: flex;
+        width: 75%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .botones {
         display: flex;
         justify-content: right;
         margin-top: 20px;
     }
-    .btn-aceptar{
+
+    .btn-aceptar {
         background: var(--color-boton);
         padding: 5px 45px;
         border-radius: 4px;
@@ -106,15 +122,17 @@
         text-decoration: none;
         border: 1px solid black;
     }
-   
-     button img{
+
+    button img {
         width: 35px;
-        height: 35px;        
+        height: 35px;
     }
-    .btn-aceptar:hover{
+
+    .btn-aceptar:hover {
         background: #0b7914;
     }
-    .btn-imprimir:hover{
+
+    .btn-imprimir:hover {
         background: #486c96;
     }
 </style>

@@ -4,6 +4,7 @@ import 'datatables.net-dt';
 import 'datatables.net-colreorder';
 import 'datatables.net-keytable-dt';
 import 'datatables.net-scroller-dt';
+import { Modal } from 'bootstrap';
 
 
 // Inicializar DataTables
@@ -98,53 +99,65 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-//abrir modal con boton
-var modal = document.getElementById("myModal");
-var btn = document.getElementById("openModalBtn");
-var closeBtn = document.getElementsByClassName("close-btn")[0];
-
-btn.onclick = function (event) {
-    event.preventDefault();
-    modal.style.display = "block";
-}
-
-closeBtn.onclick = function () {
-    modal.style.display = "none";
-}
-
-window.onclick = function (event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
+document.addEventListener("DOMContentLoaded", function () {
+    // Función para abrir un modal
+    function abrirModal(modalId) {
+        let modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = "block";
+        }
     }
-}
 
-document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") {
-        modal.style.display = "none";
+    // Función para cerrar un modal
+    function cerrarModal(modal) {
+        if (modal) {
+            modal.style.display = "none";
+        }
     }
+
+    // Mapeo de botones a modales
+    let botones = {
+        "openModalBtnnuevocentro": "modalnuevocentro",
+        "openModalBtnnuevogrupo": "modalnuevogrupo",
+        "openModalBtn": "myModal"
+    };
+
+    // Asignar eventos a los botones para abrir los modales
+    Object.keys(botones).forEach(btnId => {
+        let boton = document.getElementById(btnId);
+        if (boton) {
+            boton.addEventListener("click", function (event) {
+                event.preventDefault();
+                abrirModal(botones[btnId]);
+            });
+        }
+    });
+
+    // Detectar botones de cierre y asignar eventos
+    document.querySelectorAll(".close-btn1").forEach((boton) => {
+        boton.addEventListener("click", function () {
+            let modal = this.closest(".modal");
+            cerrarModal(modal);
+        });
+    });
+
+    // Cerrar modal al hacer clic fuera de él
+    window.addEventListener("click", function (event) {
+        document.querySelectorAll(".modal").forEach((modal) => {
+            if (event.target === modal) {
+                cerrarModal(modal);
+            }
+        });
+    });
+
+    // Cerrar el modal al presionar la tecla ESC
+    window.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") { // Si se presiona la tecla ESC
+            document.querySelectorAll(".modal").forEach((modal) => {
+                cerrarModal(modal);
+            });
+        }
+    });
 });
 
-var modalnuevocentro = document.getElementById("modalnuevocentro");
-var btnnuevocentro = document.getElementById("openModalBtnnuevocentro");
-var closeBtnnuevocentro = document.getElementsByClassName("close-btn")[0];
 
-btnnuevocentro.onclick = function (event) {
-    event.preventDefault();
-    modalnuevocentro.style.display = "block";
-}
-
-closeBtnnuevocentro.onclick = function () {
-    modalnuevocentro.style.display = "none";
-}
-
-window.onclick = function (event) {
-    if (event.target == modalnuevocentro) {
-        modalnuevocentro.style.display = "none";
-    }
-}
-
-document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") {
-        modalnuevocentro.style.display = "none";
-    }
-});

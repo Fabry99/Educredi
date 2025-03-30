@@ -82,15 +82,15 @@ table.dataTable tbody tr:hover {
   }
 
   /* El botón de cerrar */
-  .close-btn {
+  .close-btn1 {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
   }
 
-  .close-btn:hover,
-  .close-btn:focus {
+  .close-btn1:hover,
+  .close-btn1:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;

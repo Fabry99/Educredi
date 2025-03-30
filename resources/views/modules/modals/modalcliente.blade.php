@@ -2,7 +2,7 @@
 <div id="myModal" class="modal">
     <!-- Contenido del Modal -->
     <div class="modal-content">
-        <span class="close-btn">&times;</span>
+        <span class="close-btn1">&times;</span>
         <h2>Agregar Cliente</h2>
         <form action="" method="POST">
             @csrf
