@@ -308,4 +308,3 @@
     }
 </style>
 
-<!-- JavaScript para manejar la apertura y cierre del Modal -->

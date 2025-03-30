@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Centros;
+use App\Models\UserSessions;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session as FacadesSession;
 
@@ -11,37 +15,37 @@ class AuthController extends Controller
 {
 
     public function login()
-{
-    try {
-        // Verifica si el usuario ya está autenticado
-        if (Auth::check()) {
-            // Obtiene el usuario autenticado
-            $user = Auth::user();
+    {
+        try {
+            // Verifica si el usuario ya está autenticado
+            if (Auth::check()) {
+                // Obtiene el usuario autenticado
+                $user = Auth::user();
 
-            // Redirige al usuario según su rol
-            switch ($user->rol) {
-                case 'administrador':
-                    return redirect()->route('home');
-                case 'caja':
-                    return redirect()->route('caja');
-                case 'contador':
-                    return redirect()->route('contador');
-                default:
-                    // Si el rol no es válido, redirige al login
-                    return redirect()->route('login');
+                // Redirige al usuario según su rol
+                switch ($user->rol) {
+                    case 'administrador':
+                        return redirect()->route('home');
+                    case 'caja':
+                        return redirect()->route('caja');
+                    case 'contador':
+                        return redirect()->route('contador');
+                    default:
+                        // Si el rol no es válido, redirige al login
+                        return redirect()->route('login');
+                }
             }
+
+            // Si no está autenticado, muestra la vista de login
+            return view('modules/auth/login');
+        } catch (\Exception $e) {
+            // Maneja cualquier error que ocurra durante la autenticación
+            Log::error('Error al verificar o redirigir al usuario: ' . $e->getMessage());
+
+            // Redirige al login con un mensaje de error si algo sale mal
+            return redirect()->route('login')->withErrors(['error' => 'Ocurrió un error inesperado.']);
         }
-
-        // Si no está autenticado, muestra la vista de login
-        return view('modules/auth/login');
-    } catch (\Exception $e) {
-        // Maneja cualquier error que ocurra durante la autenticación
-        Log::error('Error al verificar o redirigir al usuario: ' . $e->getMessage());
-
-        // Redirige al login con un mensaje de error si algo sale mal
-        return redirect()->route('login')->withErrors(['error' => 'Ocurrió un error inesperado.']);
     }
-}
 
 
 
@@ -57,8 +61,22 @@ class AuthController extends Controller
             if (Auth::attempt($credenciales)) {
                 $user = Auth::user();
 
+                UserSessions::create([
+                    'user_id' => $user->id,
+                    'started_at' => now(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+                // Verificar si el usuario está activo
                 if ($user->estado === 'activo') {
+                    // Registra la hora de inicio de sesión en la tabla 'sessions'
+                    $sessionId = session()->getId(); // Obtener el ID de la sesión
+                    DB::table('sessions')->where('id', $sessionId)->update([
+                        'user_id' => $user->id, // Guardar el ID del usuario en la sesión
+                        'login_time' => Carbon::now(), // Registrar la hora de inicio de sesión
+                    ]);
 
+                    // Redirige al usuario según su rol
                     switch ($user->rol) {
                         case 'administrador':
                             return to_route('home');
@@ -89,19 +107,29 @@ class AuthController extends Controller
         }
     }
 
+
     public function logout(Request $request)
     {
-        // Cierra la sesión del usuario
+        // Obtener la sesión activa del usuario
+        $session = UserSessions::where('user_id', Auth::id())
+                              ->whereNull('ended_at')
+                              ->first();
+    
+        // Si hay una sesión activa, actualizar la hora de fin
+        if ($session) {
+            $session->update([
+                'ended_at' => now(),
+            ]);
+        }
+    
+        // Cerrar sesión y redirigir al login
         Auth::logout();
-        
-        // Invalida la sesión y regenera el token CSRF
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-    
-        // Redirige al login
+        
         return redirect()->route('login');
     }
-    
+
 
     public function home()
     {
@@ -122,40 +150,42 @@ class AuthController extends Controller
     public function grupos()
     {
         $rol = Auth::user()->rol;
-    
+
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador' && $rol !== 'caja') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
         }
-    
+
         // Si el rol es 'contador', cargar la vista
-        return view('modules.dashboard.grupos')->with('rol', $rol);
+        $centros = Centros::orderBy('id', 'DESC')->get();
+        return view('modules.dashboard.grupos', compact('rol', 'centros'));
     }
-   
-    public function mantenimientoAsesores(){
+
+    public function mantenimientoAsesores()
+    {
         $rol = Auth::user()->rol;
-    
+
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
         }
-    
+
         // Si el rol es 'contador', cargar la vista
         return view('modules.dashboard.mantenimientoasesor')->with('rol', $rol);
     }
-    public function reverliquidacion(){
+    public function reverliquidacion()
+    {
         $rol = Auth::user()->rol;
-    
+
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
         }
-    
+
         // Si el rol es 'contador', cargar la vista
         return view('modules.dashboard.reversionliquidacion')->with('rol', $rol);
     }
-    
 }

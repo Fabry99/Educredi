@@ -1,73 +1,61 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
-@include('modules.modals.modalcliente')
+@include('modules.modals.modalnuevocentros')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
             <h1>Mantenimiento de Grupos</h1>
             <div class="btn-grupos" style="display: flex; margin-bottom: 10px; margin-top: 10px; margin-left: 10px;">
-                <a href="" id="openModalBtn" class="btn-agregar" style="margin-right: 15px;"><span>Nuevo Grupo</span></a>
-                <a href="" id="openModalBtn" class="btn-eliminar"><span>Eliminar Grupo</span></a>
+                <a href="#" id="openModalBtnnuevocentro" class="btn-agregar" style="margin-right: 15px;"><span>Nuevo
+                        Centro</span></a>
+                <a href="" id="openModalBtn" class="btn-eliminar"><span>Nuevo Grupo</span></a>
 
 
             </div>
-            <div class="">
-                <div class="modal-ge">
-                    <div class="input-group">
-                        <label for="sfdm" class="label1">
-                            <select id="sfdm" name="sfdm" required>
-                                <option value="">Seleccione SFDM</option>  <!-- Opción por defecto -->
-                                <option value="option1">Opción 1</option>
-                                <option value="option2">Opción 2</option>
-                                <option value="option3">Opción 3</option>
-                                <!-- Puedes añadir más opciones aquí -->
-                            </select>
-                        </label>
-                    </div>
-                    <div class="input-group">
-                        <label for="grupo" class="label1">
-                            <select id="grupo" name="grupo" required>
-                                <option value="">Seleccione un Grupo</option>  <!-- Opción por defecto -->
-                                <option value="grupo1">Grupo 1</option>
-                                <option value="grupo2">Grupo 2</option>
-                                <option value="grupo3">Grupo 3</option>
-                                <!-- Puedes añadir más opciones aquí -->
-                            </select>
-                        </label>
-                    </div>
+            @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                <div class="notification custom_error">
+                    {{ $error }}
                 </div>
-                       
+            @endforeach
+        @endif
+
+        @if (session('success'))
+            <div class="notification custom_success">
+                {{ session('success') }}
             </div>
+        @endif
+
             <table id="mitabla" class="table table-striped" style="width:100%">
-                
+
                 <thead>
                     <tr>
-                        <th>Codigo</th>
-                        <th>Nombres</th>
-                        <th>Apellidos</th>
-                        <th></th>
-                        
-                        
+                        <th>ID</th>
+                        <th>Centro</th>
+                        <th>Asesor</th>
+                        <th>Fecha Creación</th>
+                        <th>Grupos Asignados</th>
+
+
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach ($centros as $centros)
                     <tr>
-                        <td>Codigo</td>
-                        <td>Nombre</td>
-                        <td>Apellidos</td>
-                        <td><a href="" id="openModalBtn" class="btn-eliminar"><span>Insertar</span></a>
-                            <a href="" id="openModalBtn" class="btn-eliminar"><span>Eliminar</span></a>
+                        <td>{{ $centros->id }}</td>
+                        <td>{{ $centros->nombre }}</td>
+                        <td>{{ $centros->asesor->name }}</td> <!-- Muestra directamente el ID del asesor -->
+                        <td>{{ $centros->created_at->format('d/m/Y H:i') }}</td>
 
-                        </td>
-                        
-                        
-                        
-                       
+                        <td></td>
                     </tr>
-
+                    @endforeach
                 </tbody>
-                
+
             </table>
         </div>
+
+     
     </div>
+
 
 </div>

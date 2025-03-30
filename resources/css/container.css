@@ -23,6 +23,7 @@
 #mitabla th {
     background-color: var(--tittle-column);
     color: white;
+    text-align: left;
 }
 
 /* Cambiar el color de las filas al pasar el cursor sobre ellas */

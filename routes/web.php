@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CentroController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,8 @@ Route::middleware('auth','prevent.back.history')->group(function () {
     Route::get('/grupos',[AuthController::class, 'grupos'])->name('grupos');
     Route::get('/asesores',[AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
     Route::get('/reversiones',[AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
+    Route::post('/centros/guardar',[CentroController::class, 'store'])->name('centros.store');
+
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');

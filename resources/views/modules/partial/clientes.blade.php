@@ -23,13 +23,23 @@
                     </tr>
                 </thead>
                 <tbody>
+
                     <tr>
-                        <td>Nombre</td>
-                        <td>zxczxczxczxcasdasdasdasdasdasd</td>
-                        <td>Saldo</td>
-                        <td>Ultim Movimiento</td>
-                        <td>Poximo Pago</td>
-                        <td>Valor</td>
+                        <td>10221</td>
+                        <td>Fabricio</td>
+                        <td>Abrego</td>
+                        <td>245854217</td>
+                        <td>-</td>
+                        <td>26/03/2025</td>
+                       
+                    </tr>
+                    <tr>
+                        <td>1233</td>
+                        <td>Joel</td>
+                        <td>Ortiz</td>
+                        <td>10285444</td>
+                        <td>-</td>
+                        <td>26/03/2025</td>
                        
                     </tr>
                    

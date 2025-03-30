@@ -5,6 +5,7 @@ import 'datatables.net-colreorder';
 import 'datatables.net-keytable-dt';
 import 'datatables.net-scroller-dt';
 
+
 // Inicializar DataTables
 $(document).ready(function () {
     const table = $('#mitabla').DataTable({
@@ -16,6 +17,7 @@ $(document).ready(function () {
         "autoWidth": false,  // Desactiva el ajuste automático de anchos de columnas
         "responsive": true,  // Hace la tabla responsive
         "colReorder": true,
+        "order": [[0, "desc"]],  // Ordena por la primera columna de forma ascendente
         "language": {
             "decimal": ",",  // Configuración del separador decimal
             "thousands": ".",  // Configuración del separador de miles
@@ -119,5 +121,30 @@ window.onclick = function (event) {
 document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") {
         modal.style.display = "none";
+    }
+});
+
+var modalnuevocentro = document.getElementById("modalnuevocentro");
+var btnnuevocentro = document.getElementById("openModalBtnnuevocentro");
+var closeBtnnuevocentro = document.getElementsByClassName("close-btn")[0];
+
+btnnuevocentro.onclick = function (event) {
+    event.preventDefault();
+    modalnuevocentro.style.display = "block";
+}
+
+closeBtnnuevocentro.onclick = function () {
+    modalnuevocentro.style.display = "none";
+}
+
+window.onclick = function (event) {
+    if (event.target == modalnuevocentro) {
+        modalnuevocentro.style.display = "none";
+    }
+}
+
+document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") {
+        modalnuevocentro.style.display = "none";
     }
 });
