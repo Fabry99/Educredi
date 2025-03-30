@@ -1,6 +1,7 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
 @include('modules.modals.modalnuevocentros')
 @include('modules.modals.modalnuevogrupos')
+@include('modules.modals.modalgrupos')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">

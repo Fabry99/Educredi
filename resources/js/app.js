@@ -44,24 +44,58 @@ $(document).ready(function () {
     });
 
     //funcion para abrir el modal al hacer clic en una fila de la tabla
-    $(document).ready(function() {
+    $(document).ready(function () {
         const table = $('.tablaClientes').DataTable();
-    
+
         $('.tablaClientes tbody').on('click', 'tr', function () {
-            $('#myModal').fadeIn();  
-    
+            $('#myModal').fadeIn();
+
             $('.close-btn').on('click', function () {
-                $('#myModal').fadeOut(); 
+                $('#myModal').fadeOut();
             });
-    
-            $(window).on('click', function(event) {
+
+            $(window).on('click', function (event) {
                 if ($(event.target).is('#myModal')) {
                     $('#myModal').fadeOut();
                 }
             });
         });
     });
-});    
+
+    $(document).ready(function () {
+        const table = $('#mitabla').DataTable();
+    
+        // Al hacer clic en una fila de la tabla
+        $('#mitabla tbody').on('click', 'tr', function () {
+            // Obtener los datos de la fila seleccionada
+            const rowData = table.row(this).data(); // Obtiene los datos de la fila clicada
+    
+            const nombreGrupo = rowData[1]; 
+        
+            // Asignar el nombre al título del modal o en otro lugar dentro del modal
+            $('#modalgrupos h2').text('Detalles del Centro - ' + nombreGrupo);
+    
+            // Asignar el nombre al campo oculto (para enviarlo en el formulario, si lo deseas)
+            $('#nombre_grupo').val(nombreGrupo);
+    
+            // Mostrar el modal
+            $('#modalgrupos').fadeIn();
+        });
+    
+        // Cerrar el modal cuando se hace clic en el botón de cerrar
+        $('.close-btn1').on('click', function () {
+            $('#modalgrupos').fadeOut();
+        });
+    
+        // Cerrar el modal si se hace clic fuera de él
+        $(window).on('click', function (event) {
+            if ($(event.target).is('#modalgrupos')) {
+                $('#modalgrupos').fadeOut();
+            }
+        });
+    });
+    
+});
 
 
 // Funcion para desplegar el subMenu del sidebar
@@ -69,17 +103,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const menuItems = document.querySelectorAll('.menu-item-dropdown');
 
     menuItems.forEach(item => {
-        const link = item.querySelector('.menu-link'); 
-        const subMenu = item.querySelector('.sub-menu'); 
+        const link = item.querySelector('.menu-link');
+        const subMenu = item.querySelector('.sub-menu');
 
         link.addEventListener('click', function (e) {
-            e.preventDefault(); 
+            e.preventDefault();
 
             const isActive = item.classList.toggle('sub-menu-toggle');
 
             if (isActive) {
-                subMenu.style.height = `${subMenu.scrollHeight + 6}px`; 
-                subMenu.style.padding = '0.2rem 0'; 
+                subMenu.style.height = `${subMenu.scrollHeight + 6}px`;
+                subMenu.style.padding = '0.2rem 0';
             } else {
                 subMenu.style.height = '0';
                 subMenu.style.padding = '0';
