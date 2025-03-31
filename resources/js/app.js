@@ -62,27 +62,99 @@ $(document).ready(function () {
         });
     });
 
+    function cargarGruposPorCentro(centroID) {
+        $.ajax({
+            url: '/grupos-por-centro/' + centroID, // Ruta del backend
+            method: 'GET',
+            success: function (response) {
+                // Destruir DataTable anterior si existe
+                if ($.fn.DataTable.isDataTable('#tablagrupos')) {
+                    $('#tablagrupos').DataTable().destroy();
+                }
+    
+                // Limpiar la tabla antes de agregar nuevos datos
+                $('#tablagrupos tbody').empty();
+    
+                // Insertar filas con los grupos obtenidos
+                response.forEach(grupo => {
+                    const formattedDate = new Date(grupo.created_at).toLocaleString('es-ES', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
+                
+                    $('#tablagrupos tbody').append(`
+                        <tr>
+                            <td>${grupo.id}</td>
+                            <td>${grupo.nombre}</td>
+                            <td>${grupo.cantidad_personas}</td>
+                            <td>${formattedDate}</td>
+                        </tr>
+                    `);
+                });                
+    
+                $(document).ready(function () {
+                    const table = $('#tablagrupos').DataTable({
+                        "paging": true,  // Habilita la paginación
+                        "lengthChange": true,  // Permite cambiar la cantidad de registros por página
+                        "searching": true,  // Habilita la búsqueda
+                        "ordering": true,  // Habilita el orden de las columnas
+                        "info": true,  // Muestra información sobre los registros
+                        "autoWidth": false,  // Desactiva el ajuste automático de anchos de columnas
+                        "responsive": true,  // Hace la tabla responsive
+                        "colReorder": true,
+                        "order": [[0, "asc"]],  // Ordena por la primera columna de forma ascendente
+                        "language": {
+                            "decimal": ",",  // Configuración del separador decimal
+                            "thousands": ".",  // Configuración del separador de miles
+                            "lengthMenu": "Mostrar _MENU_ registros por página",  // Menú para seleccionar cuántos registros mostrar
+                            "zeroRecords": "No se encontraron resultados",  // Mensaje si no hay registros
+                            "info": "Mostrando página _PAGE_ de _PAGES_",  // Mensaje de información sobre las páginas
+                            "infoEmpty": "No hay registros disponibles",  // Mensaje cuando no hay registros
+                            "infoFiltered": "(filtrado de _MAX_ registros totales)",  // Mensaje si hay filtros aplicados
+                            "search": "Buscar:",  // Texto del campo de búsqueda
+                            "paginate": {
+                                "first": "Primera",  // Botón para ir a la primera página
+                                "previous": "Anterior",  // Botón para ir a la página anterior
+                                "next": "Siguiente",  // Botón para ir a la página siguiente
+                                "last": "Última"  // Botón para ir a la última página
+                            },
+                            "aria": {
+                                "sortAscending": ": activar para ordenar la columna de manera ascendente",
+                                "sortDescending": ": activar para ordenar la columna de manera descendente"
+                            }
+                        },
+                        "lengthMenu": [5, 10, 25, 50, 100],
+                        "pageLength": 5
+                    });
+                
+                });
+                
+            },
+            error: function () {
+                alert('Error al cargar los grupos.');
+            }
+        });
+    }
+    // Función para abrir el modal al hacer clic en una fila de la tabla centros
     $(document).ready(function () {
         const table = $('#mitabla').DataTable();
     
-        // Al hacer clic en una fila de la tabla
         $('#mitabla tbody').on('click', 'tr', function () {
-            // Obtener los datos de la fila seleccionada
-            const rowData = table.row(this).data(); // Obtiene los datos de la fila clicada
+            const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
+            const centroID = rowData[0]; // ID del centro (Columna 0)
+            const nombreCentro = rowData[1]; // Nombre del centro (Columna 1)
     
-            const nombreGrupo = rowData[1]; 
-        
-            // Asignar el nombre al título del modal o en otro lugar dentro del modal
-            $('#modalgrupos h2').text('Detalles del Centro - ' + nombreGrupo);
+            // Actualizar el título del modal
+            $('#modalgrupos h2').text('Grupos del Centro - ' + nombreCentro);
     
-            // Asignar el nombre al campo oculto (para enviarlo en el formulario, si lo deseas)
-            $('#nombre_grupo').val(nombreGrupo);
+            // Llamar a la función para cargar los grupos
+            cargarGruposPorCentro(centroID);
     
             // Mostrar el modal
             $('#modalgrupos').fadeIn();
         });
     
-        // Cerrar el modal cuando se hace clic en el botón de cerrar
+        // Cerrar el modal al hacer clic en el botón de cerrar
         $('.close-btn1').on('click', function () {
             $('#modalgrupos').fadeOut();
         });
@@ -93,9 +165,19 @@ $(document).ready(function () {
                 $('#modalgrupos').fadeOut();
             }
         });
+    
+        // Cerrar el modal al presionar ESC
+        $(document).on('keydown', function (event) {
+            if (event.key === "Escape") {
+                $('#modalgrupos').fadeOut();
+            }
+        });
     });
     
 });
+
+//Tabla de grupos
+
 
 
 // Funcion para desplegar el subMenu del sidebar

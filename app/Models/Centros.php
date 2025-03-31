@@ -17,4 +17,8 @@ class Centros extends Model
     {
         return $this->belongsTo(User::class, 'id_asesor');
     }
+    public function clientes()
+    {
+        return $this->hasMany(Clientes::class, 'id_centro');
+    }
 }

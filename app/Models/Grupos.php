@@ -14,6 +14,10 @@ class Grupos extends Model
     // En el modelo Grupo (Grupos.php)
     public function centro()
     {
-        return $this->belongsTo(Centros::class, 'id_centros');
+        return $this->belongsTo(Centros::class, 'id_centro');
+    }
+    public function clientes()
+    {
+        return $this->hasMany(Clientes::class, 'id_grupo');
     }
 }

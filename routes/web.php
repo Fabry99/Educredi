@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CentroController;
+use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\GruposController;
+use App\Models\Grupos;
+use App\Models\Municipios;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +24,14 @@ Route::middleware('auth','prevent.back.history')->group(function () {
     Route::get('/reversiones',[AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
     Route::post('/centros/guardar',[CentroController::class, 'store'])->name('centros.store');
     Route::post('7grupos/guardar',[GruposController::class, 'savegroup'])->name('grupos.savegroup');
+    Route::get('/grupos-por-centro/{id}', function ($id) {
+        $grupos = Grupos::where('id_centros', $id)->get();
+        return response()->json($grupos);
+    });
+    Route::get('/municipios/{id}', function ($id) {
+        return response()->json(Municipios::where('id_departamento', $id)->get());
+    });
+    Route::post('clientes/guardar',[ClientesController::class, 'saveclient'])->name('clientes.saveclient');
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');

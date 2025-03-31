@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Centros;
+use App\Models\Departamentos;
 use App\Models\Grupos;
 use App\Models\UserSessions;
 use Carbon\Carbon;
@@ -146,7 +147,8 @@ class AuthController extends Controller
     public function contador()
     {
         $rol = Auth::user()->rol;
-        return view('modules.dashboard.home')->with('rol', $rol);
+        $departamentos = Departamentos::all();
+        return view('modules.dashboard.home', compact('rol', 'departamentos'));
     }
     public function grupos()
     {

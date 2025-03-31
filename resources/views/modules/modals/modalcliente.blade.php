@@ -4,42 +4,42 @@
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
         <h2>Agregar Cliente</h2>
-        <form action="" method="POST">
+        <form action="{{ route('clientes.saveclient') }}" method="POST">
             @csrf
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="nombre" class="label1">
-                        <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:" required>
+                        <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="apellido" class="label1">
-                        <input type="apellido" id="apellido" name="apellido" placeholder="Apellidos:" required>
+                        <input type="apellido" id="apellido" name="apellido" placeholder="Apellidos:">
                     </label>
                 </div>
             </div>
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="direccion" class="label1">
-                        <input type="nombre" id="direccion" name="direccion" placeholder="Dirección:" required>
+                        <input type="text" id="direccion" name="direccion" placeholder="Dirección:">
                     </label>
                 </div>
                 <div class="input-group">
-                    <label for="apellido" class="label1">
-                        <input type="number" id="teloficina" name="teloficina" placeholder="Tel.Oficina:" required>
+                    <label for="teloficina" class="label1">
+                        <input type="text" id="teloficina" name="teloficina" placeholder="Telefono Oficina:"
+                            pattern="\d{8}" title="El teléfono debe tener exactamente 8 dígitos">
                     </label>
                 </div>
             </div>
             <div class="modal-ge">
                 <div class="input-group">
-                    <label for="direcciondenegocio" class="label1">
-                        <input type="nombre" id="direcciondenegocio" name="direcciondenegocio"
-                            placeholder="Dirección de Negocio:" required>
+                    <label for="dir_negocio" class="label1">
+                        <input type="text" id="dir_negocio" name="dir_negocio" placeholder="Dirección Negocio:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="sector" class="label1">
-                        <input type="text" id="sector" name="sectOr" placeholder="Sector:" required>
+                        <input type="text" id="sector" name="sector" placeholder="Sector:">
                     </label>
                 </div>
             </div>
@@ -47,63 +47,65 @@
                 <div class="input-group">
                     <label for="actividadeconomica" class="label1">
                         <input type="nombre" id="actividadeconomica" name="actividadeconomica"
-                            placeholder="Actividad Economica:" required>
+                            placeholder="Actividad Economica:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="NIT" class="label1">
-                        <input type="number" id="NIT" name="NIT" placeholder="NIT:" required>
+                        <input type="text" id="NIT" name="NIT" placeholder="NIT: 1234-567891-234-5"
+                         pattern="\d{4}-\d{6}-\d{3}-\d{1}" title="Formato: 4 dígitos - 6 dígitos - 3 dígitos - 1 dígito (Ej: 1234-567891-234-5)">
                     </label>
                 </div>
             </div>
-            <div class="modal-ge">
-                <div class="input-group">
-                    <label for="depto" class="label1">
-                        <input type="text" id="depto" name="depto" placeholder="Depto:" required>
-                    </label>
+            <div class="modal-ge select">
+                <div class="input-group select">
+                    <select id="id_departamento" name="id_departamento" required>
+                        <option value="" disabled selected>Seleccione un Departamento</option>
+                        @foreach ($departamentos as $departamento)
+                            <option value="{{ $departamento->id }}">{{ $departamento->nombre }}</option>
+                        @endforeach
+                    </select>
+
                 </div>
-                <div class="input-group">
-                    <label for="municipio" class="label1">
-                        <input type="text" id="municipio" name="municipio" placeholder="Municipio:" required>
-                    </label>
+                <div class="input-group select" style="margin-left: 40px;">
+                    <select id="id_municipio" name="id_municipio" required>
+                        <option value="" disabled selected>Seleccione un Municipio</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="ocupacion" class="label1">
-                        <input type="text" id="ocupacion" name="ocupacion" placeholder="Ocupación:" required>
+                        <input type="text" id="ocupacion" name="ocupacion" placeholder="Ocupación:">
                     </label>
                 </div>
-                <div class="input-group">
-                    <label for="nopuedefirmar" class="label1">
-                        <input type="checkbox" id="nopuedefirmar" name="nopuedefirmar" value="nopuedefirmar"
-                            style="width: 20px; height: 20px; margin-right: 10px;">
-                        No puede Firmar
-                    </label>
+                <div class="input-group select" style="margin-left: 20px;">
+                    <select id="firma" name="firma">
+                        <option value="" disabled selected>Puede Firmar ?</option>
+                        <option value="si">Si</option>
+                        <option value="no">No</option>
+                    </select>
                 </div>
             </div>
             <h3>Datos Personales</h3>
 
             <div class="modal-ge">
-                <div class="input-group">
-                    <label for="cliente" class="label2">
-                        <input type="text" id="cliente" name="cliente" placeholder="Cliente:" required>
-                    </label>
-                </div>
+
                 <div class="input-group">
                     <label for="dui" class="label2">
-                        <input type="number" id="dui" name="dui" placeholder="DUI:" required>
+                        <input type="text" id="dui" name="dui" placeholder="DUI: 12345678-9"
+                            pattern="\d{8}-\d{1}" title="Formato: 8 dígitos - 1 dígito (Ej: 12345678-9)" required>
                     </label>
                 </div>
                 <div class="input-group">
-                    <label for="edad" class="label2">
-                        <input type="number" id="edad" name="edad" placeholder="Edad:" required>
+                    <label for="expedida" class="label2">
+                        <input type="text" id="expedida" name="expedida" placeholder="Expedida En:">
                     </label>
                 </div>
+
                 <div class="input-group">
-                    <label for="fecha_nacimiento" class="label2">
-                        <input type="date" id="fecha_nacimiento" name="fecha_nacimiento"
-                            placeholder="F.Nacimiento:" required>
+                    <label for="expedicion" class="label2" style="font-size: 12px">Fecha Expedición:
+                        <input type="date" id="expedicion" name="expedicion" required>
                     </label>
                 </div>
             </div>
@@ -111,99 +113,127 @@
                 <div class="input-group">
                     <label for="lugarnacimiento" class="label2">
                         <input type="text" id="lugarnacimiento" name="lugarnacimiento"
-                            placeholder="Lugar de Nacimiento:" required>
+                            placeholder="Lugar de Nacimiento:">
                     </label>
                 </div>
                 <div class="input-group">
-                    <label for="estadocivil" class="label2">
-                        <input type="text" id="estadocivil" name="estadocivil" placeholder="Estado Civil:"
-                            required>
+                    <label for="nacionalidad" class="label2">
+                        <input type="text" id="nacionalidad" name="nacionalidad" placeholder="Nacionalidad:">
                     </label>
                 </div>
-                <div class="input-group">
-                    <label for="edad" class="label2">
-                        <input type="number" id="edad" name="edad" placeholder="Edad:" required>
-                    </label>
+                <div class="input-group select" style="margin-left: 20px;">
+                    <select id="genero" name="genero">
+                        <option value="" disabled selected>Genero:</option>
+                        <option value="masculino">masculino</option>
+                        <option value="femenino">femenino</option>
+
+                    </select>
                 </div>
-                <div class="input-group">
-                    <label for="nrc" class="label2">
-                        <input type="date" id="nrc" name="nrc" placeholder="NRC:" required>
-                    </label>
-                </div>
+
+
             </div>
             <div class="modal-ge">
                 <div class="input-group">
+                    <label for="fecha_nacimiento" class="label2" style="font-size: 12px">Fecha Nacimiento:
+                        <input type="date" id="fecha_nacimiento" name="fecha_nacimiento"
+                            placeholder="F.Nacimiento:" required>
+                    </label>
+                </div>
+                <div class="input-group">
                     <label for="telcasa" class="label2">
-                        <input type="number" id="telcasa" name="telcasa" placeholder="Tel.Casa:" required>
+                        <input type="text" id="telcasa" name="telcasa" placeholder="Tel.Casa:" pattern="\d{8}"
+                            title="El teléfono debe tener exactamente 8 dígitos">
+                    </label>
+                </div>
+                <div class="input-group select" style="margin-left: 20px;">
+                    <select id="estado_civil" name="estado_civil">
+                        <option value="" disabled selected>Estado Civil:</option>
+                        <option value="soltero">soltero</option>
+                        <option value="casado">casado</option>
+                        <option value="divorciado">divorciado</option>
+                        <option value="viudo">viudo</option>
+                    </select>
+                </div>
+
+
+
+            </div>
+            <div class="modal-ge">
+                <div class="input-group">
+                    <label for="nrc" class="label2">
+                        <input type="text" id="nrc" name="nrc" placeholder="NRC:" pattern="\d{22}" title="Ingrese el Código de 22 Dígitos">
+                    </label>
+                </div>
+                <div class="input-group">
+                    <label for="perdependiente" class="label2">
+                        <input type="text" id="perdependiente" name="perdependiente"
+                            placeholder="Personas Dependientes:" min="1" max="20" title="Se Debe Agregar la Cantidad de Personas Dependientes">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="conyugue" class="label2">
-                        <input type="text" id="conyugue" name="conyugue" placeholder="Conyugue:" required>
-                    </label>
-                </div>
-                <div class="input-group">
-                    <label for="expedida" class="label2">
-                        <input type="date" id="expedida" name="expedida" placeholder="Expedida En:" required>
+                        <input type="text" id="conyugue" name="conyugue" placeholder="Conyugue:">
                     </label>
                 </div>
 
             </div>
             <div class="modal-ge">
                 <div class="input-group">
-                    <label for="fechaingreso" class="label2">
-                        <input type="date" id="fechaingreso" name="fechaingreso"
-                            placeholder="Fecha de Ingreso:" required>
-                    </label>
-                </div>
-                <div class="input-group">
-                    <label for="fecharetiro" class="label2">
-                        <input type="date" id="fecharetiro" name="fecharetiro" placeholder="Fecha de Retiro:"
-                            required>
-                    </label>
-                </div>
-                
-            </div>
-            <div class="modal-ge">
-                <div class="input-group">
                     <label for="sueldo" class="label2">
-                        <input type="text" id="sueldo" name="sueldo"
-                            placeholder="Sueldo:" required>
+                        <input type="number" id="sueldo" name="sueldo" placeholder="Sueldo: 0.0"
+                            step="0.01" min="0">
+
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="otroingreso" class="label2">
-                        <input type="text" id="otroingreso" name="otroingreso" placeholder="Otr.Ingreso:"
-                            required>
+                        <input type="text" id="otroingreso" name="otroingreso" placeholder="Otr.Ingreso: 0.0"
+                            step="0.01" min="0">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="egreso" class="label2">
-                        <input type="number" id="egreso" name="egreso" placeholder="Egreso:" required>
+                        <input type="number" id="egreso" name="egreso" placeholder="Egreso: 0.0"
+                            step="0.01" min="0">
                     </label>
                 </div>
-                <div class="input-group">
-                    <label for="perdependiente" class="label2">
-                        <input type="text" id="perdependiente" name="perdependiente" placeholder="Personas Dependientes:" required>
-                    </label>
-                </div>
-            </div>
-            <div class="modal-ge">
-                <div class="input-group" style="width: 100%">
-                    <label for="sfdm" class="label2">
-                        <input type="text" id="sfdm" name="sfdm"
-                            placeholder="SFDM:" required>
-                    </label>
-                </div>
+
             </div>
             <div class="botones">
-                <a href="" class="btn-imprimir"><img src="{{asset('img/icon_imprimir.svg')}}" alt=""></a>
-                <a href="" class="btn-aceptar"><img src="{{asset('img/aceptar.svg')}}" alt=""></a>
-                
+                <button type="submit" class="btn-aceptar"><img src="{{ asset('img/aceptar.svg') }}"
+                        alt=""></button>
             </div>
         </form>
     </div>
 </div>
+<script>
+    document.getElementById("id_departamento").addEventListener("change", function() {
+        var departamentoId = this.value;
+
+        // Limpiar el select de municipios
+        var municipioSelect = document.getElementById("id_municipio");
+        municipioSelect.innerHTML =
+        '<option value="" disabled selected>Seleccione un Municipio</option>'; // Reset
+
+        // Solo hacer la solicitud si se seleccionó un departamento
+        if (departamentoId) {
+            fetch(`/municipios/${departamentoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Agregar los municipios del departamento seleccionado
+                    data.forEach(function(municipio) {
+                        var option = document.createElement("option");
+                        option.value = municipio.id;
+                        option.text = municipio.nombre;
+                        municipioSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error al cargar municipios:", error);
+                });
+        }
+    });
+</script>
 
 <!-- Estilos CSS -->
 <style>
@@ -218,7 +248,7 @@
         --borde: #ccc;
         --background-inputs: #f7f7f7;
         --font-personal: #8d0808;
-        --azul:#385E89;
+        --azul: #385E89;
     }
 
     h2 {
@@ -229,6 +259,19 @@
         display: flex;
         width: 100%;
         margin-top: 10px;
+    }
+
+    .modal-ge select {
+        width: 100%;
+        padding: 10px 15px;
+        border-radius: 4px;
+        background: var(--background-inputs);
+    }
+
+    .input-group.select {
+        border: 1px solid var(--borde);
+        border-radius: 4px;
+        background: var(--background-inputs);
     }
 
     .input-group {
@@ -243,14 +286,16 @@
         font-size: 16px;
 
     }
+
     .input-group select {
         border: none;
         background: none;
         outline: none;
         width: 100%;
         font-size: 16px;
-        
+
     }
+
     .input-group .label1 {
         display: flex;
         align-items: center;
@@ -274,12 +319,14 @@
         border-radius: 4px;
         padding: 10px;
     }
-    .botones{
+
+    .botones {
         display: flex;
         justify-content: right;
         margin-top: 20px;
     }
-    .btn-aceptar{
+
+    .btn-aceptar {
         background: var(--color-boton);
         padding: 5px 25px;
         border-radius: 4px;
@@ -287,7 +334,8 @@
         text-decoration: none;
         border: 1px solid black;
     }
-    .btn-imprimir{
+
+    .btn-imprimir {
         background: var(--azul);
         padding: 5px 25px;
         border-radius: 4px;
@@ -296,15 +344,17 @@
         margin-right: 10px;
         border: 1px solid black;
     }
-    .botones a img{
+
+    .botones button img {
         width: 35px;
-        height: 35px;        
+        height: 35px;
     }
-    .btn-aceptar:hover{
+
+    .btn-aceptar:hover {
         background: #0b7914;
     }
-    .btn-imprimir:hover{
+
+    .btn-imprimir:hover {
         background: #486c96;
     }
 </style>
-

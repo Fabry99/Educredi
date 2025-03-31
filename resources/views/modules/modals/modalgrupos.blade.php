@@ -1,39 +1,25 @@
 <!-- El Modal -->
-<div id="modalgrupos" class="modal">
+<div id="modalgrupos" class="modalgrupos">
     <!-- Contenido del Modal -->
-    <div class="modal-content">
+    <div class="modal-contentgrupos">
         <span class="close-btn1">&times;</span>
         <h2 id="modal-title">Detalles del Grupo</h2> <!-- Aquí se actualizará el título con el ID -->
-        
-        <!-- Puedes también agregar un campo de texto para mostrar el ID -->
-        <p id="grupo-id"></p> <!-- Aquí se mostrará el ID -->
-        
-        <form action="{{ route('grupos.savegroup') }}" method="POST">
-            @csrf
-            <div class="modal-ge">
-                <div class="input-group">
-                    <input type="hidden" id="id_fila" name="id_fila">
-                    <input type="text" id="nombre" name="nombre" placeholder="Nombre del Grupo:" required>
-                </div>
-                <div class="input-group">
-                    <select class="select-centro" id="id_centros" name="id_centros" required>
-                        <option value="" disabled selected>Selecciona un Centro</option>
-                        @foreach($centros as $centro)
-                            <option value="{{ $centro->id }}">{{ $centro->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-            <div class="botones">
-                <button type="submit" class="btn-aceptar">
-                    <img src="{{ asset('img/aceptar.svg') }}" alt="">
-                </button>
-            </div>
-        </form>
+        <table id="tablagrupos" class="table table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Grupos</th>
+                    <th>Cantidad de Personas</th>
+                    <th>Fecha Creación</th>
+                </tr>
+            </thead>
+            <tbody>
+               
+            </tbody>
+
+        </table>
     </div>
 </div>
-
-
 <!-- Estilos CSS -->
 <style>
     :root {
@@ -49,7 +35,28 @@
         --font-personal: #8d0808;
         --azul: #385E89;
     }
+    .modalgrupos {
+    display: none; /* Ocultar el modal por defecto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+  }
 
+  /* Contenido del Modal */
+  .modal-contentgrupos {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: auto;
+    max-width: 1000px;
+    border-radius: 10px;
+  }
     h2 {
         justify-self: center
     }
@@ -138,4 +145,43 @@
     .btn-imprimir:hover {
         background: #486c96;
     }
+
+/* Cambiar el color de fondo de las cabeceras */
+#tablagrupos th {
+    background-color: var(--tittle-column);
+    color: white;
+    text-align: left;
+}
+
+/* Cambiar el color de las filas al pasar el cursor sobre ellas */
+#tablagrupos tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Establecer el borde de las celdas */
+#tablagrupos th, #tablagrupos td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+/* Personalizar las filas alternadas */
+#tablagrupos tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Cambiar el color de la paginación */
+.dataTables_paginate .paginate_button {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+}
+
+.dataTables_paginate .paginate_button:hover {
+    background-color: #0056b3;
+}
+table.dataTable tbody tr:hover {
+    cursor: pointer;
+}
+
+
 </style>

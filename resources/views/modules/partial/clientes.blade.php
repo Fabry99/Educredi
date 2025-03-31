@@ -5,12 +5,26 @@
         <div class="container mt-4">
             <h1>Clientes</h1>
             <div class="btn-clientes">
-                <a href="" id="openModalBtn"><img src="{{asset('img/icon-clientes.svg')}}" alt=""><span>Agregar Cliente</span></a>
-                
+                <a href="" id="openModalBtn"><img src="{{ asset('img/icon-clientes.svg') }}"
+                        alt=""><span>Agregar Cliente</span></a>
+
 
             </div>
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    <div class="notification custom_error">
+                        {{ $error }}
+                    </div>
+                @endforeach
+            @endif
+
+            @if (session('success'))
+                <div class="notification custom_success">
+                    {{ session('success') }}
+                </div>
+            @endif
             <table id="mitabla" class="table table-striped tablaClientes" style="width:100%">
-                
+
                 <thead>
                     <tr>
                         <th>Codigo</th>
@@ -19,7 +33,7 @@
                         <th>DUI</th>
                         <th>Act.Economica</th>
                         <th>Feha Ingresor</th>
-                        
+
                     </tr>
                 </thead>
                 <tbody>
@@ -31,7 +45,7 @@
                         <td>245854217</td>
                         <td>-</td>
                         <td>26/03/2025</td>
-                       
+
                     </tr>
                     <tr>
                         <td>1233</td>
@@ -40,11 +54,11 @@
                         <td>10285444</td>
                         <td>-</td>
                         <td>26/03/2025</td>
-                       
+
                     </tr>
-                   
+
                 </tbody>
-                
+
             </table>
         </div>
     </div>
