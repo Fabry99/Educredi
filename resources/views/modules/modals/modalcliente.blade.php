@@ -229,7 +229,6 @@
                     });
                 })
                 .catch(error => {
-                    console.error("Error al cargar municipios:", error);
                 });
         }
     });

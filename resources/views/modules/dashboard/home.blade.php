@@ -18,6 +18,7 @@
             @break
         @case('administrador')
             @include('modules.partial.prueba_administrador')
+            
             @break
         @case('caja')
             @include('modules.partial.prueba_caja')

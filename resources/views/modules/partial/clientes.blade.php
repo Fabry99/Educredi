@@ -1,5 +1,6 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
 @include('modules.modals.modalcliente')
+@include('modules.modals.modaleditarcliente')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
@@ -30,32 +31,35 @@
                         <th>Codigo</th>
                         <th>Nombres</th>
                         <th>Apellidos</th>
+                        <th>Genero</th>
+                        <th>Edad</th>
+                        <th>Telefono</th>
                         <th>DUI</th>
-                        <th>Act.Economica</th>
-                        <th>Feha Ingresor</th>
+                        <th>Departamento</th>
+                        <th>Municipio</th>
+                        <th>Centro pert.</th>
+                        <th>Grupo pert.</th>
 
                     </tr>
                 </thead>
                 <tbody>
-
+                    @foreach ($clientes as $clientes)
                     <tr>
-                        <td>10221</td>
-                        <td>Fabricio</td>
-                        <td>Abrego</td>
-                        <td>245854217</td>
-                        <td>-</td>
-                        <td>26/03/2025</td>
+                        <td>{{$clientes->id}}</td>
+                        <td>{{$clientes->nombre}}</td>
+                        <td>{{$clientes->apellido}}</td>
+                        <td>{{$clientes->genero}}</td>
+                        <td>{{ \Carbon\Carbon::parse($clientes->fecha_nacimiento)->age }} años</td>
+                        <td>{{$clientes->telefono_casa}}</td>
+                        <td>{{$clientes->dui}}</td>
+                        <td>{{$clientes->departamento->nombre ?? 'Sin Departamento'}}</td>
+                        <td>{{$clientes->municipio->nombre ?? 'Sin Municipio'}}</td>
+                        <td></td>
+                        <td></td>
 
                     </tr>
-                    <tr>
-                        <td>1233</td>
-                        <td>Joel</td>
-                        <td>Ortiz</td>
-                        <td>10285444</td>
-                        <td>-</td>
-                        <td>26/03/2025</td>
-
-                    </tr>
+                        
+                    @endforeach
 
                 </tbody>
 

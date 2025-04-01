@@ -9,21 +9,21 @@ use App\Models\Municipios;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest','prevent.back.history')->group(function () {
+Route::middleware('guest', 'prevent.back.history')->group(function () {
     Route::get('/', [AuthController::class, 'login'])->name('login');
     Route::post('/loggear', [AuthController::class, 'loggear'])->name('loggear');
 });
 
 
-Route::middleware('auth','prevent.back.history')->group(function () {
+Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/home', [AuthController::class, 'home'])->name('home');
     Route::get('/caja', [AuthController::class, 'caja'])->name('caja');
     Route::get('/clientes', [AuthController::class, 'contador'])->name('contador');
-    Route::get('/grupos',[AuthController::class, 'grupos'])->name('grupos');
-    Route::get('/asesores',[AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
-    Route::get('/reversiones',[AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
-    Route::post('/centros/guardar',[CentroController::class, 'store'])->name('centros.store');
-    Route::post('7grupos/guardar',[GruposController::class, 'savegroup'])->name('grupos.savegroup');
+    Route::get('/grupos', [AuthController::class, 'grupos'])->name('grupos');
+    Route::get('/asesores', [AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
+    Route::get('/reversiones', [AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
+    Route::post('/centros/guardar', [CentroController::class, 'store'])->name('centros.store');
+    Route::post('7grupos/guardar', [GruposController::class, 'savegroup'])->name('grupos.savegroup');
     Route::get('/grupos-por-centro/{id}', function ($id) {
         $grupos = Grupos::where('id_centros', $id)->get();
         return response()->json($grupos);
@@ -31,13 +31,18 @@ Route::middleware('auth','prevent.back.history')->group(function () {
     Route::get('/municipios/{id}', function ($id) {
         return response()->json(Municipios::where('id_departamento', $id)->get());
     });
-    Route::post('clientes/guardar',[ClientesController::class, 'saveclient'])->name('clientes.saveclient');
+    Route::post('clientes/guardar', [ClientesController::class, 'saveclient'])->name('clientes.saveclient');
+    Route::get('/obtener-cliente/{id}', [ClientesController::class, 'obtenerCliente']);
+
+    Route::get('/grupos/{id}', function ($id) {
+        return response()->json(Grupos::where('id_centros', $id)->get());
+    });
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->get('/redirect', function () {
-    $user = Auth::user();  
+    $user = Auth::user();
 
     switch ($user->rol) {
         case 'administrador':
@@ -47,6 +52,6 @@ Route::middleware('auth')->get('/redirect', function () {
         case 'contador':
             return redirect()->route('contador');
         default:
-            return redirect()->route('login'); 
+            return redirect()->route('login');
     }
 });

@@ -82,4 +82,20 @@ class ClientesController extends Controller
             return redirect()->back()->with('error', 'Hubo un Problema al Agregar el Cliente.');
         }
     }
+    public function obtenerCliente($id)
+    {
+        // Buscar el cliente junto con su grupo y centro
+        $cliente = Clientes::with(['departamento', 'municipio','centro','grupo'])->find($id);
+    
+        // Si el cliente existe, devolver los datos en formato JSON
+        if ($cliente) {
+            return response()->json($cliente);
+        }
+    
+        // Si no se encuentra el cliente, devolver un error
+        return response()->json(['error' => 'Cliente no encontrado'], 404);
+    }
+
+    
+    
 }

@@ -7,7 +7,7 @@ import 'datatables.net-scroller-dt';
 import { Modal } from 'bootstrap';
 
 
-// Inicializar DataTables
+// Inicializar DataTables clientes
 $(document).ready(function () {
     const table = $('#mitabla').DataTable({
         "paging": true,  // Habilita la paginación
@@ -43,24 +43,186 @@ $(document).ready(function () {
         "pageLength": 5
     });
 
-    //funcion para abrir el modal al hacer clic en una fila de la tabla
     $(document).ready(function () {
         const table = $('.tablaClientes').DataTable();
 
+        // Cuando se hace clic en una fila de la tabla
         $('.tablaClientes tbody').on('click', 'tr', function () {
-            $('#myModal').fadeIn();
+            const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
+            const idCliente = rowData[0]; // Asume que el ID del cliente está en la primera columna (puedes ajustarlo según tu estructura)
 
-            $('.close-btn').on('click', function () {
-                $('#myModal').fadeOut();
+            // Realizar una solicitud AJAX para obtener más información sobre el cliente
+            $.ajax({
+                url: '/obtener-cliente/' + idCliente, // Ruta definida en Laravel
+                type: 'GET',
+                success: function (response) {
+
+                    // Asigna los datos al modal
+                    $('#modaleditarcliente #nombre').val(response.nombre);
+                    $('#modaleditarcliente #apellido').val(response.apellido);
+                    $('#modaleditarcliente #direccion').val(response.direccion);
+                    $('#modaleditarcliente #teloficina').val(response.telefono_oficina);
+                    $('#modaleditarcliente #dir_negocio').val(response.direc_trabajo);
+                    $('#modaleditarcliente #sector').val(response.sector);
+                    $('#modaleditarcliente #actividadeconomica').val(response.act_economica);
+                    $('#modaleditarcliente #NIT').val(response.nit);
+                    $('#modaleditarcliente #id_departamentoeditcliente').val(response.departamento.id);
+                    $('#modaleditarcliente #id_municipioedit').val(response.municipio.id);
+                    $('#modaleditarcliente #ocupacion').val(response.ocupacion);
+                    $('#modaleditarcliente #firma').val(response.puede_firmar);
+                    $('#modaleditarcliente #dui').val(response.dui);
+                    $('#modaleditarcliente #expedida').val(response.lugar_expe);
+                    $('#modaleditarcliente #expedicion').val(response.fecha_expedicion);
+                    $('#modaleditarcliente #lugarnacimiento').val(response.lugar_nacimiento);
+                    $('#modaleditarcliente #fecha_nacimiento').val(response.fecha_nacimiento);
+                    $('#modaleditarcliente #nacionalidad').val(response.nacionalidad);
+                    $('#modaleditarcliente #genero').val(response.genero);
+                    $('#modaleditarcliente #telcasa').val(response.telefono_casa);
+                    $('#modaleditarcliente #estado_civil').val(response.estado_civil);
+                    $('#modaleditarcliente #nrc').val(response.nrc);
+                    $('#modaleditarcliente #perdependiente').val(response.persona_dependiente);
+                    $('#modaleditarcliente #conyugue').val(response.nombre_conyugue);
+                    $('#modaleditarcliente #sueldo').val(response.ing_economico);
+                    $('#modaleditarcliente #egreso').val(response.egre_economico);
+                    $('#modaleditarcliente #otroingreso').val(response.otros_ing);
+                    // if (response.centro) {
+                    //     $('#modaleditarcliente #id_centro').val(response.centro.id);
+                    // } else {
+                    //     $('#modaleditarcliente #id_centro').val(''); // Permite la selección de un nuevo centro
+                    // }
+
+                    // if (response.grupo) {
+                    //     $('#modaleditarcliente #id_grupo').val(response.grupo.id);
+                    // } else {
+                    //     $('#modaleditarcliente #id_grupo').val(''); // Dejar en blanco para permitir selección
+                    // }
+
+                    // // Si response.centro existe, cargar los grupos asociados
+                    // if (response.centro) {
+                    //     cargarGrupos(response.centro.id, response.grupo);
+                    // } else {
+                    //     cargarGrupos(null, null); // Llamar la función para resetear el select de grupos
+                    // }
+                    // $('#modaleditarcliente #id_centro').on('change', function () {
+                    //     let centroId = $(this).val();
+                    //     cargarGrupos(centroId, null); // Cargar grupos cuando se seleccione un centro
+                    // });
+
+
+                    console.log(response);
+                    // Actualizar el título del modal
+                    $('#modaleditarcliente h2').html('Editar Cliente: ' + response.nombre.toUpperCase() + '&nbsp;' + response.apellido.toUpperCase());
+
+                    // Cargar los municipios para el departamento seleccionado
+                    cargarMunicipios(response.departamento.id, response.municipio.id);
+
+                    // Mostrar el modal
+                    $('#modaleditarcliente').fadeIn();
+                },
+                error: function () {
+                    alert('Error al obtener los datos del cliente.');
+                }
             });
 
+
+            // Cargar grupos
+            function cargarGrupos(centroId, grupoId) {
+                console.log(centroId);
+                var grupoSelect = $('#modaleditarcliente #id_grupo');
+                grupoSelect.empty(); // Limpiar el select
+                grupoSelect.append('<option value="" disabled selected>Seleccione un Grupo</option>'); // Reset
+
+                if (centroId) {
+                    // Realizar una solicitud AJAX para obtener los grupos del centro
+                    $.ajax({
+                        url: '/grupos/' + centroId,
+                        type: 'GET',
+                        success: function (data) {
+                            if (data.length > 0) {
+                                data.forEach(function (grupo) {
+                                    var option = $('<option></option>')
+                                        .val(grupo.id)
+                                        .text(grupo.nombre);
+                                    grupoSelect.append(option);
+                                });
+
+                                // Si el cliente tiene un grupo asignado y no es null, seleccionarlo
+                                if (grupoId && grupoId.id) {
+                                    grupoSelect.val(grupoId.id);
+                                }
+                            }
+                        },
+                        error: function () {
+                            console.error("Error al cargar los grupos.");
+                        }
+                    });
+                }
+            }
+
+            // Función para cargar los municipios según el departamento seleccionado
+            function cargarMunicipios(departamentoId, municipioId) {
+                console.log("Cargando municipios para el departamento ID:", departamentoId);  // Agregado
+                var municipioSelect = $('#modaleditarcliente #id_municipioedit');
+                municipioSelect.empty();
+                municipioSelect.append('<option value="" disabled selected>Seleccione un Municipio</option>');
+            
+                if (departamentoId) {
+                    $.ajax({
+                        url: '/municipios/' + departamentoId,
+                        type: 'GET',
+                        success: function (data) {
+                            console.log("Municipios recibidos:", data);  // Agregado para verificar los datos
+                            if (data.length > 0) {
+                                data.forEach(function (municipio) {
+                                    var option = $('<option></option>')
+                                        .val(municipio.id)
+                                        .text(municipio.nombre);
+                                    municipioSelect.append(option);
+                                });
+            
+                                if (municipioId) {
+                                    municipioSelect.val(municipioId);
+                                }
+                            }
+                        },
+                        error: function () {
+                            console.error("Error al cargar municipios.");
+                        }
+                    });
+                }
+            }
+            $('#id_departamentoeditcliente').on('change', function() {
+                var departamentoId = $(this).val();
+                cargarMunicipios(departamentoId, null);
+            });
+                        
+            
+
+            // Función para cerrar el modal al hacer clic en el botón de cerrar
+            $('.close-btn1').on('click', function () {
+                $('#modaleditarcliente').fadeOut();
+            });
+
+            // Cerrar el modal cuando se hace clic fuera de él
             $(window).on('click', function (event) {
-                if ($(event.target).is('#myModal')) {
-                    $('#myModal').fadeOut();
+                if ($(event.target).is('#modaleditarcliente')) {
+                    $('#modaleditarcliente').fadeOut();
+                }
+            });
+
+            // Cerrar el modal al presionar la tecla Escape
+            $(document).on('keydown', function (event) {
+                if (event.key === "Escape") {
+                    $('#modaleditarcliente').fadeOut();
                 }
             });
         });
+
+
+
+
     });
+
 
     function cargarGruposPorCentro(centroID) {
         $.ajax({
@@ -71,17 +233,17 @@ $(document).ready(function () {
                 if ($.fn.DataTable.isDataTable('#tablagrupos')) {
                     $('#tablagrupos').DataTable().destroy();
                 }
-    
+
                 // Limpiar la tabla antes de agregar nuevos datos
                 $('#tablagrupos tbody').empty();
-    
+
                 // Insertar filas con los grupos obtenidos
                 response.forEach(grupo => {
                     const formattedDate = new Date(grupo.created_at).toLocaleString('es-ES', {
                         year: 'numeric', month: '2-digit', day: '2-digit',
                         hour: '2-digit', minute: '2-digit', second: '2-digit'
                     });
-                
+
                     $('#tablagrupos tbody').append(`
                         <tr>
                             <td>${grupo.id}</td>
@@ -90,8 +252,8 @@ $(document).ready(function () {
                             <td>${formattedDate}</td>
                         </tr>
                     `);
-                });                
-    
+                });
+
                 $(document).ready(function () {
                     const table = $('#tablagrupos').DataTable({
                         "paging": true,  // Habilita la paginación
@@ -126,9 +288,9 @@ $(document).ready(function () {
                         "lengthMenu": [5, 10, 25, 50, 100],
                         "pageLength": 5
                     });
-                
+
                 });
-                
+
             },
             error: function () {
                 alert('Error al cargar los grupos.');
@@ -138,34 +300,34 @@ $(document).ready(function () {
     // Función para abrir el modal al hacer clic en una fila de la tabla centros
     $(document).ready(function () {
         const table = $('#mitabla').DataTable();
-    
+
         $('#mitabla tbody').on('click', 'tr', function () {
             const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
             const centroID = rowData[0]; // ID del centro (Columna 0)
             const nombreCentro = rowData[1]; // Nombre del centro (Columna 1)
-    
+
             // Actualizar el título del modal
             $('#modalgrupos h2').text('Grupos del Centro - ' + nombreCentro);
-    
+
             // Llamar a la función para cargar los grupos
             cargarGruposPorCentro(centroID);
-    
+
             // Mostrar el modal
             $('#modalgrupos').fadeIn();
         });
-    
+
         // Cerrar el modal al hacer clic en el botón de cerrar
         $('.close-btn1').on('click', function () {
             $('#modalgrupos').fadeOut();
         });
-    
+
         // Cerrar el modal si se hace clic fuera de él
         $(window).on('click', function (event) {
             if ($(event.target).is('#modalgrupos')) {
                 $('#modalgrupos').fadeOut();
             }
         });
-    
+
         // Cerrar el modal al presionar ESC
         $(document).on('keydown', function (event) {
             if (event.key === "Escape") {
@@ -173,7 +335,7 @@ $(document).ready(function () {
             }
         });
     });
-    
+
 });
 
 //Tabla de grupos

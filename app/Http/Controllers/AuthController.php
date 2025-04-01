@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Centros;
+use App\Models\Clientes;
 use App\Models\Departamentos;
 use App\Models\Grupos;
 use App\Models\UserSessions;
@@ -148,7 +149,12 @@ class AuthController extends Controller
     {
         $rol = Auth::user()->rol;
         $departamentos = Departamentos::all();
-        return view('modules.dashboard.home', compact('rol', 'departamentos'));
+        $centros = Centros::all();
+        $clientes = Clientes::with('departamento','municipio','centro','grupo')->get();
+        if ($rol == 'contador') {
+            return view('modules.dashboard.home', compact('rol', 'departamentos', 'clientes','centros'));
+        }
+        
     }
     public function grupos()
     {
