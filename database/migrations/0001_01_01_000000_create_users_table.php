@@ -38,6 +38,8 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->longText('payload');
             $table->integer('last_activity')->index();
+            $table->timestamp('login_time')->nullable(); // Hora de inicio de sesión
+            $table->timestamp('logout_time')->nullable(); // Hora de cierre de sesión
         });
     }
 

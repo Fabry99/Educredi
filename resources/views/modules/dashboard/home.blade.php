@@ -18,6 +18,7 @@
             @break
         @case('administrador')
             @include('modules.partial.prueba_administrador')
+            
             @break
         @case('caja')
             @include('modules.partial.prueba_caja')
@@ -27,4 +28,5 @@
 @endsection
 @section('js')
     @vite('resources/js/app.js')
+    @vite('resources/js/notifications.js')
 @endsection

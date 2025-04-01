@@ -151,3 +151,25 @@ body {
     margin-bottom: 15px;
 }
 
+
+.notification{
+    position: fixed;
+    top: 15%;
+    right: 20px;
+    z-index: 9999;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.5s ease, visibility 0.5s ease, top 0.5s ease;
+    max-width: 300px;
+}
+.custom_success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.custom_error {
+    background-color: #f44336; /* Color rojo para error */
+    color: white;
+}
+
