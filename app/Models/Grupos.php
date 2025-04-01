@@ -16,6 +16,7 @@ class Grupos extends Model
     {
         return $this->belongsTo(Centros::class, 'id_centro');
     }
+
     public function clientes()
     {
         return $this->hasMany(Clientes::class, 'id_grupo');

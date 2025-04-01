@@ -49,12 +49,12 @@ class Clientes extends Model
     {
         return $this->belongsTo(Departamentos::class, 'id_departamento');
     }
-    public function centro()
-    {
-        return $this->belongsTo(Centros::class, 'id_centro');
-    }
     public function grupo()
     {
         return $this->belongsTo(Grupos::class, 'id_grupo');
+    }
+    public function centro()
+    {
+        return $this->belongsTo(Centros::class, 'id_centro');
     }
 }

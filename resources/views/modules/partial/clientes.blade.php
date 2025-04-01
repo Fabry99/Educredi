@@ -54,8 +54,8 @@
                         <td>{{$clientes->dui}}</td>
                         <td>{{$clientes->departamento->nombre ?? 'Sin Departamento'}}</td>
                         <td>{{$clientes->municipio->nombre ?? 'Sin Municipio'}}</td>
-                        <td></td>
-                        <td></td>
+                        <td>{{$clientes->centro->nombre ?? 'Sin Centro'}}</td>
+                        <td>{{$clientes->grupo->nombre ?? 'Sin Grupo'}}</td>
 
                     </tr>
                         
