@@ -28,6 +28,15 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
         $grupos = Grupos::where('id_centros', $id)->get();
         return response()->json($grupos);
     });
+    Route::get('/grupos-por-centro/{id}', function ($id) {
+        // Recuperar los grupos del centro y contar la cantidad de clientes por grupo
+        $grupos = Grupos::where('id_centros', $id)
+            ->withCount('clientes')  // Añadir el conteo de clientes por grupo
+            ->get();
+
+        // Devolver la respuesta en formato JSON
+        return response()->json($grupos);
+    });
     Route::get('/municipios/{id}', function ($id) {
         return response()->json(Municipios::where('id_departamento', $id)->get());
     });
@@ -37,9 +46,13 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/grupos/{id}', function ($id) {
         return response()->json(Grupos::where('id_centros', $id)->get());
     });
-// routes/web.php
-Route::put('clientes/update', [ClientesController::class, 'updateclient'])
-     ->name('clientes.update');
+    // routes/web.php
+    Route::put('clientes/update', [ClientesController::class, 'updateclient'])
+        ->name('clientes.update');
+
+    Route::get('/clientes-por-grupo/{grupoId}', [ClientesController::class, 'clientesPorGrupo']);
+    // Ruta para eliminar un cliente del grupo (actualizar su id_grupo a null)
+    Route::put('/eliminarclientegrupo/{id}', [ClientesController::class, 'eliminarDelGrupo'])->name('eliminarclientegrupo');
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');

@@ -2,6 +2,7 @@
 @include('modules.modals.modalnuevocentros')
 @include('modules.modals.modalnuevogrupos')
 @include('modules.modals.modalgrupos')
+@include('modules.modals.modalmostrarclientegrupo')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
@@ -26,6 +27,9 @@
                     {{ session('success') }}
                 </div>
             @endif
+            <div id="custom-alert" class="alert" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px;">
+                <span id="custom-alert-message"></span>
+            </div>
 
             <table id="mitabla" class="table table-striped" style="width:100%">
 

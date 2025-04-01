@@ -1,10 +1,143 @@
 import './bootstrap';
-import $, { event } from 'jquery'; // Importar jQuery
+import $, { error, event } from 'jquery'; // Importar jQuery
 import 'datatables.net-dt';
 import 'datatables.net-colreorder';
 import 'datatables.net-keytable-dt';
 import 'datatables.net-scroller-dt';
 import { Modal } from 'bootstrap';
+
+
+$('#tablaclientesgrupos').DataTable({
+    "paging": true,
+    "lengthChange": true,
+    "searching": true,
+    "ordering": true,
+    "info": true,
+    "autoWidth": false,
+    "responsive": true,
+    "colReorder": true,
+    "order": [[0, "asc"]],
+    "language": {
+        "decimal": ",",
+        "thousands": ".",
+        "lengthMenu": "Mostrar _MENU_ registros por página",
+        "zeroRecords": "No se encontraron resultados",
+        "info": "Mostrando página _PAGE_ de _PAGES_",
+        "infoEmpty": "No hay registros disponibles",
+        "infoFiltered": "(filtrado de _MAX_ registros totales)",
+        "search": "Buscar:",
+        "paginate": {
+            "first": "Primera",
+            "previous": "Anterior",
+            "next": "Siguiente",
+            "last": "Última"
+        },
+        "aria": {
+            "sortAscending": ": activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": activar para ordenar la columna de manera descendente"
+        }
+    },
+    "lengthMenu": [5, 10, 25, 50, 100],
+    "pageLength": 5
+});
+ // Evento para manejar el clic en una fila de la tabla de grupos
+ $('#tablagrupos tbody').on('click', 'tr', function () {
+    // Obtener el id del grupo y el nombre desde los atributos data-id y data-nombre
+    const grupoId = $(this).data('id'); // Obtiene el id
+    const nombreGrupo = $(this).data('nombre'); // Obtiene el nombre
+
+    console.log('El ID del grupo seleccionado es: ' + grupoId);
+    console.log('El nombre del grupo seleccionado es: ' + nombreGrupo);
+
+    // Actualizar el título del modal con el nombre del grupo
+    $('#modalmostrarcliente h2').text('Grupo: ' + nombreGrupo);
+
+    // Mostrar el modal
+    $('#modalmostrarcliente').fadeIn();
+    $('#tablaclientesgrupos tbody').empty();
+
+
+    $.ajax({
+        url: '/clientes-por-grupo/' + grupoId, // Ruta al backend que maneja la consulta
+        method: 'GET',
+        success: function (response) {
+            console.log(response);
+            $('#tablaclientesgrupos tbody').empty();
+
+            response.forEach(cliente => {
+                $('#tablaclientesgrupos tbody').append(`
+                    <tr>
+                        <td>${cliente.id}</td>
+                        <td>${cliente.nombre}</td>
+                        <td>${cliente.apellido}</td>
+<td>
+        <!-- Botón para eliminar cliente del grupo -->
+        <button class="btn btn-danger eliminar-cliente" data-id="${cliente.id}">Eliminar de grupo</button>
+    </td>                                    </tr>
+                `);
+            });
+
+        },
+        error: function (error) {
+            console.error('Error al obtener los clientes:', error);
+            alert('No se pudieron cargar los clientes para este grupo.');
+        }
+    });
+
+});
+// Evento para manejar el clic en el botón de "Eliminar de grupo"
+// Evento para manejar el clic en el botón de "Eliminar de grupo"
+$('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
+    const clienteId = $(this).data('id');
+    console.log('ID del cliente a eliminar: ' + clienteId);
+    $('#tablaclientesgrupos tbody').empty();
+
+    // Realizar la solicitud AJAX para eliminar al cliente del grupo
+    $.ajax({
+        url: '/eliminarclientegrupo/' + clienteId, // Ruta para eliminar el cliente del grupo
+        method: 'PUT', // Usamos PUT para actualización
+        data: {
+            _token: $('meta[name="csrf-token"]').attr('content') // Enviar el token CSRF
+        },
+        success: function (response) {
+            $('#tablaclientesgrupos tbody').empty();
+
+            // Mostrar alerta de éxito
+            $('#custom-alert-message').text(response.success); // Mostrar el mensaje de éxito
+            $('#custom-alert').removeClass('alert-error').addClass('alert-success'); // Agregar clases para éxito
+            $('#custom-alert').fadeIn().delay(10000).fadeOut(); // Mostrar la alerta y ocultarla después de 3 segundos
+
+            $('#modalmostrarcliente').fadeOut();
+            location.reload(); // Recargar la página para actualizar la lista
+        },
+        error: function (xhr, status, error) {
+            // Mostrar alerta de error
+            const errorMessage = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Hubo un problema';
+            $('#custom-alert-message').text(errorMessage); // Mostrar el mensaje de error
+            $('#custom-alert').removeClass('alert-success').addClass('alert-error'); // Agregar clases para error
+            $('#custom-alert').fadeIn().delay(3000).fadeOut(); // Mostrar la alerta y ocultarla después de 3 segundos
+        }
+    });
+
+});
+
+
+
+$('.close-btncerrarmostrarcliente').on('click', function () {
+    $('#modalmostrarcliente').fadeOut();
+});
+$(window).on('click', function (event) {
+    if ($(event.target).is('#modalmostrarcliente')) {
+        $('#modalmostrarcliente').fadeOut();
+    }
+});
+
+// Cerrar el modal al presionar ESC
+$(document).on('keydown', function (event) {
+    if (event.key === "Escape") {
+        $('#modalmostrarcliente').fadeOut();
+    }
+});
 
 
 // Inicializar DataTables clientes
@@ -238,15 +371,15 @@ $(document).ready(function () {
                 }
             });
 
-           
+
         });
 
 
 
 
     });
-   
- 
+
+
 
     function cargarGruposPorCentro(centroID) {
         $.ajax({
@@ -255,7 +388,7 @@ $(document).ready(function () {
             success: function (response) {
                 // Destruir DataTable anterior si existe
                 if ($.fn.DataTable.isDataTable('#tablagrupos')) {
-                    $('#tablagrupos').DataTable().destroy();
+                    $('#tablagrupos').DataTable().clear().destroy();
                 }
 
                 // Limpiar la tabla antes de agregar nuevos datos
@@ -268,53 +401,56 @@ $(document).ready(function () {
                         hour: '2-digit', minute: '2-digit', second: '2-digit'
                     });
 
+                    // Usamos 'data-id' para almacenar el id del grupo en cada fila
                     $('#tablagrupos tbody').append(`
-                        <tr>
+        <tr data-id="${grupo.id}" data-nombre="${grupo.nombre}"> <!-- Aquí se almacena el id y el nombre -->
                             <td>${grupo.id}</td>
                             <td>${grupo.nombre}</td>
-                            <td>${grupo.cantidad_personas}</td>
+                            <td>${grupo.clientes_count}</td>
                             <td>${formattedDate}</td>
                         </tr>
                     `);
                 });
 
-                $(document).ready(function () {
-                    const table = $('#tablagrupos').DataTable({
-                        "paging": true,  // Habilita la paginación
-                        "lengthChange": true,  // Permite cambiar la cantidad de registros por página
-                        "searching": true,  // Habilita la búsqueda
-                        "ordering": true,  // Habilita el orden de las columnas
-                        "info": true,  // Muestra información sobre los registros
-                        "autoWidth": false,  // Desactiva el ajuste automático de anchos de columnas
-                        "responsive": true,  // Hace la tabla responsive
-                        "colReorder": true,
-                        "order": [[0, "asc"]],  // Ordena por la primera columna de forma ascendente
-                        "language": {
-                            "decimal": ",",  // Configuración del separador decimal
-                            "thousands": ".",  // Configuración del separador de miles
-                            "lengthMenu": "Mostrar _MENU_ registros por página",  // Menú para seleccionar cuántos registros mostrar
-                            "zeroRecords": "No se encontraron resultados",  // Mensaje si no hay registros
-                            "info": "Mostrando página _PAGE_ de _PAGES_",  // Mensaje de información sobre las páginas
-                            "infoEmpty": "No hay registros disponibles",  // Mensaje cuando no hay registros
-                            "infoFiltered": "(filtrado de _MAX_ registros totales)",  // Mensaje si hay filtros aplicados
-                            "search": "Buscar:",  // Texto del campo de búsqueda
-                            "paginate": {
-                                "first": "Primera",  // Botón para ir a la primera página
-                                "previous": "Anterior",  // Botón para ir a la página anterior
-                                "next": "Siguiente",  // Botón para ir a la página siguiente
-                                "last": "Última"  // Botón para ir a la última página
-                            },
-                            "aria": {
-                                "sortAscending": ": activar para ordenar la columna de manera ascendente",
-                                "sortDescending": ": activar para ordenar la columna de manera descendente"
-                            }
+                // Inicializar DataTable después de que los datos se hayan agregado
+                $('#tablagrupos').DataTable({
+                    "paging": true,
+                    "lengthChange": true,
+                    "searching": true,
+                    "ordering": true,
+                    "info": true,
+                    "autoWidth": false,
+                    "responsive": true,
+                    "colReorder": true,
+                    "order": [[0, "asc"]],
+                    "language": {
+                        "decimal": ",",
+                        "thousands": ".",
+                        "lengthMenu": "Mostrar _MENU_ registros por página",
+                        "zeroRecords": "No se encontraron resultados",
+                        "info": "Mostrando página _PAGE_ de _PAGES_",
+                        "infoEmpty": "No hay registros disponibles",
+                        "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                        "search": "Buscar:",
+                        "paginate": {
+                            "first": "Primera",
+                            "previous": "Anterior",
+                            "next": "Siguiente",
+                            "last": "Última"
                         },
-                        "lengthMenu": [5, 10, 25, 50, 100],
-                        "pageLength": 5
-                    });
-
+                        "aria": {
+                            "sortAscending": ": activar para ordenar la columna de manera ascendente",
+                            "sortDescending": ": activar para ordenar la columna de manera descendente"
+                        }
+                    },
+                    "lengthMenu": [5, 10, 25, 50, 100],
+                    "pageLength": 5
                 });
 
+
+
+
+               
             },
             error: function () {
                 alert('Error al cargar los grupos.');

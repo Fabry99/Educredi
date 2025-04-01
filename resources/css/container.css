@@ -201,3 +201,17 @@ table.dataTable tbody tr:hover {
 .section-container2 a:hover{
     background-color: var(--tittle-column);
 }
+
+/* Estilo de alerta personalizada para éxito */
+.alert-success {
+    background-color: #28a745; /* Verde */
+    color: white;
+    border-radius: 5px;
+}
+
+/* Estilo de alerta personalizada para error */
+.alert-error {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+    border-radius: 5px;
+}

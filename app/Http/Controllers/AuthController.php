@@ -174,7 +174,12 @@ class AuthController extends Controller
             ->with('centro')  // Cargar la relación con el centro
             ->groupBy('id_centros')
             ->get();
-        return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro'));
+            $clienteporGrupo = Clientes::select('id_grupo', DB::raw('count(*) as cantidad_persona'))
+            ->with('grupo')  // Cargar la relación con el centro
+            ->groupBy('id_grupo')
+            ->get();
+
+        return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro','clienteporGrupo'));
     }
 
     public function mantenimientoAsesores()

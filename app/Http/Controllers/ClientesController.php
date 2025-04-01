@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Clientes;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class ClientesController extends Controller
@@ -108,5 +109,28 @@ class ClientesController extends Controller
     
     return redirect()->back()->with('success', 'Cliente actualizado');
 }
+public function clientesPorGrupo($grupoId)
+    {
+        // Obtén los clientes que pertenecen al grupo
+        $clientes = Clientes::where('id_grupo', $grupoId)->get();
 
+        // Retorna los clientes en formato JSON
+        return response()->json($clientes);
+    }
+
+    public function eliminarDelGrupo($id)
+    {
+        $cliente = Clientes::find($id);
+
+        if ($cliente) {
+            // Eliminar el cliente del grupo y centro
+            $cliente->id_grupo = null;
+            $cliente->id_centro = null;
+            $cliente->save();
+
+            return response()->json(['success' => 'Cliente Eliminado Correctamente.']);
+        }
+
+        return response()->json(['error' => 'Hubo un problema al eliminar al cliente.']);
+    }
 }

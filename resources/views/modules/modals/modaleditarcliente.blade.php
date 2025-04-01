@@ -285,30 +285,4 @@
         border-radius: 4px;
         background: var(--background-inputs);
     }
-
-    /* .modal-ge1 {
-        display: flex;
-        width: 100%;
-        border: 1px solid blue;
-        flex-direction: row
-    }
-    .input-group1 {
-        margin-left: 10px;
-        text-align: center;
-
-    } */
-
-    /* .input-group1 input {
-        border: none;
-        background: none;
-        outline: none;
-        width: 100%;
-        font-size: 16px;
-       margin-top: 5px;
-       background: var(--background-inputs);
-       border: 1px solid var(--borde);
-        border-radius: 4px;
-        padding: 10px 30px;
-        margin-right: 20px;
-    } */
 </style>
