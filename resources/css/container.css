@@ -13,7 +13,7 @@
 .main-content {
     margin-left: 180px; 
     padding: 20px;
-    margin-top: 70px;
+    margin-top: 50px;
     flex-grow: 1;
     background-color: var(--background); 
 }
@@ -199,4 +199,164 @@ table.dataTable tbody tr:hover {
 }
 .section-container2 a:hover{
     background-color: var(--tittle-column);
+}
+
+.form-container {
+    display: flex;
+    gap: 40px; /* Espacio entre columnas */
+}
+
+.fila {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.columna2{
+    margin-right: 20px;
+}
+
+
+.campos input{
+    margin-top: 5px;
+    margin-bottom: 20px;
+    width: 15rem;
+    height: 2rem;
+    padding-left: 11px;
+    font-size: 16px;
+    border: 1.9px solid lightgray;
+    border-radius: 4px;
+    color: rgb(5, 0, 0);
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    background: white;
+}
+
+.campos input:hover {
+    border-color: #159109;
+    box-shadow: 0 0 5px rgba(43, 255, 0, 0.938);
+  }
+
+label {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    width: auto;
+}
+
+.check-container{
+    margin-top: 20px;
+    padding-left: 40px;
+}
+
+input[type="checkbox"] {
+    margin-right: 8px; /* Espacio entre el checkbox y el texto */
+    transform: scale(1.2); /* Ajusta el tamaño del checkbox si es necesario */
+}
+
+textarea {
+    margin-top: 20px;
+    width: 40%;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.campo-verificar{
+    margin-left: -20px;
+    width: 80rem;
+    height: 100;
+    margin-top: -40px;
+
+}
+
+.container-select select{
+    margin-top: 5px;
+    margin-bottom: 20px;
+    width: 16rem;
+    height: 36px;
+    padding-left: 15px;
+    font-size: 16px;
+    border: 1.9px solid lightgray;
+    border-radius: 4px;
+    color: rgb(5, 0, 0);
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    background: white;
+}
+
+.container-select select:hover {
+    border-color: #159109;
+    box-shadow: 0 0 5px rgba(43, 255, 0, 0.938);
+  }
+
+.container-select .icon{
+    position: relative;
+    font-size: 12px;
+    color: black;
+    left: -33px;
+    pointer-events: none;
+}
+
+.container-select select:focus {
+    background-color: #ecfaec;  /* Verde claro */
+    border-color: #159109;
+    box-shadow: 0 0 5px rgba(43, 255, 0, 0.938);
+    outline: none;
+}
+
+.btn-hecho {
+    margin-top: 20px;
+    height: 50px;
+    width: auto;
+    padding: 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    font-size: 14px; /* Fuente más pequeña */
+    border-radius: 6px; /* Bordes más pequeños */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Espacio entre ícono y texto */
+}
+
+/* Efecto al pasar el mouse */
+.btn-hecho:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+/* Efecto al presionar */
+.btn-hecho:active {
+    background-color: #1e7e34;
+    transform: scale(0.95);
+}
+
+/* Ícono */
+.btn-hecho i {
+    font-size: 18px;
+}
+
+.btn-verificar {
+    margin-top: 20px;
+    margin-left: 20px;
+    height: 40px;
+    width: auto;
+    padding: 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    font-size: 14px; /* Fuente más pequeña */
+    border-radius: 6px; /* Bordes más pequeños */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Espacio entre ícono y texto */
+}
+
+.campos-desactivados input{
+    background: rgb(209, 209, 209);
+    border-color: black;
+
 }

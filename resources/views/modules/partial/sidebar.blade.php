@@ -53,8 +53,8 @@
 
                         <ul class="sub-menu">
                             <li><a href="{{route('grupos')}}" class="sub-menu-link">Grupos</a></li>
-                            <li><a href="#" class="sub-menu-link">Credito Individual</a></li>
-                            <li><a href="#" class="sub-menu-link">Cambiar datos de prestamo</a></li>
+                            <li><a href="{{route('creditos')}}" class="sub-menu-link">Desembolso de préstamos</a></li>
+                            <li><a href="{{route('cambiardatos')}}" class="sub-menu-link">Cambiar datos de prestamo</a></li>
 
                         </ul>
                     </li>
@@ -67,7 +67,7 @@
 
                         <ul class="sub-menu">
                             <li><a href="{{route('reverliquidacion')}}" class="sub-menu-link">Revertir desembolso de prestamo</a></li>
-                            <li><a href="#" class="sub-menu-link">Transferencia de cartera entre asesores</a></li>
+                            <li><a href="{{route('transferenciadecartera')}}" class="sub-menu-link">Transferencia de cartera entre asesores</a></li>
                         </ul>
                     </li>
                 @break
