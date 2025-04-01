@@ -151,11 +151,15 @@ class AuthController extends Controller
         $departamentos = Departamentos::all();
         $centros = Centros::all();
         $clientes = Clientes::with('departamento','municipio','centro','grupo')->get();
+        
+         // Recupera el cliente, lanza error si no se encuentra
+
         if ($rol == 'contador') {
             return view('modules.dashboard.home', compact('rol', 'departamentos', 'clientes','centros'));
         }
         
     }
+   
     public function grupos()
     {
         $rol = Auth::user()->rol;

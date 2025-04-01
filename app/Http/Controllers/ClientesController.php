@@ -85,17 +85,28 @@ class ClientesController extends Controller
     public function obtenerCliente($id)
     {
         // Buscar el cliente junto con su grupo y centro
-        $cliente = Clientes::with(['departamento', 'municipio','centro','grupo'])->find($id);
-    
+        $cliente = Clientes::with(['departamento', 'municipio', 'centro', 'grupo'])->find($id);
+
         // Si el cliente existe, devolver los datos en formato JSON
         if ($cliente) {
             return response()->json($cliente);
         }
-    
+
         // Si no se encuentra el cliente, devolver un error
         return response()->json(['error' => 'Cliente no encontrado'], 404);
     }
 
+    public function updateclient(Request $request)
+{
+    // Obtén el ID desde el formulario (campo oculto)
+
+    $id = $request->id;
     
+    // Validación y lógica de actualización
+    $cliente = Clientes::findOrFail($id);
+    $cliente->update($request->all());
     
+    return redirect()->back()->with('success', 'Cliente actualizado');
+}
+
 }

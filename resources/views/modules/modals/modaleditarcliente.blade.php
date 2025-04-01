@@ -2,8 +2,10 @@
     <div class="modal-contentedit">
         <span class="close-btn1">&times;</span>
         <h2></h2>
-        <form action="" method="POST">
+        <form method="POST" action="{{ route('clientes.update') }}">
             @csrf
+            @method('PUT')
+            <input type="hidden" id="cliente_id" name="id"> <!-- Nuevo campo para el ID -->
             <div class="modal-ge1">
                 <div class="input-group1">
                     <p>Nombre:</p>

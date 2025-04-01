@@ -50,6 +50,8 @@ $(document).ready(function () {
         $('.tablaClientes tbody').on('click', 'tr', function () {
             const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
             const idCliente = rowData[0]; // Asume que el ID del cliente está en la primera columna (puedes ajustarlo según tu estructura)
+            console.log(idCliente);
+            $('#cliente_id').val(idCliente); // Opción 1: En el campo oculto
 
             // Realizar una solicitud AJAX para obtener más información sobre el cliente
             $.ajax({
@@ -85,28 +87,28 @@ $(document).ready(function () {
                     $('#modaleditarcliente #sueldo').val(response.ing_economico);
                     $('#modaleditarcliente #egreso').val(response.egre_economico);
                     $('#modaleditarcliente #otroingreso').val(response.otros_ing);
-                    // if (response.centro) {
-                    //     $('#modaleditarcliente #id_centro').val(response.centro.id);
-                    // } else {
-                    //     $('#modaleditarcliente #id_centro').val(''); // Permite la selección de un nuevo centro
-                    // }
+                    if (response.centro) {
+                        $('#modaleditarcliente #id_centro').val(response.centro.id);
+                    } else {
+                        $('#modaleditarcliente #id_centro').val(''); // Permite la selección de un nuevo centro
+                    }
 
-                    // if (response.grupo) {
-                    //     $('#modaleditarcliente #id_grupo').val(response.grupo.id);
-                    // } else {
-                    //     $('#modaleditarcliente #id_grupo').val(''); // Dejar en blanco para permitir selección
-                    // }
+                    if (response.grupo) {
+                        $('#modaleditarcliente #id_grupo').val(response.grupo.id);
+                    } else {
+                        $('#modaleditarcliente #id_grupo').val(''); // Dejar en blanco para permitir selección
+                    }
 
-                    // // Si response.centro existe, cargar los grupos asociados
-                    // if (response.centro) {
-                    //     cargarGrupos(response.centro.id, response.grupo);
-                    // } else {
-                    //     cargarGrupos(null, null); // Llamar la función para resetear el select de grupos
-                    // }
-                    // $('#modaleditarcliente #id_centro').on('change', function () {
-                    //     let centroId = $(this).val();
-                    //     cargarGrupos(centroId, null); // Cargar grupos cuando se seleccione un centro
-                    // });
+                    // Si response.centro existe, cargar los grupos asociados
+                    if (response.centro) {
+                        cargarGrupos(response.centro.id, response.grupo);
+                    } else {
+                        cargarGrupos(null, null); // Llamar la función para resetear el select de grupos
+                    }
+                    $('#modaleditarcliente #id_centro').on('change', function () {
+                        let centroId = $(this).val();
+                        cargarGrupos(centroId, null); // Cargar grupos cuando se seleccione un centro
+                    });
 
 
                     console.log(response);
@@ -115,6 +117,7 @@ $(document).ready(function () {
 
                     // Cargar los municipios para el departamento seleccionado
                     cargarMunicipios(response.departamento.id, response.municipio.id);
+                    $('#form-editar-cliente').attr('action', '/clientes/actualizar/' + response.id);
 
                     // Mostrar el modal
                     $('#modaleditarcliente').fadeIn();
@@ -124,6 +127,24 @@ $(document).ready(function () {
                 }
             });
 
+            $('#form-editar-cliente').submit(function (e) {
+                e.preventDefault(); // Prevenir que se envíe el formulario de manera tradicional
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'PUT',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        // Aquí puedes hacer algo con la respuesta, como mostrar un mensaje de éxito
+                        alert('Cliente actualizado correctamente');
+                        $('#modaleditarcliente').fadeOut(); // Cierra el modal
+                        location.reload(); // Recarga la página para reflejar los cambios
+                    },
+                    error: function () {
+                        alert('Error al actualizar el cliente.');
+                    }
+                });
+            });
 
             // Cargar grupos
             function cargarGrupos(centroId, grupoId) {
@@ -165,7 +186,7 @@ $(document).ready(function () {
                 var municipioSelect = $('#modaleditarcliente #id_municipioedit');
                 municipioSelect.empty();
                 municipioSelect.append('<option value="" disabled selected>Seleccione un Municipio</option>');
-            
+
                 if (departamentoId) {
                     $.ajax({
                         url: '/municipios/' + departamentoId,
@@ -179,7 +200,7 @@ $(document).ready(function () {
                                         .text(municipio.nombre);
                                     municipioSelect.append(option);
                                 });
-            
+
                                 if (municipioId) {
                                     municipioSelect.val(municipioId);
                                 }
@@ -191,12 +212,12 @@ $(document).ready(function () {
                     });
                 }
             }
-            $('#id_departamentoeditcliente').on('change', function() {
+            $('#id_departamentoeditcliente').on('change', function () {
                 var departamentoId = $(this).val();
                 cargarMunicipios(departamentoId, null);
             });
-                        
-            
+
+
 
             // Función para cerrar el modal al hacer clic en el botón de cerrar
             $('.close-btn1').on('click', function () {
@@ -216,13 +237,16 @@ $(document).ready(function () {
                     $('#modaleditarcliente').fadeOut();
                 }
             });
+
+           
         });
 
 
 
 
     });
-
+   
+ 
 
     function cargarGruposPorCentro(centroID) {
         $.ajax({

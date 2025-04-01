@@ -37,6 +37,9 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/grupos/{id}', function ($id) {
         return response()->json(Grupos::where('id_centros', $id)->get());
     });
+// routes/web.php
+Route::put('clientes/update', [ClientesController::class, 'updateclient'])
+     ->name('clientes.update');
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');
