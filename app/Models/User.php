@@ -48,4 +48,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function bitacora()
+    {
+        return $this->hasMany(Bitacora::class, 'id_asesor');
+    }
 }

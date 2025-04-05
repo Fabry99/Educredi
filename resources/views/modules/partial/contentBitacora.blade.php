@@ -1,0 +1,74 @@
+<link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
+<div class="container">
+    <div class="main-content">
+        <div class="container mt-4">
+            <h1>Bitacora de Personal</h1>
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    <div class="notification custom_error">
+                        {{ $error }}
+                    </div>
+                @endforeach
+            @endif
+
+            @if (session('success'))
+                <div class="notification custom_success">
+                    {{ session('success') }}
+                </div>
+            @endif
+            <div id="custom-alert" class="alert" style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px;">
+                <span id="custom-alert-message"></span>
+            </div>
+
+            <table id="tablaBitacora" class="table table-striped" style="width:100%">
+
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Tabla Afectada</th>
+                        <th>Acción Realizada</th>
+                        <th>Datos Afectados</th>
+                        <th>Fecha y Hora</th>
+
+
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($bitacora as $item)
+                    @php
+                        // Decodificar el JSON de la columna 'datos'
+                        $datos = json_decode($item->datos, true);
+                        
+                        // formatear fechas para hacerlas legibles
+                        $created_at = \Carbon\Carbon::parse($datos['created_at'] ?? '')->timezone('America/Guatemala')->format('d/m/Y H:i:s');
+                        $updated_at = \Carbon\Carbon::parse($datos['updated_at'] ?? '')->timezone('America/Guatemala')->format('d/m/Y H:i:s');
+                        @endphp
+                
+                    <tr>
+                        <td>{{ optional($item->user)->name }} {{ optional($item->user)->last_name }}</td>
+                        <td>{{$item->tabla_afectada}}</td>
+                        <td>{{$item->accion}}</td>
+                        <td>
+                            <ul>
+                                <li><strong>Nombre:</strong> {{$datos['nombre'] ?? 'No disponible'}}</li>
+                                <li><strong>ID Asesor:</strong> {{$datos['id_asesor'] ?? 'No disponible'}}</li>
+                                <li><strong>Fecha de Creación:</strong> {{$created_at}}</li>
+                                <li><strong>Fecha de Actualización:</strong> {{$updated_at}}</li>
+                            </ul>
+                        </td>
+                        <td>{{$created_at}}</td>
+                    </tr>
+                @endforeach
+                
+                </tbody>
+
+            </table>
+        </div>
+
+
+    </div>
+
+
+</div>

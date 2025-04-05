@@ -1,0 +1,56 @@
+:root {
+    --navbar: #067016;
+    --background: #eae9e9;
+    --color-font: #fff5f5;
+    --background-form: rgb(255, 255, 255);
+    --color-font-form: #333;
+    --sombra-login-form: rgba(9, 72, 9, 0.308);
+    --color-boton: rgba(11, 121, 20, 0.866);
+    --borde: #ccc;
+    --background-inputs: #f7f7f7;
+    --font-personal: #8d0808;
+    --azul: #385E89;
+}
+table{
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); 
+}
+/* Cambiar el color de fondo de las cabeceras */
+.table th {
+    background-color: var(--tittle-column);
+    color: white;
+    text-align: left;
+}
+
+/* Cambiar el color de las filas al pasar el cursor sobre ellas */
+.table tbody tr:hover {
+    background-color: #e1efda;
+}
+
+/* Establecer el borde de las celdas */
+.table th, #table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+/* Personalizar las filas alternadas */
+.table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+.table tbody tr:nth-child(even):hover {
+    background-color: #e1efda;
+}
+
+/* Cambiar el color de la paginación */
+.dataTables_paginate .paginate_button {
+    background-color: #007bff;
+    color: white;
+    padding: 5px 10px;
+}
+
+.dataTables_paginate .paginate_button:hover {
+    background-color: #0056b3;
+}
+.table.dataTable tbody tr:hover {
+    cursor: pointer;
+}
+

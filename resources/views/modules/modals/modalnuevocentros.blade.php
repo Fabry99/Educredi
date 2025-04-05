@@ -38,6 +38,20 @@
         --font-personal: #8d0808;
         --azul:#385E89;
     }
+    .close-btn1 {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close-btn1:hover,
+  .close-btn1:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
 
     h2 {
         justify-self: center

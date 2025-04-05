@@ -20,10 +20,10 @@
         @if (Auth::check())
             @switch(Auth::user()->rol)
                 @case('administrador')
-                    <li class="menu-item menu-item-static"><a href="" class="menu-link"><i class="fa-solid fa-hotel"></i>
+                    <li class="menu-item menu-item-static"><a href="{{route('home')}}" class="menu-link"><img src="{{asset('img/icon-home.svg')}}" alt=""> 
                             <span>Inicio</span></a></li>
-                    <li class="menu-item menu-item-static"> <a href="" class="menu-link"><i class="fa-regular fa-pen-to-square"></i>
-                            <span>Check-In<br>Check-Out</span></a>
+                    <li class="menu-item menu-item-static"> <a href="{{route('bitacora')}}" class="menu-link"><img src="{{asset('img/icon-bitacora.svg')}}" alt="">
+                            <span>Bitacora</span></a>
                     </li>
                     <li class="menu-item menu-item-static"><a href="" class="menu-link"><i class="fa-solid fa-coins"></i> <span>Caja
                                 Diaria</span></a></li>

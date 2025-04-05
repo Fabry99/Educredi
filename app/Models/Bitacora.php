@@ -15,6 +15,12 @@ class Bitacora extends Model
         'tabla_afectada',
         'accion',
         'datos',
-        'fecha'
+        'fecha',
+        'id_asesor',
     ];
+
+
+    public function user(){
+        return $this->belongsTo(User::class, 'id_asesor');
+    }
 }

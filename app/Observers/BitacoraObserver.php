@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Bitacora;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class BitacoraObserver
@@ -14,7 +15,8 @@ class BitacoraObserver
             'tabla_afectada' => $model->getTable(),  // Dinámicamente se toma el nombre de la tabla del modelo
             'accion' => 'INSERT',
             'datos' => json_encode($model), // Los datos insertados
-            'fecha' => now(),
+            'fecha' => Carbon::now()->format('Y-m-d H:i:s'),  // Formato estándar de fecha y hora
+            'id_asesor' => Auth::user()->id,
         ]);
     }
 
@@ -26,7 +28,8 @@ class BitacoraObserver
             'tabla_afectada' => $model->getTable(),
             'accion' => 'UPDATE',
             'datos' => json_encode($model->getChanges()),  // Los datos modificados
-            'fecha' => now(),
+            'fecha' => Carbon::now()->format('Y-m-d H:i:s'),  // Formato estándar de fecha y hora
+            'id_asesor' => Auth::user()->id,
         ]);
     }
 
@@ -38,7 +41,8 @@ class BitacoraObserver
             'tabla_afectada' => $model->getTable(),
             'accion' => 'DELETE',
             'datos' => json_encode($model),  // Los datos eliminados
-            'fecha' => now(),
+            'fecha' => Carbon::now()->format('Y-m-d H:i:s'),  // Formato estándar de fecha y hora
+            'id_asesor' => Auth::user()->id,
         ]);
     }
 }

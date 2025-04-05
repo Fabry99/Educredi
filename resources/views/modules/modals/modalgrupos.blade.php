@@ -60,6 +60,20 @@
     h2 {
         justify-self: center
     }
+    .close-btn1 {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close-btn1:hover,
+  .close-btn1:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
 
     .modal-ge {
         display: flex;

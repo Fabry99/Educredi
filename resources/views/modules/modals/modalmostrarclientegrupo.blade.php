@@ -38,6 +38,7 @@
         --background-inputs: #f7f7f7;
         --font-personal: #8d0808;
         --azul: #385E89;
+        --warning: #c12c2c;
     }
 
     .modaledit {
@@ -124,7 +125,14 @@
 table.dataTable tbody tr:hover {
     cursor: pointer;
 }
-.btn-danger{
-    background: #8d0808;
+.eliminar-cliente{
+    background: var(--warning);
+    color: white;
+    padding: 10px;
+    border-radius:5px;
+    border: 1px solid var(--background); 
+}
+.eliminar-cliente:hover{
+    background: #ce3535;
 }
 </style>

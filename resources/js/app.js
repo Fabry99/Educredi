@@ -72,7 +72,7 @@ $('#tablaclientesgrupos').DataTable({
                         <td>${cliente.apellido}</td>
 <td>
         <!-- Botón para eliminar cliente del grupo -->
-        <button class="btn btn-danger eliminar-cliente" data-id="${cliente.id}">Eliminar de grupo</button>
+        <button class="btn btn-danger eliminar-cliente" data-id="${cliente.id}">Eliminar del Grupo</button>
     </td>                                    </tr>
                 `);
             });

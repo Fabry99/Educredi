@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bitacora;
 use App\Models\Centros;
 use App\Models\Clientes;
 use App\Models\Departamentos;
@@ -139,11 +140,22 @@ class AuthController extends Controller
         $rol = Auth::user()->rol; // Obtener el rol del usuario autenticado
         return view('modules.dashboard.home')->with('rol', $rol); // Pasar el rol a la vista
     }
+    public function bitacora(){
+
+        $rol = Auth::user()->rol;
+        $bitacora = Bitacora::with('user:id,name,last_name')->get();
+        if ($rol == 'administrador') {
+            return view('modules.dashboard.bitacora', compact('rol','bitacora'));
+        }
+    }
+
+
     public function caja()
     {
         $rol = Auth::user()->rol;
         return view('modules.dashboard.home')->with('rol', $rol);
     }
+
 
     public function contador()
     {
