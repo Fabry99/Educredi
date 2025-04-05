@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Bitacora;
 use App\Models\Centros;
 use App\Models\Clientes;
 use App\Models\Departamentos;
@@ -114,40 +113,27 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Obtener la sesión activa del usuario
+        // Obtener la sesión más reciente sin cerrar del usuario autenticado
         $session = UserSessions::where('user_id', Auth::id())
             ->whereNull('ended_at')
+            ->orderByDesc('started_at') // ordena por fecha de inicio más reciente
             ->first();
-
-        // Si hay una sesión activa, actualizar la hora de fin
+    
+        // Si existe, actualiza la hora de salida
         if ($session) {
             $session->update([
                 'ended_at' => now(),
             ]);
         }
-
-        // Cerrar sesión y redirigir al login
+    
+        // Cerrar sesión y limpiar la sesión de Laravel
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
+    
         return redirect()->route('login');
     }
-
-
-    public function home()
-    {
-        $rol = Auth::user()->rol; // Obtener el rol del usuario autenticado
-        return view('modules.dashboard.home')->with('rol', $rol); // Pasar el rol a la vista
-    }
-    public function bitacora(){
-
-        $rol = Auth::user()->rol;
-        $bitacora = Bitacora::with('user:id,name,last_name')->get();
-        if ($rol == 'administrador') {
-            return view('modules.dashboard.bitacora', compact('rol','bitacora'));
-        }
-    }
+    
 
 
     public function caja()

@@ -27,9 +27,12 @@
 
 /* Cambiar el color de las filas al pasar el cursor sobre ellas */
 #mitabla tbody tr:hover {
-    background-color: #f1f1f1;
+    background-color: #e1efda;
 }
 
+#mitabla tbody tr:nth-child(even):hover {
+    background-color: #e1efda;
+}
 /* Establecer el borde de las celdas */
 #mitabla th, #mitabla td {
     border: 1px solid #ddd;

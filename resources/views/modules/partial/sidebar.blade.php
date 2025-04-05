@@ -25,8 +25,7 @@
                     <li class="menu-item menu-item-static"> <a href="{{route('bitacora')}}" class="menu-link"><img src="{{asset('img/icon-bitacora.svg')}}" alt="">
                             <span>Bitacora</span></a>
                     </li>
-                    <li class="menu-item menu-item-static"><a href="" class="menu-link"><i class="fa-solid fa-coins"></i> <span>Caja
-                                Diaria</span></a></li>
+                    <li class="menu-item menu-item-static"><a href="{{route('usuarios')}}" class="menu-link"><img src="{{asset('img/icon-users.svg')}}" alt=""><span>Usuarios</span></a></li>
                 @break
 
                 @case('caja') 

@@ -2,7 +2,13 @@
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
-            <h1>Bitacora de Personal</h1>
+            <h1>Usuarios</h1>
+            <div class="btn-clientes">
+                <a href="" id="openModalBtn" style="width: 170px"><img src="{{ asset('img/icon-clientes.svg') }}"
+                        alt=""><span>Agregar Usuario</span></a>
+
+
+            </div>
 
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
@@ -26,18 +32,57 @@
 
                 <thead>
                     <tr>
-                        <th>Usuario</th>
-                        <th>Tabla Afectada</th>
-                        <th>Acción Realizada</th>
-                        <th>Datos Afectados</th>
-                        <th>Fecha y Hora</th>
-
-
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Fecha de Nacimiento</th>
+                        <th>Rol</th>
+                        <th>Inicio de Sesión</th>
+                        <th>Ultima Conexión</th>
+                        <th>Estado</th>
+                        <th>Fecha de Creación</th>
 
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($bitacora as $item)
+                    @foreach ($usuarios as $item)
+                        <tr>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->name }} {{ $item->last_name }}</td>
+                            <td>{{ $item->email }}</td>
+                            <td>
+                                {{ $item->fecha_nacimiento == '0000-00-00' || !$item->fecha_nacimiento ? '-' : \Carbon\Carbon::parse($item->fecha_nacimiento)->format('d/m/Y') }}
+                            </td>
+                            <td>{{ $item->rol }}</td>
+                            <td>
+                                {{ optional($item->latestSession)->started_at
+                                    ? \Carbon\Carbon::parse($item->latestSession->started_at)->setTimezone('America/Guatemala')->format('Y-m-d H:i:s')
+                                    : '-' }}
+                            </td>
+                            <td>
+                                {{ optional($item->latestSession)->ended_at
+                                    ? \Carbon\Carbon::parse($item->latestSession->ended_at)->setTimezone('America/Guatemala')->format('Y-m-d H:i:s')
+                                    : '-' }}
+                            </td>
+                            <td>
+                                <span
+                                    class="estados {{ $item->estado == 'activo' ? 'estado-activo' : ($item->estado == 'inactivo' ? 'estado-inactivo' : '') }}">
+                                    {{ $item->estado }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ $item->created_at == '0000-00-00' ||
+                                !$item->created_at ||
+                                !\Carbon\Carbon::hasFormat($item->created_at, 'Y-m-d H:i:s')
+                                    ? '-'
+                                    : \Carbon\Carbon::parse($item->created_at)->format('d/m/Y H:i:s') }}
+                            </td>
+
+
+                        </tr>
+                    @endforeach
+                    {{-- @foreach ($bitacora as $item)
                         @php
                             // Decodificar el JSON de la columna 'datos'
                             $datos = json_decode($item->datos, true);
@@ -65,7 +110,7 @@
                             </td>
                             <td>{{ $created_at }}</td>
                         </tr>
-                    @endforeach
+                    @endforeach --}}
 
                 </tbody>
 

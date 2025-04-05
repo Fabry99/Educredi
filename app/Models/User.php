@@ -52,4 +52,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Bitacora::class, 'id_asesor');
     }
+    public function user_session()
+    {
+        return $this->hasMany(UserSessions::class, 'user_id');
+    }
+    public function latestSession()
+    {
+        return $this->hasOne(UserSessions::class)->latestOfMany(); // Usa la más reciente
+    }
 }

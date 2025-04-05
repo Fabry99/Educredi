@@ -169,9 +169,12 @@
 
 /* Cambiar el color de las filas al pasar el cursor sobre ellas */
 #tablagrupos tbody tr:hover {
-    background-color: #f1f1f1;
+    background-color: #e1efda;
 }
 
+.tablagrupos tbody tr:nth-child(even):hover {
+    background-color: #e1efda;
+}
 /* Establecer el borde de las celdas */
 #tablagrupos th, #tablagrupos td {
     border: 1px solid #ddd;

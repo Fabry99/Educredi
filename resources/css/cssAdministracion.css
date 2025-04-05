@@ -10,6 +10,8 @@
     --background-inputs: #f7f7f7;
     --font-personal: #8d0808;
     --azul: #385E89;
+    --color-red-error:#e11a1a;
+    --color-activo-estado: #59ab2e;
 }
 table{
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); 
@@ -25,7 +27,9 @@ table{
 .table tbody tr:hover {
     background-color: #e1efda;
 }
-
+.table tbody tr:nth-child(even):hover {
+    background-color: #e1efda;
+}
 /* Establecer el borde de las celdas */
 .table th, #table td {
     border: 1px solid #ddd;
@@ -36,9 +40,7 @@ table{
 .table tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
-.table tbody tr:nth-child(even):hover {
-    background-color: #e1efda;
-}
+
 
 /* Cambiar el color de la paginación */
 .dataTables_paginate .paginate_button {
@@ -54,3 +56,25 @@ table{
     cursor: pointer;
 }
 
+.estados{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.estado-activo {
+    background-color: var(--color-activo-estado);
+    color: white;
+    padding: 4px 5px; /* Ajusta el padding a tu preferencia */
+    border-radius:10px; /* Para darle bordes redondeados */
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.estado-inactivo {
+    background-color:var(--color-red-error);
+    color: white;
+    padding: 5px 5px; /* Ajusta el padding a tu preferencia */
+    border-radius: 10px; /* Para darle bordes redondeados */
+    text-transform: uppercase;
+    font-size: 13px;
+}
