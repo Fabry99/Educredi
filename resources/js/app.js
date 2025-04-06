@@ -43,11 +43,79 @@ $('#tablacentros').DataTable({
     "lengthMenu": [5, 10, 25, 50, 100],
     "pageLength": 5
 });
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Escuchar los clics en los botones de editar
+    const editarBtns = document.querySelectorAll('.btn-editar-centro');
+
+    editarBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const centroId = btn.getAttribute('data-id');  // Obtener el ID desde el data-id
+            console.log("ID del centro a editar:", centroId);
+            $('#centro_id_editarcentro').val(centroId);
+            $.ajax({
+                url: '/obtener-centros/' + centroId, // Ruta definida en Laravel
+                type: 'GET',
+                success: function (response) {
+                    console.log('respuesta', response);
+                    $('#modaleditarcentro #nombrecentro').val(response.nombre);
+
+                    $('#modaleditarcentro').fadeIn();
+                },
+                error: function () {
+                    alert('Error al obtener los datos del cliente.');
+                }
+            });
+        });
+    });
+
+    const actualizarCentroBtn= document.querySelector('.btn-actualizarcentros');
+    if (actualizarCentroBtn) {
+        actualizarCentroBtn.addEventListener('click',function(event){
+            event.preventDefault();
+            console.log('click');
+            const centroId = $('#centro_id_editarcentro').val(); // Obtener el ID del centro
+            const nombreCentro = $('#nombrecentro').val();
+            console.log(centroId);
+            console.log(nombreCentro);
+
+            $.ajax({
+                url: '/actualizar-centro/' + centroId,
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'), 
+                    id: centroId,
+                    nombrecentro: nombreCentro,
+                },
+                success: function (response) {
+                    $('#custom-alert-message').text(response.success); 
+                    $('#custom-alert').removeClass('alert-error').addClass('alert-success'); 
+                    $('#custom-alert').fadeIn();
+
+                    setTimeout(function () {
+                        $('#custom-alert').fadeOut(); 
+                        location.reload(); 
+                    }, 1000); 
+
+                    $('#modaleditarcentro').fadeOut(); 
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.responseText);
+                    alert('Error al actualizar el centro.');
+                }
+            });
+        });
+    }
+});
 $(document).ready(function () {
     const table = $('#tablacentros').DataTable();
 
     $('#tablacentros tbody').on('click', 'tr', function (event) {
         // Si el clic es en el botón de eliminación, no abrir el modal
+        if ($(event.target).closest('button').is('.btn-editar-centro')) {
+            $('#modalgrupos').fadeOut(); // Cerrar el modal si el clic es en el botón de eliminar
+            return; // Detener la ejecución para no abrir el modal
+        }
         if ($(event.target).closest('button').is('.btn-eliminar-centro')) {
             $('#modalgrupos').fadeOut(); // Cerrar el modal si el clic es en el botón de eliminar
             return; // Detener la ejecución para no abrir el modal
@@ -126,9 +194,9 @@ function cargarGruposPorCentro(centroID) {
                 $('#tablagrupos tbody').append(fila);
             });
             $(document).on('click', '.btn-eliminarGrupo', function () {
-                
-            $('#modalmostrarcliente').fadeOut();
-                
+
+                $('#modalmostrarcliente').fadeOut();
+
                 var grupoId = $(this).data('id');
                 // Aquí puedes realizar la acción de eliminar usando el grupoId
                 console.log('ID del grupo a eliminar:', grupoId);
@@ -141,19 +209,17 @@ function cargarGruposPorCentro(centroID) {
                     success: function (response) {
                         // Limpiar la tabla de clientes del grupo
                         $('#tablaclientesgrupos tbody').empty();
-                    
+
                         // Mostrar alerta de éxito
                         $('#custom-alert-message').text(response.success); // Mostrar el mensaje de éxito
                         $('#custom-alert').removeClass('alert-error').addClass('alert-success'); // Asegúrate de tener las clases de estilo
                         $('#custom-alert').fadeIn(); // Mostrar la alerta
-                    
-                        // Ocultar la alerta después de 5 segundos y luego recargar la página
+
                         setTimeout(function () {
                             $('#custom-alert').fadeOut(); // Ocultar la alerta
                             location.reload(); // Recargar la página después de que la alerta desaparezca
-                        }, 1000); // 5000 ms = 5 segundos
-                    
-                        // Cerrar el modal
+                        }, 1000); 
+
                     },
                     error: function (xhr, status, error) {
                         alert('Error al eliminar el grupo. Por favor, inténtalo de nuevo.');
@@ -243,7 +309,7 @@ $('#tablaclientesgrupos').DataTable({
 });
 // Evento para manejar el clic en una fila de la tabla de grupos
 $('#tablagrupos tbody').on('click', 'tr', function () {
-    
+
     // Obtener el id del grupo y el nombre desde los atributos data-id y data-nombre
     const grupoId = $(this).data('id'); // Obtiene el id
     const nombreGrupo = $(this).data('nombre'); // Obtiene el nombre

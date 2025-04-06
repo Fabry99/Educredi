@@ -4,6 +4,9 @@
     --tittle-column:#498629d2;
     --color-base:#498629;
     --color-eliminar:#E03838;
+    --background-color-editar:#0300b39f;
+    --hover-background-editar:#08065a9f;
+
 }
 .container {
     display: flex;
@@ -139,7 +142,7 @@ table.dataTable tbody tr:hover {
 
 }
 .btn-eliminar{
-    width: 35%;
+    width: 30%;
     border: 1px solid #dfdede;
     border-radius: 8px;
     box-shadow: 0px 0px 5px 0px rgba(9, 72, 9, 0.515);
@@ -388,4 +391,27 @@ textarea {
     background-color: #4CAF50; /* Verde */
     color: white;
     border-radius:5px ;
+}
+.btn-editar{
+    width: 28%;
+    border: 1px solid #dfdede;
+    border-radius: 8px;
+    box-shadow: 0px 0px 5px 0px rgba(9, 72, 9, 0.515);
+    background-color: var(--background-color-editar);
+}
+.btn-editar:hover{
+    background-color: var(--hover-background-editar);
+    box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
+    border: 1px solid #2c8ac1;
+
+}
+.btn-editar img {
+    max-width: 100%; /* Asegura que la imagen no sobresalga del botón */
+    height: auto; /* Mantiene la proporción de la imagen */
+    max-height: 100%; /* Puedes ajustar este valor dependiendo de cuán grande quieras que sea la imagen */
+}
+.btn-eliminar img {
+    max-width: 100%; /* Asegura que la imagen no sobresalga del botón */
+    height: auto; /* Mantiene la proporción de la imagen */
+    max-height: 100%; /* Puedes ajustar este valor dependiendo de cuán grande quieras que sea la imagen */
 }

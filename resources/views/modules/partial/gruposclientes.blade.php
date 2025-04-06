@@ -3,7 +3,7 @@
 @include('modules.modals.modalnuevogrupos')
 @include('modules.modals.modalgrupos')
 @include('modules.modals.modalmostrarclientegrupo')
-
+@include('modules.modals.modaleditarcentro')
 <form id="eliminar-form" method="POST" style="display:none;">
     @csrf
     @method('DELETE')
@@ -14,7 +14,8 @@
         <div class="container mt-4">
             <h1>Mantenimiento de Grupos</h1>
             <div class="btn-grupos" style="display: flex; margin-bottom: 10px; margin-top: 10px; margin-left: 10px;">
-                <a href="#" id="openModalBtnnuevocentro" class="btn-agregar" style="margin-right: 15px;"><span>Nuevo
+                <a href="#" id="openModalBtnnuevocentro" class="btn-agregar"
+                    style="margin-right: 15px;"><span>Nuevo
                         Centro</span></a>
                 <a href="#" id="openModalBtnnuevogrupo" class="btn-eliminar"><span>Nuevo
                         Grupo</span></a>
@@ -37,7 +38,7 @@
                 style="display:none; position: fixed; top: 90px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px;">
                 <span id="custom-alert-message">Hola</span>
             </div>
-        
+
 
             <table id="tablacentros" class="table table-striped " style="width:100%">
 
@@ -72,20 +73,27 @@
 
                             @if (Auth::check() && Auth::user()->rol === 'administrador')
                                 <!-- Mostrar el botón de eliminar solo si el conteo de grupos es 0 -->
-                                @if ($cantidadGrupos == 0)
-                                    <td>
-                                        <form action="{{ route('centros.eliminar', $centros->id) }}" method="POST" style="display:inline;">
+
+                                <td>
+                                    <button type="button" class="btn-editar-centro btn-editar"
+                                        id="btn-editarcentro-{{ $centros->id }}" data-id="{{ $centros->id }}">
+                                        <img src="{{ asset('img/icon-editar.svg') }}" alt="">
+                                    </button>
+                                    @if ($cantidadGrupos == 0)
+                                        <form action="{{ route('centros.eliminar', $centros->id) }}" method="POST"
+                                            style="display:inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn-eliminar-centro btn-eliminar"><img src="{{asset('img/icon-eliminar.svg')}}" alt=""></button>
+                                            <button type="submit" class="btn-eliminar-centro btn-eliminar"><img
+                                                    src="{{ asset('img/icon-eliminar.svg') }}" alt=""></button>
                                         </form>
-                                    </td>
-                                @else
-                                    <!-- Si hay grupos, no mostrar el botón -->
-                                    <td></td>
-                                @endif
+                                    @else
+                                        <!-- Si hay grupos, no mostrar el botón -->
+                                <td></td>
                             @endif
-                        </tr>
+                            </td>
+                    @endif
+                    </tr>
                     @endforeach
                 </tbody>
 

@@ -46,4 +46,41 @@ class CentroController extends Controller
     
         return redirect()->back()->with('success', 'Centro Eliminado Correctamente.');
     }
+    public function obtenercentro($id)
+    {
+        // Buscar el cliente junto con su grupo y centro
+        $centro = Centros::find($id);
+
+        // Si el cliente existe, devolver los datos en formato JSON
+        if ($centro) {
+            return response()->json($centro);
+        }
+
+        // Si no se encuentra el cliente, devolver un error
+        return response()->json(['error' => 'Cliente no encontrado'], 404);
+    }
+    public function actualizarCentro(Request $request, $id)
+{
+    // Validar los datos recibidos
+    $request->validate([
+        'nombrecentro' => 'required|string|max:255',
+    ]);
+
+    // Obtener el centro a actualizar
+    $centro = Centros::find($id);
+
+    if ($centro) {
+        // Actualizar los datos del centro
+        $centro->nombre = $request->input('nombrecentro');
+        $centro->save();
+
+        // Retornar una respuesta JSON con los datos actualizados
+        return response()->json(['success' => 'Centro Actualizado con éxito.']);
+    }
+
+    // Si no se encuentra el centro, retornar un error
+    return response()->json(['error' => 'Ocurrio un error'], 404);
+}
+    
+    
 }

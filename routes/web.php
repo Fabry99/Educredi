@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Models\Grupos;
 use App\Models\Municipios;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest', 'prevent.back.history')->group(function () {
@@ -26,6 +27,8 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/admin/usurios/obtener-user/{id}', [UserController::class, 'obtenerUser'])->name('usuarios.obtenerUser');
     Route::put('/admin/usuarios-update/', [UserController::class, 'updateuser'])
         ->name('user.update');
+
+
 
     // Rutas caja
     Route::get('/caja', [AuthController::class, 'caja'])->name('caja');
@@ -53,12 +56,20 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     });
     Route::post('clientes/guardar', [ClientesController::class, 'saveclient'])->name('clientes.saveclient');
     Route::get('/obtener-cliente/{id}', [ClientesController::class, 'obtenerCliente']);
+    Route::get('/obtener-centros/{id}', [CentroController::class, 'obtenercentro']);
+
 
     Route::get('/grupos/{id}', function ($id) {
         return response()->json(Grupos::where('id_centros', $id)->get());
     });
     Route::put('clientes/update', [ClientesController::class, 'updateclient'])
         ->name('clientes.update');
+    // Route::put('centros/update', [CentroController::class, 'updatecentro'])->name('centros.update');
+    // Ruta para actualizar el centro
+    Route::post('/actualizar-centro/{id}', [CentroController::class, 'actualizarCentro'])->name('centros.update');
+
+
+
 
     Route::get('/clientes-por-grupo/{grupoId}', [ClientesController::class, 'clientesPorGrupo']);
     Route::put('/eliminarclientegrupo/{id}', [ClientesController::class, 'eliminarDelGrupo'])->name('eliminarclientegrupo');
@@ -67,7 +78,6 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     Route::delete('/centros/eliminar/{id}', [CentroController::class, 'eliminar'])->name('centros.eliminar');
     Route::delete('/eliminar-grupo/{id}', [GruposController::class, 'eliminarGrupo']);
-
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');
