@@ -51,13 +51,11 @@ document.addEventListener("DOMContentLoaded", function () {
     editarBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
             const centroId = btn.getAttribute('data-id');  // Obtener el ID desde el data-id
-            console.log("ID del centro a editar:", centroId);
             $('#centro_id_editarcentro').val(centroId);
             $.ajax({
                 url: '/obtener-centros/' + centroId, // Ruta definida en Laravel
                 type: 'GET',
                 success: function (response) {
-                    console.log('respuesta', response);
                     $('#modaleditarcentro #nombrecentro').val(response.nombre);
 
                     $('#modaleditarcentro').fadeIn();
@@ -73,11 +71,9 @@ document.addEventListener("DOMContentLoaded", function () {
     if (actualizarCentroBtn) {
         actualizarCentroBtn.addEventListener('click',function(event){
             event.preventDefault();
-            console.log('click');
             const centroId = $('#centro_id_editarcentro').val(); // Obtener el ID del centro
             const nombreCentro = $('#nombrecentro').val();
-            console.log(centroId);
-            console.log(nombreCentro);
+
 
             $.ajax({
                 url: '/actualizar-centro/' + centroId,
@@ -100,7 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     $('#modaleditarcentro').fadeOut(); 
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.responseText);
                     alert('Error al actualizar el centro.');
                 }
             });
@@ -199,7 +194,6 @@ function cargarGruposPorCentro(centroID) {
 
                 var grupoId = $(this).data('id');
                 // Aquí puedes realizar la acción de eliminar usando el grupoId
-                console.log('ID del grupo a eliminar:', grupoId);
                 $.ajax({
                     url: '/eliminar-grupo/' + grupoId,
                     method: 'DELETE',
@@ -314,9 +308,6 @@ $('#tablagrupos tbody').on('click', 'tr', function () {
     const grupoId = $(this).data('id'); // Obtiene el id
     const nombreGrupo = $(this).data('nombre'); // Obtiene el nombre
 
-    console.log('El ID del grupo seleccionado es: ' + grupoId);
-    console.log('El nombre del grupo seleccionado es: ' + nombreGrupo);
-
     // Actualizar el título del modal con el nombre del grupo
     $('#modalmostrarcliente h2').text('Grupo: ' + nombreGrupo);
 
@@ -329,7 +320,6 @@ $('#tablagrupos tbody').on('click', 'tr', function () {
         url: '/clientes-por-grupo/' + grupoId, // Ruta al backend que maneja la consulta
         method: 'GET',
         success: function (response) {
-            console.log(response);
             $('#tablaclientesgrupos tbody').empty();
 
             response.forEach(cliente => {
@@ -347,7 +337,6 @@ $('#tablagrupos tbody').on('click', 'tr', function () {
 
         },
         error: function (error) {
-            console.error('Error al obtener los clientes:', error);
             alert('No se pudieron cargar los clientes para este grupo.');
         }
     });
@@ -356,7 +345,6 @@ $('#tablagrupos tbody').on('click', 'tr', function () {
 // Evento para manejar el clic en el botón de "Eliminar de grupo"
 $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
     const clienteId = $(this).data('id');
-    console.log('ID del cliente a eliminar: ' + clienteId);
     $('#tablaclientesgrupos tbody').empty();
 
     // Realizar la solicitud AJAX para eliminar al cliente del grupo
@@ -448,7 +436,6 @@ $(document).ready(function () {
         $('.tablaClientes tbody').on('click', 'tr', function () {
             const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
             const idCliente = rowData[0]; // Asume que el ID del cliente está en la primera columna (puedes ajustarlo según tu estructura)
-            console.log(idCliente);
             $('#cliente_id').val(idCliente); // Opción 1: En el campo oculto
 
             // Realizar una solicitud AJAX para obtener más información sobre el cliente
@@ -509,7 +496,6 @@ $(document).ready(function () {
                     });
 
 
-                    console.log(response);
                     // Actualizar el título del modal
                     $('#modaleditarcliente h2').html('Editar Cliente: ' + response.nombre.toUpperCase() + '&nbsp;' + response.apellido.toUpperCase());
 
@@ -546,7 +532,6 @@ $(document).ready(function () {
 
             // Cargar grupos
             function cargarGrupos(centroId, grupoId) {
-                console.log(centroId);
                 var grupoSelect = $('#modaleditarcliente #id_grupo');
                 grupoSelect.empty(); // Limpiar el select
                 grupoSelect.append('<option value="" disabled selected>Seleccione un Grupo</option>'); // Reset
@@ -572,7 +557,6 @@ $(document).ready(function () {
                             }
                         },
                         error: function () {
-                            console.error("Error al cargar los grupos.");
                         }
                     });
                 }
@@ -580,7 +564,6 @@ $(document).ready(function () {
 
             // Función para cargar los municipios según el departamento seleccionado
             function cargarMunicipios(departamentoId, municipioId) {
-                console.log("Cargando municipios para el departamento ID:", departamentoId);  // Agregado
                 var municipioSelect = $('#modaleditarcliente #id_municipioedit');
                 municipioSelect.empty();
                 municipioSelect.append('<option value="" disabled selected>Seleccione un Municipio</option>');
@@ -590,7 +573,6 @@ $(document).ready(function () {
                         url: '/municipios/' + departamentoId,
                         type: 'GET',
                         success: function (data) {
-                            console.log("Municipios recibidos:", data);  // Agregado para verificar los datos
                             if (data.length > 0) {
                                 data.forEach(function (municipio) {
                                     var option = $('<option></option>')
@@ -605,7 +587,6 @@ $(document).ready(function () {
                             }
                         },
                         error: function () {
-                            console.error("Error al cargar municipios.");
                         }
                     });
                 }

@@ -406,12 +406,12 @@ textarea {
 
 }
 .btn-editar img {
-    max-width: 100%; /* Asegura que la imagen no sobresalga del botón */
-    height: auto; /* Mantiene la proporción de la imagen */
-    max-height: 100%; /* Puedes ajustar este valor dependiendo de cuán grande quieras que sea la imagen */
+    max-width: 100%; 
+    height: auto; 
+    max-height: 100%; 
 }
 .btn-eliminar img {
-    max-width: 100%; /* Asegura que la imagen no sobresalga del botón */
-    height: auto; /* Mantiene la proporción de la imagen */
-    max-height: 100%; /* Puedes ajustar este valor dependiendo de cuán grande quieras que sea la imagen */
+    max-width: 100%; 
+    height: auto;
+    max-height: 100%; 
 }

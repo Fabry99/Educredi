@@ -15,7 +15,7 @@ $('.table1').DataTable({
     "autoWidth": false,
     "responsive": true,
     "colReorder": true,
-    "order": [[0, "desc"]],
+    "order": [[4, "desc"]],
     "language": {
         "decimal": ",",
         "thousands": ".",
