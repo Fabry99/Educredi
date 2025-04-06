@@ -20,27 +20,27 @@
 
 
 /* Cambiar el color de fondo de las cabeceras */
-#mitabla th {
+.table th {
     background-color: var(--tittle-column);
     color: white;
 }
 
 /* Cambiar el color de las filas al pasar el cursor sobre ellas */
-#mitabla tbody tr:hover {
+.table tbody tr:hover {
     background-color: #e1efda;
 }
 
-#mitabla tbody tr:nth-child(even):hover {
+.table tbody tr:nth-child(even):hover {
     background-color: #e1efda;
 }
 /* Establecer el borde de las celdas */
-#mitabla th, #mitabla td {
+.table th, .table td {
     border: 1px solid #ddd;
     padding: 10px;
 }
 
 /* Personalizar las filas alternadas */
-#mitabla tbody tr:nth-child(even) {
+.table tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
@@ -139,6 +139,10 @@ table.dataTable tbody tr:hover {
 
 }
 .btn-eliminar{
+    width: 35%;
+    border: 1px solid #dfdede;
+    border-radius: 8px;
+    box-shadow: 0px 0px 5px 0px rgba(9, 72, 9, 0.515);
     background-color: var(--color-eliminar);
 }
 .btn-agregar{
@@ -149,6 +153,9 @@ table.dataTable tbody tr:hover {
 }
 .btn-eliminar:hover{
     background-color: #c12c2c;
+    box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
+    border: 1px solid #c12c2c;
+
 }
 
 /* Estilos reversion liquidacion contador */
@@ -362,4 +369,23 @@ textarea {
     background: rgb(209, 209, 209);
     border-color: black;
 
+}
+.btn-eliminarGrupo{
+    width: 50%;
+    border: 1px solid #ffffff;
+    border-radius: 8px;
+    background-color: var(--color-eliminar);
+    color: white;
+    padding: 10px 10px;
+    box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
+}
+.btn-eliminarGrupo:hover{
+    background-color: #c12c2c;
+    box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
+    border: 1px solid #c12c2c;
+}
+#custom-alert {
+    background-color: #4CAF50; /* Verde */
+    color: white;
+    border-radius:5px ;
 }

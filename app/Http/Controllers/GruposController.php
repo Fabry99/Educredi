@@ -15,7 +15,7 @@ class GruposController extends Controller
             'nombre' => 'required|string|max:250',
             'id_centros' => 'required|exists:centros,id', // Asegúrate de que el centro existe
         ]);
-    
+
         try {
             // Crear el grupo
             Grupos::create([
@@ -23,7 +23,7 @@ class GruposController extends Controller
                 'id_centros' => $request->id_centros,  // El ID del centro seleccionado
                 'id_asesor' => Auth::user()->id,  // El ID del asesor autenticado
             ]);
-    
+
             // Mensaje de éxito
             return redirect()->back()->with('success', 'Grupo Agregado Correctamente.');
         } catch (\Exception $e) {
@@ -31,4 +31,35 @@ class GruposController extends Controller
             return redirect()->back()->with('error', 'Hubo un problema al agregar el grupo.');
         }
     }
+    public function obtenerGruposPorCentro($id)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Usuario no autenticado'], 401);
+        }
+    
+        $usuario = Auth::user();
+    
+        return response()->json([
+            'rol' => $usuario->rol,  // <- Asegúrate de que este campo exista en tu tabla users
+            'id_usuario' => $usuario->id,
+            'grupos' => Grupos::where('id_centros', $id)->get()
+        ]);
+    }
+    public function eliminarGrupo($id)
+    {
+        // Encontrar el grupo por su ID
+        $grupo = Grupos::find($id);
+        
+        // Verificar si el grupo existe
+        if (!$grupo) {
+            return response()->json(['error' => 'Grupo no encontrado'], 404);
+        }
+        
+        // Eliminar el grupo
+        $grupo->delete();
+        
+        // Responder con un mensaje de éxito
+        return response()->json(['success' => 'Grupo eliminado con éxito.']);
+    }
+    
 }

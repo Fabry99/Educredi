@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Centros;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CentroController extends Controller
 {
@@ -32,5 +33,17 @@ class CentroController extends Controller
         }
     }
 
+    public function eliminar($id)
+    {
+        
+        $centro = Centros::find($id);
 
+        if (!$centro) {
+            return redirect()->back()->with('error', 'Hubo un problema al Eliminiar el centro.');
+        }
+    
+        $centro->delete();
+    
+        return redirect()->back()->with('success', 'Centro Eliminado Correctamente.');
+    }
 }

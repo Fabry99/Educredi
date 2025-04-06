@@ -4,7 +4,208 @@ import 'datatables.net-dt';
 import 'datatables.net-colreorder';
 import 'datatables.net-keytable-dt';
 import 'datatables.net-scroller-dt';
-import { Modal } from 'bootstrap';
+import { Button, Modal } from 'bootstrap';
+
+
+
+
+
+$('#tablacentros').DataTable({
+    "paging": true,
+    "lengthChange": true,
+    "searching": true,
+    "ordering": true,
+    "info": true,
+    "autoWidth": false,
+    "responsive": true,
+    "colReorder": true,
+    "order": [[0, "desc"]],
+    "language": {
+        "decimal": ",",
+        "thousands": ".",
+        "lengthMenu": "Mostrar _MENU_ registros por página",
+        "zeroRecords": "No se encontraron resultados",
+        "info": "Mostrando página _PAGE_ de _PAGES_",
+        "infoEmpty": "No hay registros disponibles",
+        "infoFiltered": "(filtrado de _MAX_ registros totales)",
+        "search": "Buscar:",
+        "paginate": {
+            "first": "Primera",
+            "previous": "Anterior",
+            "next": "Siguiente",
+            "last": "Última"
+        },
+        "aria": {
+            "sortAscending": ": activar para ordenar la columna de manera ascendente",
+            "sortDescending": ": activar para ordenar la columna de manera descendente"
+        }
+    },
+    "lengthMenu": [5, 10, 25, 50, 100],
+    "pageLength": 5
+});
+$(document).ready(function () {
+    const table = $('#tablacentros').DataTable();
+
+    $('#tablacentros tbody').on('click', 'tr', function (event) {
+        // Si el clic es en el botón de eliminación, no abrir el modal
+        if ($(event.target).closest('button').is('.btn-eliminar-centro')) {
+            $('#modalgrupos').fadeOut(); // Cerrar el modal si el clic es en el botón de eliminar
+            return; // Detener la ejecución para no abrir el modal
+        }
+
+        // Si no es el botón de eliminar, abre el modal
+        const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
+        const centroID = rowData[0]; // ID del centro (Columna 0)
+        const nombreCentro = rowData[1]; // Nombre del centro (Columna 1)
+
+        // Actualizar el título del modal
+        $('#modalgrupos h2').text('Grupos del Centro - ' + nombreCentro);
+
+        // Llamar a la función para cargar los grupos
+        cargarGruposPorCentro(centroID);
+
+        // Mostrar el modal
+        $('#modalgrupos').fadeIn();
+    });
+
+    // Cerrar el modal al hacer clic en el botón de cerrar
+    $('.close-btn1').on('click', function () {
+        $('#modalgrupos').fadeOut();
+    });
+
+    // Cerrar el modal si se hace clic fuera de él
+    $(window).on('click', function (event) {
+        if ($(event.target).is('#modalgrupos')) {
+            $('#modalgrupos').fadeOut();
+        }
+    });
+
+    // Cerrar el modal al presionar ESC
+    $(document).on('keydown', function (event) {
+        if (event.key === "Escape") {
+            $('#modalgrupos').fadeOut();
+        }
+    });
+});
+function cargarGruposPorCentro(centroID) {
+    $.ajax({
+        url: '/grupos-por-centro/' + centroID,
+        method: 'GET',
+        success: function (response) {
+            if ($.fn.DataTable.isDataTable('#tablagrupos')) {
+                $('#tablagrupos').DataTable().clear().destroy();
+            }
+
+            $('#tablagrupos tbody').empty();
+
+            response.forEach(grupo => {
+                const formattedDate = new Date(grupo.created_at).toLocaleString('es-ES', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+
+                let fila = `
+                    <tr data-id="${grupo.id}" data-nombre="${grupo.nombre}">
+                        <td>${grupo.id}</td>
+                        <td>${grupo.nombre}</td>
+                        <td>${grupo.clientes_count}</td>
+                        <td>${formattedDate}</td>`;
+
+                if (esAdministrador) {
+                    // Verificar si clientes_count es 0 para mostrar u ocultar el botón "Eliminar"
+                    let eliminarBoton = grupo.clientes_count === 0 ? '' : 'style="display:none;"';
+
+                    fila += `
+                                <td>
+                               <button class="btn btn-eliminarGrupo" ${eliminarBoton} data-id="${grupo.id}">Eliminar</button>
+
+                                </td>`;
+                }
+
+                fila += '</tr>';
+                $('#tablagrupos tbody').append(fila);
+            });
+            $(document).on('click', '.btn-eliminarGrupo', function () {
+                
+            $('#modalmostrarcliente').fadeOut();
+                
+                var grupoId = $(this).data('id');
+                // Aquí puedes realizar la acción de eliminar usando el grupoId
+                console.log('ID del grupo a eliminar:', grupoId);
+                $.ajax({
+                    url: '/eliminar-grupo/' + grupoId,
+                    method: 'DELETE',
+                    data: {
+                        _token: $('meta[name="csrf-token"]').attr('content'), // Agregar el token CSRF aquí
+                    },
+                    success: function (response) {
+                        // Limpiar la tabla de clientes del grupo
+                        $('#tablaclientesgrupos tbody').empty();
+                    
+                        // Mostrar alerta de éxito
+                        $('#custom-alert-message').text(response.success); // Mostrar el mensaje de éxito
+                        $('#custom-alert').removeClass('alert-error').addClass('alert-success'); // Asegúrate de tener las clases de estilo
+                        $('#custom-alert').fadeIn(); // Mostrar la alerta
+                    
+                        // Ocultar la alerta después de 5 segundos y luego recargar la página
+                        setTimeout(function () {
+                            $('#custom-alert').fadeOut(); // Ocultar la alerta
+                            location.reload(); // Recargar la página después de que la alerta desaparezca
+                        }, 1000); // 5000 ms = 5 segundos
+                    
+                        // Cerrar el modal
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Error al eliminar el grupo. Por favor, inténtalo de nuevo.');
+                    }
+                });
+            });
+
+            // Inicializar DataTable después de que los datos se hayan agregado
+            $('#tablagrupos').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "colReorder": true,
+                "order": [[0, "asc"]],
+                "language": {
+                    "decimal": ",",
+                    "thousands": ".",
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron resultados",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first": "Primera",
+                        "previous": "Anterior",
+                        "next": "Siguiente",
+                        "last": "Última"
+                    },
+                    "aria": {
+                        "sortAscending": ": activar para ordenar la columna de manera ascendente",
+                        "sortDescending": ": activar para ordenar la columna de manera descendente"
+                    }
+                },
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "pageLength": 5
+            });
+
+
+
+
+
+        },
+        error: function () {
+            alert('Error al cargar los grupos.');
+        }
+    });
+}
 
 
 $('#tablaclientesgrupos').DataTable({
@@ -40,8 +241,9 @@ $('#tablaclientesgrupos').DataTable({
     "lengthMenu": [5, 10, 25, 50, 100],
     "pageLength": 5
 });
- // Evento para manejar el clic en una fila de la tabla de grupos
- $('#tablagrupos tbody').on('click', 'tr', function () {
+// Evento para manejar el clic en una fila de la tabla de grupos
+$('#tablagrupos tbody').on('click', 'tr', function () {
+    
     // Obtener el id del grupo y el nombre desde los atributos data-id y data-nombre
     const grupoId = $(this).data('id'); // Obtiene el id
     const nombreGrupo = $(this).data('nombre'); // Obtiene el nombre
@@ -371,89 +573,8 @@ $(document).ready(function () {
 
         });
 
-
-
-
     });
 
-
-
-    function cargarGruposPorCentro(centroID) {
-        $.ajax({
-            url: '/grupos-por-centro/' + centroID, // Ruta del backend
-            method: 'GET',
-            success: function (response) {
-                // Destruir DataTable anterior si existe
-                if ($.fn.DataTable.isDataTable('#tablagrupos')) {
-                    $('#tablagrupos').DataTable().clear().destroy();
-                }
-
-                // Limpiar la tabla antes de agregar nuevos datos
-                $('#tablagrupos tbody').empty();
-
-                // Insertar filas con los grupos obtenidos
-                response.forEach(grupo => {
-                    const formattedDate = new Date(grupo.created_at).toLocaleString('es-ES', {
-                        year: 'numeric', month: '2-digit', day: '2-digit',
-                        hour: '2-digit', minute: '2-digit', second: '2-digit'
-                    });
-
-                    // Usamos 'data-id' para almacenar el id del grupo en cada fila
-                    $('#tablagrupos tbody').append(`
-        <tr data-id="${grupo.id}" data-nombre="${grupo.nombre}"> <!-- Aquí se almacena el id y el nombre -->
-                            <td>${grupo.id}</td>
-                            <td>${grupo.nombre}</td>
-                            <td>${grupo.clientes_count}</td>
-                            <td>${formattedDate}</td>
-                        </tr>
-                    `);
-                });
-
-                // Inicializar DataTable después de que los datos se hayan agregado
-                $('#tablagrupos').DataTable({
-                    "paging": true,
-                    "lengthChange": true,
-                    "searching": true,
-                    "ordering": true,
-                    "info": true,
-                    "autoWidth": false,
-                    "responsive": true,
-                    "colReorder": true,
-                    "order": [[0, "asc"]],
-                    "language": {
-                        "decimal": ",",
-                        "thousands": ".",
-                        "lengthMenu": "Mostrar _MENU_ registros por página",
-                        "zeroRecords": "No se encontraron resultados",
-                        "info": "Mostrando página _PAGE_ de _PAGES_",
-                        "infoEmpty": "No hay registros disponibles",
-                        "infoFiltered": "(filtrado de _MAX_ registros totales)",
-                        "search": "Buscar:",
-                        "paginate": {
-                            "first": "Primera",
-                            "previous": "Anterior",
-                            "next": "Siguiente",
-                            "last": "Última"
-                        },
-                        "aria": {
-                            "sortAscending": ": activar para ordenar la columna de manera ascendente",
-                            "sortDescending": ": activar para ordenar la columna de manera descendente"
-                        }
-                    },
-                    "lengthMenu": [5, 10, 25, 50, 100],
-                    "pageLength": 5
-                });
-
-
-
-
-               
-            },
-            error: function () {
-                alert('Error al cargar los grupos.');
-            }
-        });
-    }
     // Función para abrir el modal al hacer clic en una fila de la tabla centros
     $(document).ready(function () {
         const table = $('#mitabla').DataTable();
@@ -495,7 +616,6 @@ $(document).ready(function () {
 
 });
 
-//Tabla de grupos
 
 
 
@@ -594,5 +714,3 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
-
-

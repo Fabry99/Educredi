@@ -157,7 +157,7 @@ class AuthController extends Controller
         $rol = Auth::user()->rol;
 
         // Verificar si el rol es 'contador'
-        if ($rol !== 'contador' && $rol !== 'caja') {
+        if ($rol !== 'contador' && $rol !== 'caja' && $rol !== 'administrador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
         }
@@ -168,12 +168,13 @@ class AuthController extends Controller
             ->with('centro')  // Cargar la relación con el centro
             ->groupBy('id_centros')
             ->get();
+            $contar = Centros::withCount('grupos')->get();
             $clienteporGrupo = Clientes::select('id_grupo', DB::raw('count(*) as cantidad_persona'))
             ->with('grupo')  // Cargar la relación con el centro
             ->groupBy('id_grupo')
             ->get();
 
-        return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro','clienteporGrupo'));
+        return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro','clienteporGrupo','contar'));
     }
 
     public function mantenimientoAsesores()

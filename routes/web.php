@@ -20,9 +20,9 @@ Route::middleware('guest', 'prevent.back.history')->group(function () {
 Route::middleware('auth', 'prevent.back.history')->group(function () {
     // Rutas Administrador
     Route::get('/home', [AdministradorController::class, 'home'])->name('home');
-    Route::get('/bitacora',[AdministradorController::class, 'bitacora'])->name('bitacora');
-    Route::get('/usuarios',[AdministradorController::class,'usuarios'])->name('usuarios');
-    Route::post('/usuarios/nuevousuario',[UserController::class, 'nuevousuario'])->name('usuarios.nuevousuario');
+    Route::get('/bitacora', [AdministradorController::class, 'bitacora'])->name('bitacora');
+    Route::get('/usuarios', [AdministradorController::class, 'usuarios'])->name('usuarios');
+    Route::post('/usuarios/nuevousuario', [UserController::class, 'nuevousuario'])->name('usuarios.nuevousuario');
     Route::get('/admin/usurios/obtener-user/{id}', [UserController::class, 'obtenerUser'])->name('usuarios.obtenerUser');
     Route::put('/admin/usuarios-update/', [UserController::class, 'updateuser'])
         ->name('user.update');
@@ -32,21 +32,19 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     // Rutas Contador
     Route::get('/clientes', [AuthController::class, 'contador'])->name('contador');
-    Route::get('/grupos',[AuthController::class, 'grupos'])->name('grupos');
-    Route::get('/asesores',[AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
-    Route::get('/reversiones',[AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
-    Route::get('/creditos',[AuthController::class,  'creditos'])->name('creditos');
-    Route::get('/cambiardatos',[AuthController::class, 'cambiardatos'])->name('cambiardatos');
-    Route::get('/transferenciadecartera',[AuthController::class, 'transferenciadecartera'])->name('transferenciadecartera');
+    Route::get('/grupos', [AuthController::class, 'grupos'])->name('grupos');
+    Route::get('/asesores', [AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
+    Route::get('/reversiones', [AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
+    Route::get('/creditos', [AuthController::class,  'creditos'])->name('creditos');
+    Route::get('/cambiardatos', [AuthController::class, 'cambiardatos'])->name('cambiardatos');
+    Route::get('/transferenciadecartera', [AuthController::class, 'transferenciadecartera'])->name('transferenciadecartera');
     Route::post('/centros/guardar', [CentroController::class, 'store'])->name('centros.store');
     Route::post('7grupos/guardar', [GruposController::class, 'savegroup'])->name('grupos.savegroup');
-    Route::get('/grupos-por-centro/{id}', function ($id) {
-        $grupos = Grupos::where('id_centros', $id)->get();
-        return response()->json($grupos);
-    });
+    Route::get('/grupos-por-centro', [GruposController::class, 'obtenerGruposPorCentro']);
+
     Route::get('/grupos-por-centro/{id}', function ($id) {
         $grupos = Grupos::where('id_centros', $id)
-            ->withCount('clientes')  
+            ->withCount('clientes')
             ->get();
         return response()->json($grupos);
     });
@@ -64,6 +62,12 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     Route::get('/clientes-por-grupo/{grupoId}', [ClientesController::class, 'clientesPorGrupo']);
     Route::put('/eliminarclientegrupo/{id}', [ClientesController::class, 'eliminarDelGrupo'])->name('eliminarclientegrupo');
+
+    // Ruta para eliminar un centro
+
+    Route::delete('/centros/eliminar/{id}', [CentroController::class, 'eliminar'])->name('centros.eliminar');
+    Route::delete('/eliminar-grupo/{id}', [GruposController::class, 'eliminarGrupo']);
+
 });
 
 Route::middleware('auth')->get('/logout', [AuthController::class, 'logout'])->name('logout');

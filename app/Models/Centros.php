@@ -21,4 +21,8 @@ class Centros extends Model
     {
         return $this->hasMany(Clientes::class, 'id_centro');
     }
+    public function grupos()
+    {
+        return $this->hasMany(Grupos::class, 'id_centros');
+    }
 }
