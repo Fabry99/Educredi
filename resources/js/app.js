@@ -86,7 +86,6 @@ $('#tablaclientesgrupos').DataTable({
 
 });
 // Evento para manejar el clic en el botón de "Eliminar de grupo"
-// Evento para manejar el clic en el botón de "Eliminar de grupo"
 $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
     const clienteId = $(this).data('id');
     console.log('ID del cliente a eliminar: ' + clienteId);
@@ -120,8 +119,6 @@ $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
     });
 
 });
-
-
 
 $('.close-btncerrarmostrarcliente').on('click', function () {
     $('#modalmostrarcliente').fadeOut();

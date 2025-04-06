@@ -66,17 +66,15 @@ class AuthController extends Controller
 
                 UserSessions::create([
                     'user_id' => $user->id,
-                    'started_at' => now(),
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent(),
+                    'started_at' => now(), 
+                    'ip_address' => $request->ip(), 
+                    'user_agent' => $request->header('User-Agent'), 
                 ]);
-                // Verificar si el usuario está activo
                 if ($user->estado === 'activo') {
-                    // Registra la hora de inicio de sesión en la tabla 'sessions'
-                    $sessionId = session()->getId(); // Obtener el ID de la sesión
+                    $sessionId = session()->getId();
                     DB::table('sessions')->where('id', $sessionId)->update([
-                        'user_id' => $user->id, // Guardar el ID del usuario en la sesión
-                        'login_time' => Carbon::now(), // Registrar la hora de inicio de sesión
+                        'user_id' => $user->id,
+                        'login_time' => Carbon::now(), 
                     ]);
 
                     // Redirige al usuario según su rol
@@ -113,26 +111,24 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        // Obtener la sesión más reciente sin cerrar del usuario autenticado
         $session = UserSessions::where('user_id', Auth::id())
             ->whereNull('ended_at')
-            ->orderByDesc('started_at') // ordena por fecha de inicio más reciente
+            ->orderByDesc('started_at') 
             ->first();
-    
-        // Si existe, actualiza la hora de salida
-        if ($session) {
+        if ($session->ended_at === null) {
             $session->update([
-                'ended_at' => now(),
+                'ended_at' => now(), 
             ]);
         }
-    
-        // Cerrar sesión y limpiar la sesión de Laravel
+        
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-    
+        
         return redirect()->route('login');
     }
+    
+    
     
 
 

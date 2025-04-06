@@ -1,10 +1,12 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
+@include('modules.modals.modalnuevouser')
+@include('modules.modals.modaleditaruser')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
             <h1>Usuarios</h1>
             <div class="btn-clientes">
-                <a href="" id="openModalBtn" style="width: 170px"><img src="{{ asset('img/icon-clientes.svg') }}"
+                <a href="" id="openModalBtnnuevousuario" style="width: 170px"><img src="{{ asset('img/icon-clientes.svg') }}"
                         alt=""><span>Agregar Usuario</span></a>
 
 
@@ -28,11 +30,11 @@
                 <span id="custom-alert-message"></span>
             </div>
 
-            <table id="tablaBitacora" class="table table-striped" style="width:100%">
+            <table id="tablaUsuarios" class="table table-striped table1" style="width:100%">
 
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th hidden>ID</th>
                         <th>Nombre</th>
                         <th>Correo</th>
                         <th>Fecha de Nacimiento</th>
@@ -47,7 +49,7 @@
                 <tbody>
                     @foreach ($usuarios as $item)
                         <tr>
-                            <td>{{ $item->id }}</td>
+                            <td hidden>{{$item->id}}</td>
                             <td>{{ $item->name }} {{ $item->last_name }}</td>
                             <td>{{ $item->email }}</td>
                             <td>
@@ -82,35 +84,6 @@
 
                         </tr>
                     @endforeach
-                    {{-- @foreach ($bitacora as $item)
-                        @php
-                            // Decodificar el JSON de la columna 'datos'
-                            $datos = json_decode($item->datos, true);
-
-                            // formatear fechas para hacerlas legibles
-                            $created_at = \Carbon\Carbon::parse($datos['created_at'] ?? '')
-                                ->timezone('America/Guatemala')
-                                ->format('d/m/Y H:i:s');
-                            $updated_at = \Carbon\Carbon::parse($datos['updated_at'] ?? '')
-                                ->timezone('America/Guatemala')
-                                ->format('d/m/Y H:i:s');
-                        @endphp
-
-                        <tr>
-                            <td>{{ strtoupper(optional($item->user)->name ?? '') }} {{ strtoupper(optional($item->user)->last_name ?? '') }}</td>
-                            <td>{{ strtoupper($item->tabla_afectada) }}</td>
-                            <td>{{ $item->accion }}</td>
-                            <td>
-                                <ul>
-                                    <li><strong>Nombre:</strong> {{ $datos['nombre'] ?? 'No disponible' }}</li>
-                                    <li><strong>ID Asesor:</strong> {{ $datos['id_asesor'] ?? 'No disponible' }}</li>
-                                    <li><strong>Fecha de Creación:</strong> {{ $created_at }}</li>
-                                    <li><strong>Fecha de Actualización:</strong> {{ $updated_at }}</li>
-                                </ul>
-                            </td>
-                            <td>{{ $created_at }}</td>
-                        </tr>
-                    @endforeach --}}
 
                 </tbody>
 

@@ -22,7 +22,7 @@
                 <span id="custom-alert-message"></span>
             </div>
 
-            <table id="tablaBitacora" class="table table-striped" style="width:100%">
+            <table id="tablaBitacora" class="table table-striped table1" style="width:100%">
 
                 <thead>
                     <tr>

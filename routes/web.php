@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CentroController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\GruposController;
+use App\Http\Controllers\UserController;
 use App\Models\Grupos;
 use App\Models\Municipios;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,10 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/home', [AdministradorController::class, 'home'])->name('home');
     Route::get('/bitacora',[AdministradorController::class, 'bitacora'])->name('bitacora');
     Route::get('/usuarios',[AdministradorController::class,'usuarios'])->name('usuarios');
+    Route::post('/usuarios/nuevousuario',[UserController::class, 'nuevousuario'])->name('usuarios.nuevousuario');
+    Route::get('/admin/usurios/obtener-user/{id}', [UserController::class, 'obtenerUser'])->name('usuarios.obtenerUser');
+    Route::put('/admin/usuarios-update/', [UserController::class, 'updateuser'])
+        ->name('user.update');
 
     // Rutas caja
     Route::get('/caja', [AuthController::class, 'caja'])->name('caja');
