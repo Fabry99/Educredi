@@ -2,57 +2,65 @@
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
         <h2></h2>
-        <form method="POST" action="{{route('user.update')}}">
+        <form method="POST" action="{{ route('user.update') }}">
             @csrf
             @method('PUT')
             <input type="hidden" id="user_id" name="id"> <!-- Nuevo campo para el ID -->
-            <div class="modal-ge">
-                <div class="input-group">
+            <div class="modal-ge1">
+                <div class="input-group1">
                     <label for="nombre" class="label1">
+                        Nombres:
                         <input type="text" id="nombreupdate" name="nombreupdate" placeholder="Nombre:" required>
                     </label>
                 </div>
-                <div class="input-group">
+                <div class="input-group1">
                     <label for="apellido" class="label1">
+                        Apellidos:
                         <input type="text" id="apellidoupdate" name="apellidoupdate" placeholder="Apellidos:"
                             required>
                     </label>
                 </div>
             </div>
-            <div class="modal-ge">
-                <div class="input-group">
+            <div class="modal-ge1">
+                <div class="input-group1">
                     <label for="correo" class="label1">
+                        Correo:
                         <input type="email" id="correoupdate" name="correoupdate" placeholder="Correo:"
                             title="Ingrese un correo válido como example@dominio.com" required>
 
                     </label>
                 </div>
-                <div class="input-group">
+                <div class="input-group1">
                     <label for="password" class="label1">
+                        Contraseña:
                         <input type="password" id="passwordupdate" name="passwordupdate"
                             placeholder="Asignar Nueva Contraseña:" minlength=" 8 "
-                            title="La contraseña debe tener al menos 8 caracteres" >
+                            title="La contraseña debe tener al menos 8 caracteres">
                     </label>
                 </div>
             </div>
-            <div class="modal-ge">
-                <div class="input-group select" style="margin-left: 20px; width: 260px;">
-                    <select id="rolupdate" name="rolupdate" required>
-                        <option value="" disabled selected>Asignar Rol:</option>
-                        <option value="administrador">Administrador</option>
-                        <option value="contador">Contador</option>
-                        <option value="caja">Cajero</option>
-                    </select>
-                </div>
-                <div class="input-group select" style="margin-left: 40px; width: 200px;">
-                    <select id="actividadupdate" name="actividadupdate" required>
-                        <option value="" disabled selected>Asignar Actividad</option>
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
-                    </select>
-                </div>
+            <div class="modal-ge1" style="margin-left: 40px">
+                <label for="">Rol:
+                    <div class="input-group1 select" style="margin-left: 30px; width: 190px;">
+                        <select id="rolupdate" name="rolupdate" required>
+                            <option value="" disabled selected>Asignar Rol:</option>
+                            <option value="administrador">Administrador</option>
+                            <option value="contador">Contador</option>
+                            <option value="caja">Cajero</option>
+                        </select>
+                    </div>
+                </label>
+                <label for="" style="margin-left: 45px">Estado:
+                    <div class="input-group1 select" style="margin-left: 30px; width: 170px;">
+                        <select id="actividadupdate" name="actividadupdate" required>
+                            <option value="" disabled selected>Asignar Actividad</option>
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </label>
             </div>
-            <div class="modal-ge">
+            <div class="modal-ge1">
                 <div class="input-group">
                     <label for="nacimiento" class="label2" style="font-size: 12px">Fecha de Nacimiento:
                         <input type="date" id="nacimientoupdate" name="nacimientoupdate" required>
@@ -69,6 +77,21 @@
 </div>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const fechaActual = new Date();
+        const fechaMinima = new Date(
+            fechaActual.getFullYear() - 18,
+            fechaActual.getMonth(),
+            fechaActual.getDate()
+        );
+
+        const inputNacimiento = document.getElementById("nacimientoupdate");
+        if (inputNacimiento) {
+            inputNacimiento.max = fechaMinima.toISOString().split("T")[0];
+        }
+    });
+</script>
 
 
 <style>
@@ -92,26 +115,42 @@
         font-size: 1.3rem;
     }
 
-    .modal-ge {
+
+    .modal-ge1 {
         display: flex;
-        width: 100%;
-        margin-top: 10px;
+        flex-direction: row;
+        margin-top: 15px;
     }
 
-    .modal-ge select {
+    .input-group1 {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .input-group1 input {
+        border: none;
+        background: none;
+        outline: none;
         width: 100%;
-        padding: 10px 15px;
-        border-radius: 4px;
+        font-size: 16px;
+        margin-top: 5px;
         background: var(--background-inputs);
-    }
-
-    .input-group.select {
         border: 1px solid var(--borde);
         border-radius: 4px;
-        background: var(--background-inputs);
+        padding: 10px 10px;
+        margin: 0px 20px 0px 5px;
     }
 
-    .input-group {
+    .modal-ge1 select {
+        width: 100%;
+        padding: 10px 0px;
+        border-radius: 4px;
+        background: var(--background-inputs);
+        margin-left:-20px; 
+    }
+
+
+    .input-group1 {
         margin-left: 20px;
     }
 
@@ -209,12 +248,12 @@
         cursor: pointer;
     }
 
-    .modal-ge label:hover {
+    .modal-ge1 input:hover {
         border-color: var(--verde-shadow);
         box-shadow: 0 0 5px var(--verde-shadow);
     }
 
-    .modal-ge select:hover {
+    .modal-ge1 select:hover {
         border-color: var(--verde-shadow);
         box-shadow: 0 0 5px var(--verde-shadow);
     }
