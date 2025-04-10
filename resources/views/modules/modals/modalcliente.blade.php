@@ -146,7 +146,7 @@
                     </label>
                 </div>
                 <div class="input-group select" style="margin-left: 20px;">
-                    <select id="estado_civil" name="estado_civil">
+                    <select id="estado_civil" name="estado_civil" required>
                         <option value="" disabled selected>Estado Civil:</option>
                         <option value="soltero">soltero</option>
                         <option value="casado">casado</option>
@@ -230,6 +230,38 @@
                 })
                 .catch(error => {
                 });
+        }
+    });
+    function formatDate(date) {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    window.addEventListener("DOMContentLoaded", function () {
+        const today = new Date();
+
+        // Persona debe tener al menos 18 años => Fecha máxima = hoy - 18 años
+        const maxBirthDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+        // Por si quieres un límite inferior (por ejemplo, no más de 100 años de edad)
+        const minBirthDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+
+        // Fecha de expedición también debe ser hasta hoy (sin futuro)
+        const maxToday = formatDate(today);
+
+        // Aplicar a los campos correspondientes
+        const fechaNacimientoInput = document.getElementById("fecha_nacimiento");
+        const expedicionInput = document.getElementById("expedicion");
+
+        if (fechaNacimientoInput) {
+            fechaNacimientoInput.setAttribute("max", formatDate(maxBirthDate));
+            fechaNacimientoInput.setAttribute("min", formatDate(minBirthDate));
+        }
+
+        if (expedicionInput) {
+            expedicionInput.setAttribute("max", maxToday);
         }
     });
 </script>
@@ -356,4 +388,18 @@
     .btn-imprimir:hover {
         background: #486c96;
     }
+    .close-btn1 {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+  }
+
+  .close-btn1:hover,
+  .close-btn1:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
 </style>

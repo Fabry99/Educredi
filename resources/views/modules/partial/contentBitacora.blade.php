@@ -26,6 +26,7 @@
 
                 <thead>
                     <tr>
+                        <th hidden>ID</th>
                         <th>Usuario</th>
                         <th>Tabla Afectada</th>
                         <th>Acción Realizada</th>
@@ -52,6 +53,7 @@
                         @endphp
 
                         <tr>
+                            <td hidden>{{$item->id}}</td>
                             <td>{{ strtoupper(optional($item->user)->name ?? '') }} {{ strtoupper(optional($item->user)->last_name ?? '') }}</td>
                             <td>{{ strtoupper($item->tabla_afectada) }}</td>
                             <td>{{ $item->accion }}</td>

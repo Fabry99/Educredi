@@ -87,9 +87,7 @@
                                             <button type="submit" class="btn-eliminar-centro btn-eliminar"><img
                                                     src="{{ asset('img/icon-eliminar.svg') }}" alt=""></button>
                                         </form>
-                                    @else
-                                        <!-- Si hay grupos, no mostrar el botón -->
-                                <td></td>
+                                   
                             @endif
                             </td>
                     @endif

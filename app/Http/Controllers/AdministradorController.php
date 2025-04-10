@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bitacora;
+use App\Models\Centros;
+use App\Models\Clientes;
+use App\Models\Departamentos;
+use App\Models\Grupos;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +17,14 @@ class AdministradorController extends Controller
     {
         $rol = Auth::user()->rol; // Obtener el rol del usuario autenticado
         return view('modules.dashboard.home')->with('rol', $rol); // Pasar el rol a la vista
+    }
+    public function clientesadmin(){
+        $rol = Auth::user()->rol;
+        $departamentos = Departamentos::all();
+        $centros = Centros::all();
+        $grupo = Grupos::all();
+        $clientes = Clientes::with('departamento', 'municipio', 'grupo','centro')->get();
+        return view('modules.dashboard.clientesAdmin', compact('rol', 'departamentos', 'clientes', 'grupo','centros'));
     }
     public function bitacora(){
 

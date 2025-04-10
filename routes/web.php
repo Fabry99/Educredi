@@ -27,6 +27,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/admin/usurios/obtener-user/{id}', [UserController::class, 'obtenerUser'])->name('usuarios.obtenerUser');
     Route::put('/admin/usuarios-update/', [UserController::class, 'updateuser'])
         ->name('user.update');
+    Route::get('/admin/clientes',[AdministradorController::class,'clientesadmin'])->name('admin.clientes');
 
 
 
