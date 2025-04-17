@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bitacora;
 use App\Models\Centros;
+use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
 use App\Models\Departamentos;
 use App\Models\Grupos;
@@ -23,8 +24,9 @@ class AdministradorController extends Controller
         $departamentos = Departamentos::all();
         $centros = Centros::all();
         $grupo = Grupos::all();
-        $clientes = Clientes::with('departamento', 'municipio', 'grupo','centro')->get();
-        return view('modules.dashboard.clientesAdmin', compact('rol', 'departamentos', 'clientes', 'grupo','centros'));
+        $centros_grupos_clientes = Centros_Grupos_Clientes::with('clientes','grupos','centros')->get();
+        $clientes = Clientes::with('departamento', 'municipio','Centros_Grupos_Clientes.grupos','Centros_Grupos_Clientes.centros')->get();
+        return view('modules.dashboard.clientesAdmin', compact('rol', 'departamentos', 'clientes','centros_grupos_clientes','centros','grupo'));
     }
     public function bitacora(){
 

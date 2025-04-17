@@ -35,8 +35,6 @@ class Clientes extends Model
         'act_economica',
         'ocupacion',
         'puede_firmar',
-        'id_centro',
-        'id_grupo',
         'created_at',
         'updated_at',
         'nrc',
@@ -49,12 +47,8 @@ class Clientes extends Model
     {
         return $this->belongsTo(Departamentos::class, 'id_departamento');
     }
-    public function grupo()
+    public function Centros_Grupos_Clientes()
     {
-        return $this->belongsTo(Grupos::class, 'id_grupo');
-    }
-    public function centro()
-    {
-        return $this->belongsTo(Centros::class, 'id_centro');
+        return $this->hasMany(Centros_Grupos_Clientes::class, 'cliente_id');
     }
 }

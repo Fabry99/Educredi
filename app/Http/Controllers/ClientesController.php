@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -86,7 +87,7 @@ class ClientesController extends Controller
     public function obtenerCliente($id)
     {
         // Buscar el cliente junto con su grupo y centro
-        $cliente = Clientes::with(['departamento', 'municipio', 'centro', 'grupo'])->find($id);
+        $cliente = Clientes::with(['departamento', 'municipio'])->find($id);
 
         // Si el cliente existe, devolver los datos en formato JSON
         if ($cliente) {
@@ -98,39 +99,80 @@ class ClientesController extends Controller
     }
 
     public function updateclient(Request $request)
-{
-    // Obtén el ID desde el formulario (campo oculto)
+    {
+        $id = $request->id;
 
-    $id = $request->id;
-    
-    // Validación y lógica de actualización
-    $cliente = Clientes::findOrFail($id);
-    $cliente->update($request->all());
-    
-    return redirect()->back()->with('success', 'Cliente actualizado');
-}
-public function clientesPorGrupo($grupoId)
+        // Validar campos básicos del cliente
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+        ]);
+
+        // Actualizar datos del cliente (exceptuando los campos de relación)
+        $cliente = Clientes::findOrFail($id);
+        $cliente->update($request->except(['id_centro', 'id_grupo']));
+
+        // Verifica que ambos campos estén presentes y no sean nulos
+        if ($request->filled('id_centro') && $request->filled('id_grupo')) {
+
+            // Verifica que no exista ya la relación
+            $yaExisteRelacion = \App\Models\Centros_Grupos_Clientes::where('cliente_id', $cliente->id)
+                ->where('centro_id', $request->id_centro)
+                ->where('grupo_id', $request->id_grupo)
+                ->exists();
+
+            if (!$yaExisteRelacion && $request->filled('id_centro') && $request->filled('id_grupo')) {
+                \App\Models\Centros_Grupos_Clientes::create([
+                    'cliente_id' => $cliente->id,
+                    'centro_id' => $request->id_centro,
+                    'grupo_id' => $request->id_grupo
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Cliente actualizado correctamente');
+    }
+
+    public function clientesPorGrupo($grupoId)
     {
         // Obtén los clientes que pertenecen al grupo
-        $clientes = Clientes::where('id_grupo', $grupoId)->get();
+        $clientes = Centros_Grupos_Clientes::where('grupo_id', $grupoId)->with('clientes')->get();
 
         // Retorna los clientes en formato JSON
         return response()->json($clientes);
     }
 
-    public function eliminarDelGrupo($id)
-    {
-        $cliente = Clientes::find($id);
+    public function eliminarDelGrupo(Request $request)
+{
+    $clienteId = $request->input('cliente_id');
+    $grupoId = $request->input('grupo_id');
+    $centroId = $request->input('centro_id');
+    // Validar o buscar si existe la relación
+    $registro = Centros_Grupos_Clientes::where('cliente_id', $clienteId)
+                ->where('grupo_id', $grupoId)
+                ->where('centro_id', $centroId)
+                ->first();
 
-        if ($cliente) {
-            // Eliminar el cliente del grupo y centro
-            $cliente->id_grupo = null;
-            $cliente->id_centro = null;
-            $cliente->save();
+    if ($registro) {
+        $registro->delete(); // elimina la relación del grupo
 
-            return response()->json(['success' => 'Cliente Eliminado Correctamente.']);
-        }
-
-        return response()->json(['error' => 'Hubo un problema al eliminar al cliente.']);
+        return response()->json(['success' => 'Cliente eliminado correctamente del grupo.']);
     }
+
+    return response()->json(['error' => 'No se encontró la relación.'], 404);
 }
+
+}
+
+// $cliente = Clientes::find($id);
+
+        // if ($cliente) {
+        //     // Eliminar el cliente del grupo y centro
+        //     $cliente->id_grupo = null;
+        //     $cliente->id_centro = null;
+        //     $cliente->save();
+
+        //     return response()->json(['success' => 'Cliente Eliminado Correctamente.']);
+        // }
+
+        // return response()->json(['error' => 'Hubo un problema al eliminar al cliente.']);

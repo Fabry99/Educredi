@@ -17,12 +17,12 @@ class Centros extends Model
     {
         return $this->belongsTo(User::class, 'id_asesor');
     }
-    public function clientes()
+    public function Centros_Grupos_Clientes()
     {
-        return $this->hasMany(Clientes::class, 'id_centro');
+        return $this->hasMany(Centros_Grupos_Clientes::class, 'centro_id');
     }
-    public function grupos()
-    {
+    
+    public function grupos(){
         return $this->hasMany(Grupos::class, 'id_centros');
     }
 }

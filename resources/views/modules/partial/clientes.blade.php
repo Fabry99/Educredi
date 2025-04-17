@@ -1,6 +1,7 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
 @include('modules.modals.modalcliente')
 @include('modules.modals.modaleditarcliente')
+@include('modules.modals.modalPrestamoGrupal')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
@@ -44,24 +45,47 @@
                 </thead>
                 <tbody>
                     @foreach ($clientes as $clientes)
-                    <tr>
-                        <td>{{$clientes->id}}</td>
-                        <td>{{$clientes->nombre}}</td>
-                        <td>{{$clientes->apellido}}</td>
-                        <td>{{$clientes->genero}}</td>
-                        <td>{{ \Carbon\Carbon::parse($clientes->fecha_nacimiento)->age }} años</td>
-                        <td>{{$clientes->telefono_casa}}</td>
-                        <td>{{$clientes->dui}}</td>
-                        <td>{{$clientes->departamento->nombre ?? 'Sin Departamento'}}</td>
-                        <td>{{$clientes->municipio->nombre ?? 'Sin Municipio'}}</td>
-                        <td>{{$clientes->centro->nombre ?? 'Sin Centro'}}</td>
-                        <td>{{$clientes->grupo->nombre ?? 'Sin Grupo'}}</td>
+                        <tr>
+                            <td>{{ $clientes->id }}</td>
+                            <td>{{ $clientes->nombre }}</td>
+                            <td>{{ $clientes->apellido }}</td>
+                            <td>{{ $clientes->genero }}</td>
+                            <td>{{ \Carbon\Carbon::parse($clientes->fecha_nacimiento)->age }} años</td>
+                            <td>{{ $clientes->telefono_casa }}</td>
+                            <td>{{ $clientes->dui }}</td>
+                            <td>{{ $clientes->departamento->nombre ?? 'Sin Departamento' }}</td>
+                            <td>{{ $clientes->municipio->nombre ?? 'Sin Municipio' }}</td>
 
-                    </tr>
-                        
+                            {{-- Centros --}}
+                            <td>
+                                @forelse ($clientes->Centros_Grupos_Clientes as $relacion)
+                                    @if ($relacion->centros)
+                                        <span
+                                            class="badge bg-primary">{{ $relacion->centros->nombre ?? 'Sin Centro' }}</span><br>
+                                    @else
+                                        <span class="badge bg-secondary">Sin Centro</span><br>
+                                    @endif
+                                @empty
+                                    <span class="badge bg-secondary">Sin Centro</span>
+                                @endforelse
+                            </td>
+
+                            {{-- Grupos --}}
+                            <td>
+                                @forelse ($clientes->Centros_Grupos_Clientes as $relacion)
+                                    @if ($relacion->grupos)
+                                        <span class="badge bg-success">{{ $relacion->grupos->nombre }}</span><br>
+                                    @else
+                                        <span class="badge bg-secondary">Sin Grupo</span><br>
+                                    @endif
+                                @empty
+                                    <span class="badge bg-secondary">Sin Grupo</span>
+                                @endforelse
+                            </td>
+                        </tr>
                     @endforeach
-
                 </tbody>
+
 
             </table>
         </div>

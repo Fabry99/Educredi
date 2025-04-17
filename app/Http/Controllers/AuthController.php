@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Centros;
+use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
 use App\Models\Departamentos;
 use App\Models\Grupos;
@@ -66,15 +67,15 @@ class AuthController extends Controller
 
                 UserSessions::create([
                     'user_id' => $user->id,
-                    'started_at' => now(), 
-                    'ip_address' => $request->ip(), 
-                    'user_agent' => $request->header('User-Agent'), 
+                    'started_at' => now(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
                 ]);
                 if ($user->estado === 'activo') {
                     $sessionId = session()->getId();
                     DB::table('sessions')->where('id', $sessionId)->update([
                         'user_id' => $user->id,
-                        'login_time' => Carbon::now(), 
+                        'login_time' => Carbon::now(),
                     ]);
 
                     // Redirige al usuario según su rol
@@ -113,23 +114,23 @@ class AuthController extends Controller
     {
         $session = UserSessions::where('user_id', Auth::id())
             ->whereNull('ended_at')
-            ->orderByDesc('started_at') 
+            ->orderByDesc('started_at')
             ->first();
         if ($session->ended_at === null) {
             $session->update([
-                'ended_at' => now(), 
+                'ended_at' => now(),
             ]);
         }
-        
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        
+
         return redirect()->route('login');
     }
-    
-    
-    
+
+
+
 
 
     public function caja()
@@ -143,12 +144,14 @@ class AuthController extends Controller
     {
         $rol = Auth::user()->rol;
         $departamentos = Departamentos::all();
+       
         $centros = Centros::all();
         $grupo = Grupos::all();
-        $clientes = Clientes::with('departamento', 'municipio', 'grupo','centro')->get();
+        $centros_grupos_clientes = Centros_Grupos_Clientes::with('clientes', 'grupos', 'centros')->get();
+        $clientes = Clientes::with('departamento', 'municipio', 'Centros_Grupos_Clientes.grupos', 'Centros_Grupos_Clientes.centros')->get();
         // Recupera el cliente, lanza error si no se encuentra
         if ($rol == 'contador') {
-            return view('modules.dashboard.home', compact('rol', 'departamentos', 'clientes', 'grupo','centros'));
+            return view('modules.dashboard.home', compact('rol', 'clientes', 'centros_grupos_clientes', 'centros', 'grupo','departamentos'));
         }
     }
 
@@ -164,17 +167,27 @@ class AuthController extends Controller
 
         // Si el rol es 'contador', cargar la vista
         $centros = Centros::orderBy('id', 'DESC')->get();
+        
         $gruposPorCentro = Grupos::select('id_centros', DB::raw('count(*) as cantidad_grupos'))
             ->with('centro')  // Cargar la relación con el centro
             ->groupBy('id_centros')
             ->get();
-            $contar = Centros::withCount('grupos')->get();
-            $clienteporGrupo = Clientes::select('id_grupo', DB::raw('count(*) as cantidad_persona'))
-            ->with('grupo')  // Cargar la relación con el centro
-            ->groupBy('id_grupo')
-            ->get();
+        $contar = Centros::withCount('grupos')->get();
+        // $clienteporGrupo = Clientes::select('id_grupo', DB::raw('count(*) as cantidad_persona'))
+        //     ->with('grupo')  // Cargar la relación con el centro
+        //     ->groupBy('id_grupo')
+        //     ->get();
+        
+        $clientesPorCentroYGrupo = Centros_Grupos_Clientes::select(
+            'centro_id',
+            'grupo_id',
+            DB::raw('COUNT(cliente_id) as clientes_count')
+        )
+        ->with(['centros', 'grupos']) // Carga relaciones para usar los nombres
+        ->groupBy('centro_id', 'grupo_id')
+        ->get();
 
-        return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro','clienteporGrupo','contar'));
+        return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro', 'clientesPorCentroYGrupo', 'contar'));
     }
 
     public function mantenimientoAsesores()
@@ -202,45 +215,46 @@ class AuthController extends Controller
 
         // Si el rol es 'contador', cargar la vista
         return view('modules.dashboard.reversionliquidacion')->with('rol', $rol);
-
-        
     }
 
-    public function creditos(){
+    public function creditos()
+    {
         $rol = Auth::user()->rol;
-    
+
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
         }
-    
+
         // Si el rol es 'contador', cargar la vista
         return view('modules.dashboard.desembolso')->with('rol', $rol);
     }
 
-    public function cambiardatos(){
+    public function cambiardatos()
+    {
         $rol = Auth::user()->rol;
-    
+
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
         }
-    
+
         // Si el rol es 'contador', cargar la vista
         return view('modules.dashboard.cambiodatos')->with('rol', $rol);
     }
 
-    public function transferenciadecartera(){
+    public function transferenciadecartera()
+    {
         $rol = Auth::user()->rol;
-    
+
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
         }
-    
+
         // Si el rol es 'contador', cargar la vista
         return view('modules.dashboard.transferencia')->with('rol', $rol);
     }

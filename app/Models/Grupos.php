@@ -14,14 +14,12 @@ class Grupos extends Model
     // En el modelo Grupo (Grupos.php)
     public function centro()
     {
-        return $this->belongsTo(Centros::class, 'id_centro');
-    }
-
-    public function clientes()
-    {
-        return $this->hasMany(Clientes::class, 'id_grupo');
-    }
-    public function centros(){
         return $this->belongsTo(Centros::class, 'id_centros');
     }
+
+    public function Centros_Grupos_Clientes()
+    {
+        return $this->hasMany(Centros_Grupos_Clientes::class, 'grupo_id');
+    }
+ 
 }

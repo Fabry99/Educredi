@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Grupos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GruposController extends Controller
 {
@@ -36,9 +37,9 @@ class GruposController extends Controller
         if (!Auth::check()) {
             return response()->json(['error' => 'Usuario no autenticado'], 401);
         }
-    
+
         $usuario = Auth::user();
-    
+
         return response()->json([
             'rol' => $usuario->rol,  // <- Asegúrate de que este campo exista en tu tabla users
             'id_usuario' => $usuario->id,
@@ -49,17 +50,40 @@ class GruposController extends Controller
     {
         // Encontrar el grupo por su ID
         $grupo = Grupos::find($id);
-        
+
         // Verificar si el grupo existe
         if (!$grupo) {
             return response()->json(['error' => 'Grupo no encontrado'], 404);
         }
-        
+
         // Eliminar el grupo
         $grupo->delete();
-        
+
         // Responder con un mensaje de éxito
         return response()->json(['success' => 'Grupo eliminado con éxito.']);
+    }
+
+    public function gruposcentros($id)
+    {
+        $grupos = Grupos::where('id_centros', $id)
+            ->get();
+    
+        $resultados = DB::table('centros_grupos_clientes')
+            ->select(
+                DB::raw('COUNT(cliente_id) AS clientes_en_grupo'),
+                'grupo_id',
+                'centro_id'
+            )
+            ->where('centro_id', $id)
+            ->groupBy('centro_id', 'grupo_id')
+            ->get();
+    
+        // Asociar el conteo de clientes con los grupos
+        foreach ($grupos as $grupo) {
+            $grupo->clientes_count = $resultados->firstWhere('grupo_id', $grupo->id)->clientes_en_grupo ?? 0;
+        }
+    
+        return response()->json(['grupos' => $grupos]);
     }
     
 }
