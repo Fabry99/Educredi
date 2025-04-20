@@ -69,6 +69,7 @@
                                     <span class="badge bg-secondary">Sin Centro</span>
                                 @endforelse
                             </td>
+
                             {{-- Grupos --}}
                             <td>
                                 @forelse ($clientes->Centros_Grupos_Clientes as $relacion)
