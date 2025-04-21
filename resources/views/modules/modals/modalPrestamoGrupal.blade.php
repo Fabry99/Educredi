@@ -30,8 +30,10 @@
                         <p style="white-space:nowrap;">Linea:</p>
                         <select id="linea" name="linea" style="width:200px; margin-right:50px; margin-left:5px;">
                             <option value="" disabled selected>Seleccionar:</option>
-                            @foreach ($linea as $linea)
-                                <option value="{{ $linea->id }}">{{ $linea->nombre }}</option>
+                            @foreach ($linea as $item)
+                                <option value="{{ $item->id }}" data-interes="{{ $item->tasa_interes }}">
+                                    {{ $item->nombre }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -93,7 +95,7 @@
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
                             <label for="cantPagos" class="label1">Pagos:
-                                <input type="text" id="cantPagos" name="cantPagos" placeholder="0"
+                                <input type="number" id="cantPagos" name="cantPagos" placeholder="0"
                                     style="width: 120px; margin-left:75px" required>
                             </label>
                         </div>
@@ -130,7 +132,7 @@
                         <div class="input-group1" style=" margin: 10px 5px; ">
                             <label for="fechavencimiento" class="label1">Fecha <br> Vencimiento:
                                 <input type="date" id="fechavencimiento" name="fechavencimiento"
-                                    style="width: 120px; margin-left:22px" required>
+                                    style="width: 120px; margin-left:22px; color:red" required>
                             </label>
                         </div>
                     </div>
@@ -241,6 +243,7 @@
 <script>
     const links = document.querySelectorAll('.nav-links a');
     const secciones = document.querySelectorAll('.seccion');
+
 
     links.forEach(link => {
         link.addEventListener('click', function(e) {

@@ -165,6 +165,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Modal para Elegir el tipo de prestamo
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Codigo para calcular las fechas de los prestamos
     const modal = document.getElementById('modalEleccionTipoPrestamo');
     const modalGrupal = document.getElementById('modalprestamogrupal');
     const modalIndividual = document.getElementById('modalPrestamoIndividual');
@@ -174,8 +176,77 @@ document.addEventListener('DOMContentLoaded', function () {
     let datacliente = [];
     let centroSeleccionado = null;
 
+
     const selectCentro = document.getElementById('centro');
     const selectGrupo = document.getElementById('grupo');
+    const cantPago = document.getElementById('cantPagos');
+    const formaPago = document.getElementById('formaPago');
+    const diasPorTipoPago = {
+        'Diario': 1,
+        'Semanal': 7,
+        'Catorcenal': 14,
+        'Mensual': 30,
+        'Bimensual': 60,
+        'Trimestral': 90,
+        'Semestral': 180,
+        'Anual': 365
+    };
+    const inputFecha = document.getElementById('fechaapertura');
+    const fechaPrimerPago = document.getElementById('fechaprimerpagointereses');
+    const fechaDebeSer = document.getElementById('fechaprimerpagodebeser');
+    const selectLinea = document.getElementById('linea');
+    const inputInteres = document.getElementById('tasainteres');
+
+    selectLinea.addEventListener('change', function () {
+        const interes = this.options[this.selectedIndex].dataset.interes;
+        if (interes) {
+            inputInteres.value = parseFloat(interes).toFixed(2);
+        } else {
+            inputInteres.value = '';
+        }
+    });
+
+
+    function actualizarFechaDebeSer() {
+        const textoSeleccionado = formaPago.options[formaPago.selectedIndex]?.text?.trim();
+        const diasporpago = diasPorTipoPago[textoSeleccionado];
+
+        if (inputFecha.value && diasporpago) {
+            const fechaInicio = new Date(inputFecha.value);
+            fechaInicio.setDate(fechaInicio.getDate() + diasporpago);
+
+            const fechaFormateada = fechaInicio.toISOString().split('T')[0]; // yyyy-mm-dd
+            fechaDebeSer.value = fechaFormateada;
+        } else {
+            fechaDebeSer.value = '';
+        }
+    }
+
+    function calcularFechaFinal() {
+        const textoSeleccionado = formaPago.options[formaPago.selectedIndex]?.text?.trim();
+        const diasporpago = diasPorTipoPago[textoSeleccionado];
+        const cantidadPagos = parseInt(cantPago.value);
+        const fechaInicio = new Date(inputFecha.value); // Convierte el string yyyy-mm-dd en Date
+        fechaPrimerPago.value = inputFecha.value;
+
+
+        if (!isNaN(diasporpago) && !isNaN(cantidadPagos) && inputFecha.value) {
+            const totalDias = diasporpago * cantidadPagos;
+            const fechaFinal = new Date(fechaInicio);
+            fechaFinal.setDate(fechaInicio.getDate() + totalDias);
+
+            const fechaFormateada = fechaFinal.toISOString().split('T')[0]; // yyyy-mm-dd
+            document.getElementById('fechavencimiento').value = fechaFormateada;
+        } else {
+            document.getElementById('fechavencimiento').value = '';
+        }
+    }
+    //actualizacion al instante de los campos de fecha
+    inputFecha.addEventListener('change', actualizarFechaDebeSer);
+    formaPago.addEventListener('change', actualizarFechaDebeSer);
+    inputFecha.addEventListener('change', calcularFechaFinal);
+    formaPago.addEventListener('change', calcularFechaFinal);
+    cantPago.addEventListener('input', calcularFechaFinal);
 
     // Mostrar modal de elección
     document.querySelectorAll('.btn-prestamo').forEach(button => {
@@ -325,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Limpiar y cerrar modal
+    // Limpiar y cerrar modal prestamo grupal
     function limpiarModalPrestamoGrupal() {
         selectCentro.innerHTML = '<option value="" disabled selected>Centro:</option>';
         selectGrupo.innerHTML = '<option value="" disabled selected>Grupo:</option>';
