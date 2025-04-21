@@ -4,6 +4,8 @@ use App\Http\Controllers\AdministradorController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CentroController;
 use App\Http\Controllers\ClientesController;
+use App\Http\Controllers\DesembolsoprestamoController;
+use App\Http\Controllers\DesemsolsoprestamoController;
 use App\Http\Controllers\GruposController;
 use App\Http\Controllers\UserController;
 use App\Models\Grupos;
@@ -122,20 +124,13 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/grupos', [AuthController::class, 'grupos'])->name('grupos');
     Route::get('/asesores', [AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
     Route::get('/reversiones', [AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
-    Route::get('/creditos', [AuthController::class,  'creditos'])->name('creditos');
+    Route::get('/prestamos', [DesembolsoprestamoController::class,  'creditos'])->name('creditos');
     Route::get('/cambiardatos', [AuthController::class, 'cambiardatos'])->name('cambiardatos');
     Route::get('/transferenciadecartera', [AuthController::class, 'transferenciadecartera'])->name('transferenciadecartera');
     Route::post('/centros/guardar', [CentroController::class, 'store'])->name('centros.store');
     Route::post('7grupos/guardar', [GruposController::class, 'savegroup'])->name('grupos.savegroup');
     Route::get('/grupos-por-centro', [GruposController::class, 'obtenerGruposPorCentro']);
 
-    // Route::get('/grupos-por-centro/{id}', function ($id) {
-    //     dd($id);
-    //     $grupos = Grupos::where('id_centros', $id)
-    //         ->withCount('clientes')
-    //         ->get();
-    //     return response()->json($grupos);
-    // });
     Route::get('/grupos-centros/{id}', [GruposController::class, 'gruposcentros']);
     Route::get('/municipios/{id}', function ($id) {
         return response()->json(Municipios::where('id_departamento', $id)->get());
@@ -150,7 +145,6 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     });
     Route::put('clientes/update', [ClientesController::class, 'updateclient'])
         ->name('clientes.update');
-    // Route::put('centros/update', [CentroController::class, 'updatecentro'])->name('centros.update');
     // Ruta para actualizar el centro
     Route::post('/actualizar-centro/{id}', [CentroController::class, 'actualizarCentro'])->name('centros.update');
 
@@ -164,6 +158,10 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     Route::delete('/centros/eliminar/{id}', [CentroController::class, 'eliminar'])->name('centros.eliminar');
     Route::delete('/eliminar-grupo/{id}', [GruposController::class, 'eliminarGrupo']);
+
+    //Rutas para desembolso de prestamos
+    Route::get('/prestamos/obtener-centros-grupos-clientes/{id}',[DesembolsoprestamoController::class,'obtenerCentrosGruposClientes']);
+    Route::get('/prestamos/obtenergrupos-clientes/{centro_id}/{grupo_id}',[DesembolsoprestamoController::class,'obtenergruposclientes']);
 });
 
 

@@ -1,24 +1,29 @@
-
 /* Estilos Generales */
-:root{
-    --tittle-column:#498629d2;
-    --color-base:#498629;
-    --color-eliminar:#E03838;
-    --background-color-editar:#0300b39f;
-    --hover-background-editar:#08065a9f;
-
+:root {
+    --tittle-column: #498629d2;
+    --color-base: #498629;
+    --color-eliminar: #E03838;
+    --background-color-editar: #0300b39f;
+    --hover-background-editar: #08065a9f;
+    --verde-shadow: rgba(43, 255, 0, 0.938);
+    --border-color-input: #159109;
+    --background-prestamo:#5ba433ed;
+    --background-prestamo-hover:#17850d;
+    --border-btn-prestamo:#0e616e;
 }
+
 .container {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
+
 .main-content {
-    margin-left: 180px; 
+    margin-left: 180px;
     padding: 20px;
     margin-top: 50px;
     flex-grow: 1;
-    background-color: var(--background); 
+    background-color: var(--background);
 }
 
 
@@ -36,8 +41,10 @@
 .table tbody tr:nth-child(even):hover {
     background-color: #e1efda;
 }
+
 /* Establecer el borde de las celdas */
-.table th, .table td {
+.table th,
+.table td {
     border: 1px solid #ddd;
     padding: 10px;
 }
@@ -57,6 +64,7 @@
 .dataTables_paginate .paginate_button:hover {
     background-color: #0056b3;
 }
+
 table.dataTable tbody tr:hover {
     cursor: pointer;
 }
@@ -64,7 +72,8 @@ table.dataTable tbody tr:hover {
 
 /* Estilos para el modal */
 .modal {
-    display: none; /* Ocultar el modal por defecto */
+    display: none;
+    /* Ocultar el modal por defecto */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -73,10 +82,17 @@ table.dataTable tbody tr:hover {
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.4);
-  }
+    align-items: center;
+    justify-content: center;
+}
 
-  /* Contenido del Modal */
-  .modal-content {
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* Contenido del Modal */
+.modal-content {
     background-color: #fff;
     margin: 15% auto;
     padding: 20px;
@@ -84,27 +100,27 @@ table.dataTable tbody tr:hover {
     width: auto;
     max-width: 600px;
     border-radius: 10px;
-  }
+}
 
-  /* El botón de cerrar */
-  .close-btn {
+/* El botón de cerrar */
+.close-btn {
     color: #aaa;
     float: right;
     font-size: 28px;
     font-weight: bold;
-  }
+}
 
-  .close-btn:hover,
-  .close-btn:focus {
+.close-btn:hover,
+.close-btn:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
-  }
+}
 
 
 /* Estilos Contador */
 
-.btn-clientes a{
+.btn-clientes a {
     width: 12%;
     color: white;
     text-decoration: none;
@@ -116,16 +132,18 @@ table.dataTable tbody tr:hover {
     margin-top: 25px;
     margin-bottom: 12px;
 }
-.btn-clientes a img{
+
+.btn-clientes a img {
     width: 30px;
     margin-right: 10px;
 }
-.btn-clientes a:hover{
+
+.btn-clientes a:hover {
     background-color: var(--color-base);
 }
 
 /* Estilos grupos contador */
-.btn-grupos a{
+.btn-grupos a {
     width: 12%;
     color: white;
     text-decoration: none;
@@ -136,25 +154,30 @@ table.dataTable tbody tr:hover {
     margin-top: 25px;
     margin-bottom: 12px;
 }
-.btn-grupos a span{
+
+.btn-grupos a span {
     text-align: center;
     justify-self: center;
 
 }
-.btn-eliminar{
+
+.btn-eliminar {
     width: 30%;
     border: 1px solid #dfdede;
     border-radius: 8px;
     box-shadow: 0px 0px 5px 0px rgba(9, 72, 9, 0.515);
     background-color: var(--color-eliminar);
 }
-.btn-agregar{
+
+.btn-agregar {
     background-color: var(--color-base);
 }
-.btn-agregar:hover{
+
+.btn-agregar:hover {
     background-color: var(--tittle-column);
 }
-.btn-eliminar:hover{
+
+.btn-eliminar:hover {
     background-color: #c12c2c;
     box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
     border: 1px solid #c12c2c;
@@ -162,7 +185,7 @@ table.dataTable tbody tr:hover {
 }
 
 /* Estilos reversion liquidacion contador */
-.section{
+.section {
     height: 250px;
     border: 1px solid rgba(0, 0, 0, 0.382);
     width: 70%;
@@ -172,36 +195,42 @@ table.dataTable tbody tr:hover {
     border-radius: 10px;
     box-shadow: 0px 8px 10px 0px rgba(9, 72, 9, 0.308);
 }
-.section-container{
+
+.section-container {
     display: flex;
     justify-content: space-around;
     align-items: center;
     margin-top: 45px;
 }
-.form-reversion{
+
+.form-reversion {
     display: flex;
     justify-content: center;
     align-items: center;
 }
-.form-reversion input{
+
+.form-reversion input {
     padding: 8px;
     border-radius: 5px;
     margin-left: 10px;
     background-color: #f1f1f1;
 }
-.section-container2{
+
+.section-container2 {
     display: flex;
     justify-content: center;
     align-items: center;
     margin-top: 70px;
 }
-.section-container2 select{
+
+.section-container2 select {
     padding: 10px 18px;
     border-radius: 5px;
     background-color: #f1f1f1;
     margin-right: 30px;
 }
-.section-container2 a{
+
+.section-container2 a {
     color: white;
     text-decoration: none;
     display: flex;
@@ -210,170 +239,18 @@ table.dataTable tbody tr:hover {
     border-radius: 5px;
     background-color: var(--color-base);
 }
-.section-container2 a:hover{
+
+.section-container2 a:hover {
     background-color: var(--tittle-column);
 }
 
 .form-container {
     display: flex;
-    gap: 40px; /* Espacio entre columnas */
+    gap: 40px;
+    /* Espacio entre columnas */
 }
 
-.fila {
-    display: flex;
-    margin-bottom: 15px;
-}
-
-.columna2{
-    margin-right: 20px;
-}
-
-
-.campos input{
-    margin-top: 5px;
-    margin-bottom: 20px;
-    width: 15rem;
-    height: 2rem;
-    padding-left: 11px;
-    font-size: 16px;
-    border: 1.9px solid lightgray;
-    border-radius: 4px;
-    color: rgb(5, 0, 0);
-    outline: none;
-    -webkit-appearance: none;
-    cursor: pointer;
-    background: white;
-}
-
-.campos input:hover {
-    border-color: #159109;
-    box-shadow: 0 0 5px rgba(43, 255, 0, 0.938);
-  }
-
-label {
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-    width: auto;
-}
-
-.check-container{
-    margin-top: 20px;
-    padding-left: 40px;
-}
-
-input[type="checkbox"] {
-    margin-right: 8px; /* Espacio entre el checkbox y el texto */
-    transform: scale(1.2); /* Ajusta el tamaño del checkbox si es necesario */
-}
-
-textarea {
-    margin-top: 20px;
-    width: 40%;
-    margin-left: 20px;
-    margin-right: 20px;
-}
-
-.campo-verificar{
-    margin-left: -20px;
-    width: 80rem;
-    height: 100;
-    margin-top: -40px;
-
-}
-
-.container-select select{
-    margin-top: 5px;
-    margin-bottom: 20px;
-    width: 16rem;
-    height: 36px;
-    padding-left: 15px;
-    font-size: 16px;
-    border: 1.9px solid lightgray;
-    border-radius: 4px;
-    color: rgb(5, 0, 0);
-    outline: none;
-    -webkit-appearance: none;
-    cursor: pointer;
-    background: white;
-}
-
-.container-select select:hover {
-    border-color: #159109;
-    box-shadow: 0 0 5px rgba(43, 255, 0, 0.938);
-  }
-
-.container-select .icon{
-    position: relative;
-    font-size: 12px;
-    color: black;
-    left: -33px;
-    pointer-events: none;
-}
-
-.container-select select:focus {
-    background-color: #ecfaec;  /* Verde claro */
-    border-color: #159109;
-    box-shadow: 0 0 5px rgba(43, 255, 0, 0.938);
-    outline: none;
-}
-
-.btn-hecho {
-    margin-top: 20px;
-    height: 50px;
-    width: auto;
-    padding: 20px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    font-size: 14px; /* Fuente más pequeña */
-    border-radius: 6px; /* Bordes más pequeños */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px; /* Espacio entre ícono y texto */
-}
-
-/* Efecto al pasar el mouse */
-.btn-hecho:hover {
-    background-color: #218838;
-    transform: scale(1.05);
-}
-
-/* Efecto al presionar */
-.btn-hecho:active {
-    background-color: #1e7e34;
-    transform: scale(0.95);
-}
-
-/* Ícono */
-.btn-hecho i {
-    font-size: 18px;
-}
-
-.btn-verificar {
-    margin-top: 20px;
-    margin-left: 20px;
-    height: 40px;
-    width: auto;
-    padding: 20px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    font-size: 14px; /* Fuente más pequeña */
-    border-radius: 6px; /* Bordes más pequeños */
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px; /* Espacio entre ícono y texto */
-}
-
-.campos-desactivados input{
-    background: rgb(209, 209, 209);
-    border-color: black;
-
-}
-.btn-eliminarGrupo{
+.btn-eliminarGrupo {
     width: 50%;
     border: 1px solid #ffffff;
     border-radius: 8px;
@@ -382,36 +259,73 @@ textarea {
     padding: 10px 10px;
     box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
 }
-.btn-eliminarGrupo:hover{
+
+.btn-eliminarGrupo:hover {
     background-color: #c12c2c;
     box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
     border: 1px solid #c12c2c;
 }
+
 #custom-alert {
-    background-color: #4CAF50; /* Verde */
+    background-color: #4CAF50;
+    /* Verde */
     color: white;
-    border-radius:5px ;
+    border-radius: 5px;
 }
-.btn-editar{
+
+.btn-editar {
     width: 28%;
     border: 1px solid #dfdede;
     border-radius: 8px;
     box-shadow: 0px 0px 5px 0px rgba(9, 72, 9, 0.515);
     background-color: var(--background-color-editar);
 }
-.btn-editar:hover{
+
+.btn-editar:hover {
     background-color: var(--hover-background-editar);
     box-shadow: 0px 0px 5px 0px rgba(40, 42, 40, 0.308);
     border: 1px solid #2c8ac1;
 
 }
+
 .btn-editar img {
-    max-width: 100%; 
-    height: auto; 
-    max-height: 100%; 
-}
-.btn-eliminar img {
-    max-width: 100%; 
+    max-width: 100%;
     height: auto;
-    max-height: 100%; 
+    max-height: 100%;
+}
+
+.btn-eliminar img {
+    max-width: 100%;
+    height: auto;
+    max-height: 100%;
+}
+.close-btn1 {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-btn1:hover,
+.close-btn1:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+/* Estilos para la vista desembolso de prestamos */
+.btn-prestamo {
+    color: white;
+    text-decoration: none;
+    background: var(--background-prestamo);
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border-btn-prestamo);
+}
+
+.btn-prestamo:hover {
+    background-color: var(--background-prestamo-hover);
+    border-color: var(--verde-shadow);
+    box-shadow: 0 0 3px var(--verde-shadow);
 }
