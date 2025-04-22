@@ -346,9 +346,9 @@ $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
     const grupoId = $(this).data('grupo_id');
     console.log(clienteId, centroId, grupoId);
 
-     $('#tablaclientesgrupos tbody').empty();
+    $('#tablaclientesgrupos tbody').empty();
 
-     // Realizar la solicitud AJAX para eliminar al cliente del grupo
+    // Realizar la solicitud AJAX para eliminar al cliente del grupo
 
     fetch('/eliminarclientegrupo', {
         method: 'DELETE',
@@ -455,6 +455,12 @@ $(document).ready(function () {
             const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
             const idCliente = rowData[0]; // Asume que el ID del cliente está en la primera columna (puedes ajustarlo según tu estructura)
             $('#cliente_id').val(idCliente); // Opción 1: En el campo oculto
+            $('#modaleditarcliente #id_centroeditar')
+                .off('change') // 💥 Quita listeners anteriores
+                .on('change', function () {
+                    let centroId = $(this).val();
+                    cargarGrupos(centroId, null);
+                });
 
             // Realizar una solicitud AJAX para obtener más información sobre el cliente
             $.ajax({
@@ -489,10 +495,7 @@ $(document).ready(function () {
                     $('#modaleditarcliente #conyugue').val(response.nombre_conyugue);
                     $('#modaleditarcliente #sueldo').val(response.ing_economico);
                     $('#modaleditarcliente #egreso').val(response.egre_economico);
-                    $('#modaleditarcliente #id_centro').on('change', function () {
-                        let centroId = $(this).val();
-                        cargarGrupos(centroId, null); // Cargar grupos cuando se seleccione un centro
-                    });
+
 
 
                     // Actualizar el título del modal
@@ -531,7 +534,7 @@ $(document).ready(function () {
 
             // Cargar grupos
             function cargarGrupos(centroId, grupoId) {
-                var grupoSelect = $('#modaleditarcliente #id_grupo');
+                var grupoSelect = $('#modaleditarcliente #id_grupoeditar');
                 grupoSelect.empty(); // Limpiar el select
                 grupoSelect.append('<option value="" disabled selected>Seleccione un Grupo</option>'); // Reset
 
@@ -596,15 +599,20 @@ $(document).ready(function () {
             });
 
 
-
+            function limpiarCamposModal() {
+                $('#modaleditarcliente #id_grupoeditar').html('<option value="" disabled selected>Seleccione un Grupo</option>');
+                $('#modaleditarcliente #id_centroeditar').val('').prop('selectedIndex', 0);
+            }
             // Función para cerrar el modal al hacer clic en el botón de cerrar
             $('.close-btn1').on('click', function () {
+                limpiarCamposModal();
                 $('#modaleditarcliente').fadeOut();
             });
 
             // Cerrar el modal cuando se hace clic fuera de él
             $(window).on('click', function (event) {
                 if ($(event.target).is('#modaleditarcliente')) {
+                    limpiarCamposModal();
                     $('#modaleditarcliente').fadeOut();
                 }
             });
@@ -612,6 +620,7 @@ $(document).ready(function () {
             // Cerrar el modal al presionar la tecla Escape
             $(document).on('keydown', function (event) {
                 if (event.key === "Escape") {
+                    limpiarCamposModal();
                     $('#modaleditarcliente').fadeOut();
                 }
             });

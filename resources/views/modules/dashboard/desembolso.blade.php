@@ -15,5 +15,6 @@
    @include('modules.partial.desembolsoprestamos')
 @endsection
 @section('js')
+    @vite('resources/js/appAdmin.js')
     @vite('resources/js/app.js')
 @endsection

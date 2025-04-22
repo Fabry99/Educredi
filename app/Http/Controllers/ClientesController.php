@@ -110,22 +110,22 @@ class ClientesController extends Controller
 
         // Actualizar datos del cliente (exceptuando los campos de relación)
         $cliente = Clientes::findOrFail($id);
-        $cliente->update($request->except(['id_centro', 'id_grupo']));
+        $cliente->update($request->except(['id_centroeditar', 'id_grupoeditar']));
 
         // Verifica que ambos campos estén presentes y no sean nulos
-        if ($request->filled('id_centro') && $request->filled('id_grupo')) {
+        if ($request->filled('id_centroeditar') && $request->filled('id_grupoeditar')) {
 
             // Verifica que no exista ya la relación
             $yaExisteRelacion = \App\Models\Centros_Grupos_Clientes::where('cliente_id', $cliente->id)
-                ->where('centro_id', $request->id_centro)
-                ->where('grupo_id', $request->id_grupo)
+                ->where('centro_id', $request->id_centroeditar)
+                ->where('grupo_id', $request->id_grupoeditar)
                 ->exists();
 
-            if (!$yaExisteRelacion && $request->filled('id_centro') && $request->filled('id_grupo')) {
+            if (!$yaExisteRelacion && $request->filled('id_centroeditar') && $request->filled('id_grupoeditar')) {
                 \App\Models\Centros_Grupos_Clientes::create([
                     'cliente_id' => $cliente->id,
-                    'centro_id' => $request->id_centro,
-                    'grupo_id' => $request->id_grupo
+                    'centro_id' => $request->id_centroeditar,
+                    'grupo_id' => $request->id_grupoeditar
                 ]);
             }
         }
