@@ -5,6 +5,7 @@
         <h2>Desembolso de Préstamos</h2>
         <form action="" method="POST">
             @csrf
+            <meta name="csrf-token" content="{{ csrf_token() }}">
             <div class="nav-links">
                 <a href="#" id="link-datos" class="active">Datos del Préstamo</a>
                 <a href="#" id="link-garantias">Garantías y Fiadores</a>

@@ -173,6 +173,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let clienteNombre = null;
     let datacliente = [];
     let centroSeleccionado = null;
+    let seguro = 0;
+    let capital = 0;
 
 
     const selectCentro = document.getElementById('centro');
@@ -385,7 +387,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const baseCalculo = Math.pow(1 + tasaporperiodo, cantPagos);
         const valorcuota = (monto * tasaporperiodo * baseCalculo) / (baseCalculo - 1);
         const cuotaFinal = (valorcuota + iva + manejo - microseguro);
-        const fechavencimientoselect = fechavencimiento.value;
+        capital = (cuotaFinal - interes - manejo - microseguro - iva);
+        seguro = (interes + capital + iva);
         // Objeto con todos los detalles
         const detalleCalculo = {
             valorcuota,
@@ -398,7 +401,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 tasa,
                 cantPagos,
                 diasporpago,
-                tasa_iva
+                tasa_iva,
+                capital,
+                seguro,
+
             },
             calculosIntermedios: {
                 tasaDiaria,
@@ -407,7 +413,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 segurodiario,
                 tasadiariaparacuota,
                 tasaporperiodo,
-                baseCalculo
+                baseCalculo,
+
             }
         };
 
@@ -641,6 +648,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     // 6. Cuota final
                     const cuotaFinal = (valorcuota + iva + manejo - microseguro);
 
+                    capital = (cuotaFinal - interes - manejo - microseguro - iva);
+                    seguro = (interes + capital + iva);
+
                     // Almacenar TODOS los datos en atributos data-* de la fila
                     row.dataset.calculoDetalle = JSON.stringify({
                         valorcuota: valorcuota,
@@ -649,7 +659,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         microseguro: microseguro,
                         cuotaFinal: cuotaFinal,
                         diasporpago: diasporpago,
-                        cantPagos: cantPagos
+                        cantPagos: cantPagos,
+                        capital: capital,
+                        seguro: seguro,
                     });
 
                     // Asignar solo el valor final al input
@@ -705,6 +717,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     id_aprobador: detalleCalculo.id_aprobador || id_aprobador,
                     linea: detalleCalculo.linea || linea,
                     garantia_id: garantiaId,
+
+
+
                     // Detalle completo
                     detalleCalculo: {
                         ...detalleCalculo,
@@ -716,6 +731,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         id_aprobador: detalleCalculo.id_aprobador || id_aprobador,
                         linea: detalleCalculo.linea || linea,
                         garantia_id: garantiaId,
+
+
 
                     }
                 };
@@ -733,7 +750,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const prestamos = obtenerTodosLosDatos();
         console.log(prestamos);
-
         // Verificamos si los valores son números válidos y mayores que 0
         if (isNaN(montoOtorgar) || isNaN(total) || montoOtorgar <= 0 || total <= 0) {
             // Si alguno de los valores no es un número válido o es igual o menor a 0, mostramos la alerta de error
@@ -743,7 +759,32 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarAlerta("¡Error! Los montos no coinciden.", "error");
         } else {
             // Si todo es correcto, mostramos una alerta de éxito
-            mostrarAlerta("¡Todo está correcto! Los montos coinciden.", "success");
+
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfToken) {
+                console.error('CSRF token no encontrado');
+                return;
+            }
+
+            console.log(JSON.stringify({ prestamos: prestamos }));
+
+            fetch('/guardarprestamogrupal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ prestamos: prestamos })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Respuesta del servidor:', data);
+                })
+                .catch(error => {
+                    console.error('Error al enviar:', error);
+                });
+
 
 
 

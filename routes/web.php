@@ -250,6 +250,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     //Rutas para desembolso de prestamos
     Route::get('/prestamos/obtener-centros-grupos-clientes/{id}', [DesembolsoprestamoController::class, 'obtenerCentrosGruposClientes']);
     Route::get('/prestamos/obtenergrupos-clientes/{centro_id}/{grupo_id}', [DesembolsoprestamoController::class, 'obtenergruposclientes']);
+    Route::post('/guardarprestamogrupal', [DesembolsoprestamoController::class,'almacenarPrestamos']);
 });
 
 
