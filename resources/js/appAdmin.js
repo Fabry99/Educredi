@@ -194,18 +194,39 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputFecha = document.getElementById('fechaapertura');
     const fechaPrimerPago = document.getElementById('fechaprimerpagointereses');
     const fechaDebeSer = document.getElementById('fechaprimerpagodebeser');
-    const selectLinea = document.getElementById('linea');
-    const inputInteres = document.getElementById('tasainteres');
+    const inputInteres = document.getElementById('tasainteres');  // Campo de tasa de interés
+    const selectLinea = document.getElementById('linea');   // Select que cambia la tasa
+
 
     selectLinea.addEventListener('change', function () {
         const interes = this.options[this.selectedIndex].dataset.interes;
         if (interes) {
-            inputInteres.value = parseFloat(interes).toFixed(2);
+            inputInteres.value = parseFloat(interes).toFixed(2);  // Asignar el valor al input de interés
+            actualizarTasaEnTabla(inputInteres.value);  // Actualizar la tasa en la tabla
         } else {
-            inputInteres.value = '';
+            inputInteres.value = '';  // Limpiar el valor si no hay tasa
         }
     });
+    inputInteres.addEventListener('input', function () {
+        const nuevaTasa = parseFloat(this.value);
+        if (!isNaN(nuevaTasa)) {
+            actualizarTasaEnTabla(nuevaTasa.toFixed(2));  // Actualizar en la tabla en tiempo real
+        }
+        actualizarTodasLasCuotas();
 
+    });
+
+
+    // Función para actualizar la tasa de interés en la tabla
+    function actualizarTasaEnTabla(tasa) {
+        const rows = contenedorMiembrosGrupo.querySelectorAll('table tbody tr');  // Obtener todas las filas de la tabla
+        rows.forEach(row => {
+            const tasaInput = row.querySelector('input[name="tasa"]');  // Seleccionar el campo tasa en cada fila
+            if (tasaInput) {
+                tasaInput.value = tasa;  // Asignar la tasa seleccionada al campo tasa
+            }
+        });
+    }
 
     function actualizarFechaDebeSer() {
         const textoSeleccionado = formaPago.options[formaPago.selectedIndex]?.text?.trim();
@@ -327,6 +348,190 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
+    function calcularCuota(monto, tasa) {
+        console.group('--- INICIO CÁLCULO DE CUOTA ---');
+        console.log('Parámetros recibidos:', { monto, tasa });
+
+        // Obtener valores de los elementos del formulario
+        const formaPago = document.getElementById('formaPago');
+        const cantPago = document.getElementById('cantPagos');
+        const manejoInput = document.getElementById('manejo');
+        const tasaIvaInput = document.getElementById('tasa_iva');
+
+        // Valores por defecto o del formulario
+        const tasa_iva = parseFloat(tasaIvaInput?.value) || 0.13;
+        const cantPagos = parseInt(cantPago?.value);
+
+        const manejo = (10 / cantPagos);
+        console.log('Datos del formulario:', {
+            formaPago: formaPago?.value,
+            cantPagos,
+            manejo,
+            tasa_iva
+        });
+
+        // Determinar días entre cuotas según forma de pago
+
+        const textoSeleccionado = formaPago.options[formaPago.selectedIndex]?.text?.trim();
+        const diasporpago = diasPorTipoPago[textoSeleccionado];
+
+        console.log('Datos de plazo:', {
+            diasporpago,
+            diasporpago
+        });
+
+        // Validaciones básicas
+        if (isNaN(monto)) {
+            console.error('Monto no es un número válido');
+            return 0;
+        }
+        if (monto <= 0) {
+            console.error('Monto debe ser mayor que 0');
+            return 0;
+        }
+        if (isNaN(tasa)) {
+            console.error('Tasa no es un número válido');
+            return 0;
+        }
+
+        // 1. Calcular la tasa diaria
+        const tasaDiaria = (tasa / 360) / 100;
+        console.log('1. Tasa diaria:', tasaDiaria, '(Tasa / 360 / 100)');
+
+        // 2. Calcular intereses
+        const interes = monto * tasaDiaria * diasporpago;
+        console.log('2. Interés del período:', interes, '(Monto * TasaDiaria * Días)');
+
+        // 3. Calcular porcentaje del monto y seguros
+        const porcentajemonto = monto * 0.02;
+        const segurodiario = porcentajemonto / 365;
+        const microseguro = (segurodiario * diasporpago) * (1 + tasa_iva);
+
+        console.log('3. Cálculo de seguros:', {
+            porcentajemonto,
+            segurodiario,
+            microseguro
+        });
+
+        // 4. Calcular IVA
+        const iva = interes * tasa_iva;
+        console.log('4. IVA calculado:', iva, '(Interés * TasaIVA)');
+
+        // 5. Cálculo de la cuota principal
+        const tasadiariaparacuota = (tasa / 365) / 100;
+        const tasaporperiodo = tasadiariaparacuota * diasporpago;
+
+        console.log('5. Tasa para cuota:', {
+            tasadiariaparacuota,
+            tasaporperiodo
+        });
+
+        // Fórmula de cuota con interés compuesto
+        const baseCalculo = Math.pow(1 + tasaporperiodo, cantPagos);
+        const valorcuota = (monto * tasaporperiodo * baseCalculo) / (baseCalculo - 1);
+
+        console.log('6. Cálculo cuota principal:', {
+            baseCalculo,
+            valorcuota
+        });
+
+        // Cuota final sumando componentes
+        const cuotaFinal = (valorcuota + iva + manejo - microseguro);
+
+        console.log('7. Cuota final:', {
+            valorcuota,
+            iva,
+            manejo,
+            microseguro,
+            cuotaFinal
+        });
+
+        console.groupEnd();
+
+        return cuotaFinal > 0 ? cuotaFinal : 0;
+
+    }
+
+    // Función para actualizar todas las cuotas en la tabla
+    function actualizarTodasLasCuotas() {
+        const rows = contenedorMiembrosGrupo.querySelectorAll('table tbody tr');
+
+        rows.forEach(row => {
+            const montoInput = row.querySelector('input[name="monto"]');
+            const tasaInput = row.querySelector('input[name="tasa"]');
+            const cuotaInput = row.querySelector('input[name="cuota"]');
+
+            const monto = parseFloat(montoInput.value) || 0;
+            const tasa = parseFloat(tasaInput.value) || 0;
+
+            if (cuotaInput) {
+                const cuotaCalculada = calcularCuota(monto, tasa);
+                cuotaInput.value = cuotaCalculada.toFixed(2);
+            }
+        });
+    }
+
+
+    document.getElementById('montootorgar').addEventListener('input', function () {
+        const montoTotal = parseFloat(this.value);
+        const inputsMonto = document.querySelectorAll('input[name="monto"]');
+        const cantidadPersonas = inputsMonto.length;
+        const totalInput = document.getElementById('total');
+
+        if (!isNaN(montoTotal) && cantidadPersonas > 0) {
+            const montoPorPersona = (montoTotal / cantidadPersonas).toFixed(2);
+            inputsMonto.forEach(input => {
+                input.value = montoPorPersona;
+            });
+
+            // Mostrar el total exacto distribuido (puede tener decimales ajustados)
+            const montoDistribuido = montoPorPersona * cantidadPersonas;
+            totalInput.value = montoDistribuido.toFixed(2);
+        } else {
+            // Si se borra el monto o es inválido, limpiar la tabla y el total
+            inputsMonto.forEach(input => {
+                input.value = '';
+            });
+            totalInput.value = '';
+        }
+        actualizarTotal();
+        actualizarTodasLasCuotas();
+
+
+    });
+
+    function actualizarTotal() {
+        const inputsMonto = document.querySelectorAll('input[name="monto"]');
+        const totalInput = document.getElementById('total');
+        const montoOtorgarInput = document.getElementById('montootorgar');
+        const montoOtorgar = parseFloat(montoOtorgarInput.value);
+        let total = 0;
+
+        inputsMonto.forEach(input => {
+            const valor = parseFloat(input.value);
+            if (!isNaN(valor)) {
+                total += valor;
+            }
+        });
+
+        totalInput.value = total.toFixed(2);
+
+        // Comparar usando una tolerancia de decimales
+        if (!isNaN(montoOtorgar) && Math.abs(total - montoOtorgar) > 0.01) {
+            totalInput.style.color = 'red';
+        } else {
+            totalInput.style.color = 'black'; // o tu color normal
+        }
+    }
+    document.getElementById('cantPagos')?.addEventListener('input', () => {
+        actualizarTodasLasCuotas();
+    });
+    
+    // Escuchar cambios en la forma de pago
+    document.getElementById('formaPago')?.addEventListener('change', () => {
+        actualizarTodasLasCuotas();
+    });
     function manejarCambioGrupo() {
         const grupoSeleccionado = this.value;
         const ruta = `/prestamos/obtenergrupos-clientes/${centroSeleccionado}/${grupoSeleccionado}`;
@@ -389,12 +594,125 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 contenedor.appendChild(tabla);
+                const inputsMonto = tabla.querySelectorAll('input[name="monto"]');
+                inputsMonto.forEach(input => {
+                    input.addEventListener('input', actualizarTotal);
+                });
+                actualizarTasaEnTabla(inputInteres.value);
+                actualizarTodasLasCuotas();
+
             },
             error: function () {
                 alert('Error al obtener los miembros del grupo.');
             }
         });
+        contenedorMiembrosGrupo.addEventListener('input', function (e) {
+            if (e.target.matches('input[name="monto"], input[name="tasa"], select[name="formaPago"], input[name="cantPagos"]')) {
+                const row = e.target.closest('tr');
+
+                // Obtener elementos
+                const montoInput = row.querySelector('input[name="monto"]');
+                const tasaInput = row.querySelector('input[name="tasa"]');
+                const cuotaInput = row.querySelector('input[name="cuota"]');
+                const formaPagoSelect = row.querySelector('select[name="formaPago"]') || document.getElementById('formaPago');
+                const cantPagoInput = row.querySelector('input[name="cantPagoS"]') || document.getElementById('cantPagSo');
+                const manejoInput = document.getElementById('manejo');
+                const tasaIvaInput = document.getElementById('tasa_iva');
+
+                // Valores con fallback
+                const monto = parseFloat(montoInput?.value) || 0;
+                const tasa = parseFloat(tasaInput?.value) || 0;
+                const cantPagos = parseInt(cantPagoInput?.value) || 12;
+                const tasa_iva = parseFloat(tasaIvaInput?.value) || 0.13;
+                const manejo = (10 / cantPagos);
+
+
+                const textoSeleccionado = formaPago.options[formaPago.selectedIndex]?.text?.trim();
+                const diasporpago = diasPorTipoPago[textoSeleccionado];
+
+                console.group('--- INICIO CÁLCULO DE CUOTA POR FILA ---');
+                console.log('Parámetros de entrada:', { monto, tasa });
+                console.log('Datos del formulario:', {
+                
+                    cantPagos,
+                    manejo,
+                    tasa_iva,
+                    diasporpago
+                });
+
+                if (monto > 0 && tasa > 0 && cuotaInput) {
+                    // 1. Tasa diaria
+                    const tasaDiaria = (tasa / 360) / 100;
+                    console.log('1. Tasa diaria:', tasaDiaria);
+
+                    // 2. Interés
+                    const interes = monto * tasaDiaria * diasporpago;
+                    console.log('2. Interés calculado:', interes);
+
+                    // 3. Seguros
+                    const porcentajemonto = monto * 0.02;
+                    const segurodiario = porcentajemonto / 365;
+                    const microseguro = (segurodiario * diasporpago) * (1 + tasa_iva);
+                    console.log('3. Cálculo de seguros:', {
+                        porcentajemonto,
+                        segurodiario,
+                        microseguro
+                    });
+
+                    // 4. IVA
+                    const iva = interes * tasa_iva;
+                    console.log('4. IVA:', iva);
+
+                    // 5. Cálculo cuota principal
+                    const tasadiariaparacuota = (tasa / 365) / 100;
+                    const tasaporperiodo = tasadiariaparacuota * diasporpago;
+                    const baseCalculo = Math.pow(1 + tasaporperiodo, cantPagos);
+                    const valorcuota = (monto * tasaporperiodo * baseCalculo) / (baseCalculo - 1);
+                    console.log('5. Cuota principal:', {
+                        tasadiariaparacuota,
+                        tasaporperiodo,
+                        baseCalculo,
+                        valorcuota
+                    });
+
+                    // 6. Cuota final
+                    const cuotaFinal = (valorcuota + iva + manejo - microseguro);
+                    console.log('6. Cuota final:', cuotaFinal);
+
+                    // Asignar al input
+                    cuotaInput.value = cuotaFinal > 0 ? cuotaFinal.toFixed(2) : '0.00';
+                    cuotaInput.dispatchEvent(new Event('change'));
+                } else {
+                    console.warn('Monto o tasa inválidos. No se puede calcular.');
+                    cuotaInput.value = '0.00';
+                }
+
+                console.groupEnd();
+            }
+        });
+
     }
+    document.getElementById('btnAceptar').addEventListener('click', function (event) {
+        event.preventDefault(); // Evita el envío del formulario si estás usando un submit
+        const montoOtorgar = parseFloat(document.getElementById('montootorgar').value);
+        const total = parseFloat(document.getElementById('total').value);
+
+        // Verificamos si los valores son números válidos y mayores que 0
+        if (isNaN(montoOtorgar) || isNaN(total) || montoOtorgar <= 0 || total <= 0) {
+            // Si alguno de los valores no es un número válido o es igual o menor a 0, mostramos la alerta de error
+            mostrarAlerta("Por favor, ingrese valores válidos y mayores que 0 para los montos.", "error");
+        } else if (montoOtorgar !== total) {
+            // Si los montos no coinciden, mostramos la alerta de error
+            mostrarAlerta("¡Error! Los montos no coinciden.", "error");
+        } else {
+            // Si todo es correcto, mostramos una alerta de éxito
+            mostrarAlerta("¡Todo está correcto! Los montos coinciden.", "success");
+
+
+
+            
+        }
+    });
 
     // Limpiar y cerrar modal prestamo grupal
     function limpiarModalPrestamoGrupal() {
@@ -409,6 +727,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('sucursal').value = '';
         document.getElementById('supervisor').value = '';
         document.getElementById('linea').value = '';
+        document.getElementById('montootorgar').value = '';
         document.getElementsByClassName
         centroSeleccionado = null;
         // Limpiar radio buttons
@@ -444,3 +763,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+function mostrarAlerta(mensaje, tipo) {
+    const alerta = document.getElementById('alert-notification');
+    const mensajeAlerta = document.getElementById('alert-notification-message');
+
+    // Limpiar cualquier contenido o clase previa
+    mensajeAlerta.textContent = mensaje;
+    alerta.classList.remove('error_notification', 'success_notification'); // Limpiar clases anteriores
+
+    // Asignar la clase correcta según el tipo
+    if (tipo === "error") {
+        alerta.classList.add('error_notification'); // Clase de error (rojo)
+    } else if (tipo === "success") {
+        alerta.classList.add('success_notification'); // Clase de éxito (verde)
+    }
+
+    // Mostrar la alerta y aplicar animación
+    alerta.style.display = 'block';
+    setTimeout(() => {
+        alerta.classList.add('show'); // Aplica la animación de mostrar
+    }, 10);
+
+    // Ocultar la alerta después de 4 segundos
+    setTimeout(function () {
+        alerta.classList.remove('show'); // Eliminar la animación de mostrar
+        setTimeout(function () {
+            alerta.style.display = 'none'; // Ocultar la alerta completamente
+        }, 500);  // Tiempo para que la animación termine
+    }, 4000);  // La alerta se oculta después de 4 segundos
+}
+
+

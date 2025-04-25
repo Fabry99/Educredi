@@ -83,8 +83,8 @@
                     <div class="group-datosPrestamos">
                         <div class="input-group1" style="margin: 10px 5px; ">
                             <label for="montootorgar" class="label1">Monto a Otorgar:
-                                <input type="text" id="montootorgar" name="montootorgar" placeholder="0.00"
-                                    style="width: 120px;" required>
+                                <input type="number" id="montootorgar" name="montootorgar" placeholder="0.00"
+                                    style="width: 120px;" required step="0.01" min="0">
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
@@ -230,10 +230,10 @@
                     <input type="text" id="total" name="total" placeholder="0.00" readonly
                         style="width: 80px; height: 20px; margin-left:10px; margin-right:20px;
                         background: var(--background-inputs); border: 1px solid var(--borde); font-size: 15px;
-                        border-radius:4px;">
+                        border-radius:4px; text-align: right;">
                 </div>
                 <div class="botones">
-                    <button type="submit" class="btn-aceptar"><img src="{{ asset('img/aceptar.svg') }}"
+                    <button type="submit" class="btn-aceptar" id="btnAceptar"><img src="{{ asset('img/aceptar.svg') }}"
                             alt=""></button>
                 </div>
             </div>

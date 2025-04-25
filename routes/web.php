@@ -19,87 +19,175 @@ Route::middleware('guest', 'prevent.back.history')->group(function () {
     Route::get('/', [AuthController::class, 'login'])->name('login');
     Route::post('/loggear', [AuthController::class, 'loggear'])->name('loggear');
     Route::get('/prueba', function () {
-        $tasa_interes = 88.55; // anual en %
-        $monto = 450;
-        $seguro = 47.65;
-        $micro_seguro_fijo = 0.0079;
-        $manejo = 0.83;
+        $tasa_interes = 115;
+        $monto = 200;
         $diasEntreCuotas = 14;
+        $cantidadCuotas = 12;
         $tasa_iva = 0.13;
-        $fechaInicio = Carbon::create(2025, 1, 1);
-        $fechaFinal = Carbon::create(2025, 6, 18);
+        $FechaApertura = 
 
-        $tasaDiaria   = ($tasa_interes / 100) / 360;
-        $microseguro  = $seguro * $micro_seguro_fijo;
-        $valor_cuota  = $seguro + $manejo + $microseguro;
+        //1-Formula tasa diaria
+        $tasaDiaria = ($tasa_interes / 360) / 100;
+        //1-Formula para calcular el manejo
+        $manejo = (10 / $cantidadCuotas);
 
-        // Salida
-        echo "<h3>Calendario de Cuotas</h3>";
-    echo "<table border='1' cellpadding='6' cellspacing='0'>";
-    echo "<tr>
-            <th># Cuota</th>
-            <th>Fecha</th>
-            <th>Valor Cuota</th>
-            <th>Monto</th>
-            <th>Tasa Interes</th>
-            <th>Intereses</th>
-            <th>Manejo</th>
-            <th>Seguro</th>
-            <th>Capital</th>
-            <th>IVA</th>
-          </tr>";
+        //2-Formula para calcular intereses
+        $intereses = ($monto * $tasaDiaria * $diasEntreCuotas);
 
-    $contador = 1;
-    $esPrimera = true;
-    $saldo = $monto;
+        //3- Formula para calcular el porcentaje del monto
+        $porcentajemonto = ($monto * (2) / 100);
+        //3- Formula para calcular el seguro diario
+        $segurodiario = ($porcentajemonto / 365);
+        //3- Formula para calcular el micro seguro
+        $microseguro = ($segurodiario * $diasEntreCuotas) * (1 + $tasa_iva);
 
-    while ($fechaInicio->lte($fechaFinal) && $saldo > 0) {
-        echo "<tr>";
-        echo "<td>$contador</td>";
-        echo "<td>" . $fechaInicio->toDateString() . "</td>";
+        //4- Formula para calcular el IVA
+        $iva = ($intereses * $tasa_iva);
 
-        if ($esPrimera) {
-            // Primera cuota: referencia del préstamo
-            echo "<td>$" . number_format($valor_cuota, 2) . "</td>";
-            echo "<td>$" . number_format($saldo, 2) . "</td>";
-            echo "<td>" . number_format($tasa_interes, 2) . "</td>";
-            echo "<td>-</td>"; // intereses
-            echo "<td>$" . number_format($manejo, 2) . "</td>";
-            echo "<td>$" . number_format($seguro, 2) . "</td>";
-            echo "<td>-</td>"; // capital
-            echo "<td>-</td>"; // iva
+        //5- Formula para calcular la tasa diaria para la cuota
+        $tasadiariaparacuota = ($tasa_interes / 365) / 100;
+        //5- Formula para calcular la tasa por periodo
+        $tasaporperiodo = ($tasadiariaparacuota * $diasEntreCuotas);
+        //5- Formula para calcular para calcular la cuota
+        $valorcuota = ($monto * $tasaporperiodo * (1 + $tasaporperiodo) ** $cantidadCuotas) / ((1 + $tasaporperiodo) ** $cantidadCuotas - 1);
+        $cuota = ($valorcuota + $iva + $manejo - $microseguro);
 
-            $esPrimera = false;
-        } else {
-            // Cuotas posteriores
-            $intereses = $saldo * $tasaDiaria * $diasEntreCuotas;
-            $iva       = $intereses * $tasa_iva;
-            $capital   = ceil(($valor_cuota - $intereses - $manejo - $microseguro - $iva) * 100) / 100;
+        //6- Formula para calcular el valor del capital
+        $capital = ($cuota - $intereses - $manejo - $microseguro - $iva);
 
-            if ($capital > $saldo) {
-                $capital = $saldo;
-            }
+        //7- Formula para calcular el seguro
+        $seguro = ($intereses + $capital + $iva);
 
-            // Descontar capital antes de mostrar el nuevo saldo
-            $saldo -= $capital;
+        echo 'manejo:', $manejo;
+        echo "<br>";
+        echo  'tasa diaria:', $tasaDiaria;
+        echo "<br>";
+        echo 'intereses:', $intereses;
+        echo "<br>";
+        echo "porcentaje monto: " . $porcentajemonto;
+        echo "<br>";
+        echo "seguro diario:" . $segurodiario;
+        echo "<br>";
+        echo "microseguro:" . $microseguro;
+        echo "<br>";
+        echo "iva:" . $iva;
+        echo "<br>";
+        echo "tasa diaria para cuota:" . $tasadiariaparacuota;
+        echo "<br>";
+        echo "tasa por periodo:" . $tasaporperiodo;
+        echo "<br>";
+        echo "cuota primaria:" . $valorcuota;
+        echo "<br>";
+        echo "cuota: " . $cuota;
+        echo "<br>";
+        echo "capital: " . $capital;
+        echo "<br>";
+        echo "seguro: " . $seguro;
 
-            echo "<td>$" . number_format($valor_cuota,2) . "</td>";
-            echo "<td>$" . number_format($saldo, 2) . "</td>";
-            echo "<td>" . number_format($tasa_interes, 2) . "</td>";
-            echo "<td>$" . number_format($intereses, 2) . "</td>";
-            echo "<td>$" . number_format($manejo, 2) . "</td>";
-            echo "<td>$" . number_format($microseguro, 2) . "</td>";
-            echo "<td>$" . number_format($capital, 2) . "</td>";
-            echo "<td>$" . number_format($iva, 2) . "</td>";
-        }
+        //     //Datos de entrada dinamicos
+        // $tasa_interes = 115; // anual en %
+        // $monto = 200;
+        // $diasEntreCuotas = 14;
+        // $cantidadCuotas = 12;
+        // $tasa_iva = 0.13;
+        // $iva = 0;
+        // $saldo = $monto;
 
-        echo "</tr>";
-        $fechaInicio->addDays($diasEntreCuotas);
-        $contador++;
-    }
+        // //Formula para calcular el manejo
+        // $manejo = 10 / $cantidadCuotas;
+        // //Formula para calcular la tasa diaria
+        // $tasaDiaria   = ($tasa_interes / 100) / 360;
 
-    echo "</table>";
-    });
+
+        // $intereses = $saldo * $tasaDiaria * $diasEntreCuotas;
+        // $iva       = $intereses * $tasa_iva;
+
+
+        // //Formula para calcular el micro seguro
+        // $porcentajemonto = $monto * (0.02);
+        // $segurodiario = $porcentajemonto / 365;
+        // $microseguro = $segurodiario * $diasEntreCuotas * (1 + $tasa_iva);
+
+
+        // $tasadiariaparacuota = ($tasa_interes / 100) / 365;
+        // $tasaporperiodo = $tasadiariaparacuota * $diasEntreCuotas;
+        // $cuota = ($monto * $tasaporperiodo * (1 + $tasaporperiodo) ** $cantidadCuotas) / ((1 + $tasaporperiodo) ** $cantidadCuotas - 1);
+
+        // $valor_cuota = ($cuota + $iva + $manejo -$microseguro);
+        // $capital   = ceil(($valor_cuota - $intereses - $manejo - $microseguro - $iva) * 100) / 100;
+
+        // $seguro = ($intereses + $iva + $capital);
+        // $fechaInicio = Carbon::create(2025, 1, 1);
+        // $fechaFinal = Carbon::create(2025, 6, 18);
+
+
+
+        // // Salida
+        // echo "<h3>Calendario de Cuotas</h3>";
+        // echo "<table border='1' cellpadding='6' cellspacing='0'>";
+        // echo "<tr>
+        //     <th># Cuota</th>
+        //     <th>Fecha</th>
+        //     <th>Valor Cuota</th>
+        //     <th>Monto</th>
+        //     <th>Tasa Interes</th>
+        //     <th>Intereses</th>
+        //     <th>Manejo</th>
+        //     <th>Seguro</th>
+        //     <th>Capital</th>
+        //     <th>IVA</th>
+        //   </tr>";
+
+        // $contador = 1;
+        // $esPrimera = true;
+
+        // while ($fechaInicio->lte($fechaFinal) && $saldo > 0) {
+        //     echo "<tr>";
+        //     echo "<td>$contador</td>";
+        //     echo "<td>" . $fechaInicio->toDateString() . "</td>";
+
+        //     if ($esPrimera) {
+        //         // Primera cuota: referencia del préstamo
+        //         echo "<td>$" . number_format($valor_cuota, 2) . "</td>";
+        //         echo "<td>$" . number_format($saldo, 2) . "</td>";
+        //         echo "<td>" . number_format($tasa_interes, 2) . "</td>";
+        //         echo "<td>-</td>"; // intereses
+        //         echo "<td>$" . number_format($manejo, 2) . "</td>";
+        //         echo "<td>$" . number_format($seguro, 2) . "</td>";
+        //         echo "<td>-</td>"; // capital
+        //         echo "<td>-</td>"; // iva
+
+        //         $esPrimera = false;
+        //     } else {
+        //         // Cuotas posteriores
+
+        //         $capital   = ceil(($valor_cuota - $intereses - $manejo - $microseguro - $iva) * 100) / 100;
+
+        //         if ($capital > $saldo) {
+        //             $capital = $saldo;
+        //         }
+
+        //         // Descontar capital antes de mostrar el nuevo saldo
+        //         $saldo -= $capital;
+
+        //         echo "<td>$" . number_format($valor_cuota, 2) . "</td>";
+        //         echo "<td>$" . number_format($saldo, 2) . "</td>";
+        //         echo "<td>" . number_format($tasa_interes, 2) . "</td>";
+        //         echo "<td>$" . number_format($intereses, 2) . "</td>";
+        //         echo "<td>$" . number_format($manejo, 2) . "</td>";
+        //         echo "<td>$" . number_format($microseguro, 2) . "</td>";
+        //         echo "<td>$" . number_format($capital, 2) . "</td>";
+        //         echo "<td>$" . number_format($iva, 2) . "</td>";
+        //     }
+
+        //     echo "</tr>";
+        //     $fechaInicio->addDays($diasEntreCuotas);
+        //     $contador++;
+        // }
+
+        // echo "</table>";
+
+    })->name('prueba');
 });
 
 
@@ -160,8 +248,8 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::delete('/eliminar-grupo/{id}', [GruposController::class, 'eliminarGrupo']);
 
     //Rutas para desembolso de prestamos
-    Route::get('/prestamos/obtener-centros-grupos-clientes/{id}',[DesembolsoprestamoController::class,'obtenerCentrosGruposClientes']);
-    Route::get('/prestamos/obtenergrupos-clientes/{centro_id}/{grupo_id}',[DesembolsoprestamoController::class,'obtenergruposclientes']);
+    Route::get('/prestamos/obtener-centros-grupos-clientes/{id}', [DesembolsoprestamoController::class, 'obtenerCentrosGruposClientes']);
+    Route::get('/prestamos/obtenergrupos-clientes/{centro_id}/{grupo_id}', [DesembolsoprestamoController::class, 'obtenergruposclientes']);
 });
 
 

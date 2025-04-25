@@ -12,7 +12,7 @@
 @endsection
 
 @section('contenido')
-   @include('modules.partial.desembolsoprestamos')
+    @include('modules.partial.desembolsoprestamos')
 @endsection
 @section('js')
     @vite('resources/js/appAdmin.js')
