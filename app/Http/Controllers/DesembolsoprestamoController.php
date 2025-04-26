@@ -89,11 +89,13 @@ class DesembolsoprestamoController extends Controller
         // Array para almacenar todos los datos a insertar
         $datosAInsertar = [];
 
+        
         // Preparar los datos a insertar
         foreach ($request->prestamos as $prestamo) {
             // Obtener los datos necesarios del préstamo
             $fechaApertura = $prestamo['detalleCalculo']['fechaapertura']; // Fecha de apertura
             $fechaVencimiento = $prestamo['detalleCalculo']['fechavencimiento']; // Fecha de vencimiento
+            $fechaDebeSer = $prestamo['detalleCalculo']['fechaDebeSer'];
             $diasPorPago = $prestamo['detalleCalculo']['parametros']['diasporpago']; // Días por pago
             $idCliente = $prestamo['id']; // ID del cliente
             $cuotaFinal = $prestamo['detalleCalculo']['cuotaFinal']; // Cuota final
@@ -106,6 +108,14 @@ class DesembolsoprestamoController extends Controller
             $iva = $prestamo['detalleCalculo']['iva']; // IVA
             $microseguro = $prestamo['detalleCalculo']['microseguro'];
             $interes = $prestamo['detalleCalculo']['calculosIntermedios']['interes'];
+            $garantia_id = $prestamo['detalleCalculo']['garantia_id'];
+            $id_colector = $prestamo['detalleCalculo']['id_colector'];
+            $grupo_id = $prestamo['detalleCalculo']['grupoId'];
+            $centro_id = $prestamo['detalleCalculo']['centroId'];
+            $sucursal = $prestamo['detalleCalculo']['sucursal'];
+            $id_supervisor = $prestamo['detalleCalculo']['supervisor'];
+            $id_aprobado = $prestamo['detalleCalculo']['id_aprobador'];
+            $id_formapago = $prestamo['detalleCalculo']['formapago'];
 
             // Convertir fecha de apertura y fecha de vencimiento a objetos Carbon para facilitar las operaciones
             $fechaActual = \Carbon\Carbon::parse($fechaApertura);
@@ -126,6 +136,40 @@ class DesembolsoprestamoController extends Controller
                 'iva' => 0, // IVA 0
                 'intereses' => $interes,
                 // 'microseguro' => $microseguro
+            ];
+
+            $datosSaldoprestamo[] = [
+                'id_cliente' => $idCliente,
+                'monto' => $monto,  
+                'saldo' => $monto,
+                'cuota' => $cuotaFinal,
+                'fechaapertura' => $fechaApertura,
+                'fechavencimiento' => $fechaVencimiento,
+                'garantia' => $garantia_id,
+                'plazo' => $plazo,
+                'interes' => $tasa,
+                'fecha_primer_pago' => $fechaDebeSer,
+                'colector' => $id_colector,
+                'manejo' => $manejo,
+                'groupsolid' => $grupo_id,
+                'centro' => $centro_id,
+                'sucursal' => $sucursal,
+                'supervisor' => $id_supervisor,
+                'segu_d' => $manejo,
+                'id_aprobadopor' => $id_aprobado,
+                'tip_pago' => $id_formapago,
+
+                
+                // 'fecha_apertura' => $fechaActual->toDateString(), // <- reemplaza si es necesario
+                // 'monto_prestamo' => $monto,                  // <- reemplaza con el nombre real
+                // 'tasa' => $tasa,                             // <- reemplaza con el nombre real
+                // 'plazo_dias' => $plazo,                      // <- reemplaza con el nombre real
+                // 'dias_por_pago' => $diasPorPago,             // <- reemplaza con el nombre real
+                // 'gasto_manejo' => $manejo,                   // <- reemplaza con el nombre real
+                // 'seguro_inicial' => $seguro,                 // <- reemplaza con el nombre real
+                // 'capital_inicial' => 0,                      // <- ajusta si tu tabla lo necesita
+                // 'iva_inicial' => 0,                          // <- ajusta si tu tabla lo necesita
+                // 'interes_total' => $interes,                 // <- ajusta si tu tabla lo necesita
             ];
             // Log para depurar los datos antes de la inserción
             Log::info('Datos a insertar:', $datosAInsertar);
@@ -188,6 +232,7 @@ class DesembolsoprestamoController extends Controller
         // Intentar insertar todos los registros de una sola vez
         try {
             DB::table('debeser')->insert($datosAInsertar);
+            DB::table('saldoprestamo')->insert($datosSaldoprestamo);
         } catch (\Exception $e) {
             // Si ocurre un error, registrar el error y devolver un mensaje
             Log::error('Error al insertar en la tabla debeSer:', ['error' => $e->getMessage()]);

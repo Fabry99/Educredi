@@ -596,6 +596,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 actualizarTasaEnTabla(inputInteres.value);
                 actualizarTodasLasCuotas();
 
+                
+
             },
             error: function () {
                 alert('Error al obtener los miembros del grupo.');
@@ -605,71 +607,86 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.target.matches('input[name="monto"], input[name="tasa"], select[name="formaPago"], input[name="cantPagos"]')) {
                 const row = e.target.closest('tr');
 
-                // Obtener elementos
-                const montoInput = row.querySelector('input[name="monto"]');
-                const tasaInput = row.querySelector('input[name="tasa"]');
+                const monto = parseFloat(row.querySelector('input[name="monto"]')?.value) || 0;
+                const tasa = parseFloat(row.querySelector('input[name="tasa"]')?.value) || 0;
                 const cuotaInput = row.querySelector('input[name="cuota"]');
-                const formaPagoSelect = row.querySelector('select[name="formaPago"]') || document.getElementById('formaPago');
-                const cantPagoInput = row.querySelector('input[name="cantPagos"]') || document.getElementById('cantPagos');
-                const manejoInput = document.getElementById('manejo');
-                const tasaIvaInput = document.getElementById('tasa_iva');
-
-                // Valores con fallback
-                const monto = parseFloat(montoInput?.value) || 0;
-                const tasa = parseFloat(tasaInput?.value) || 0;
-                const cantPagos = parseInt(cantPagoInput?.value) || 12;
-                const tasa_iva = parseFloat(tasaIvaInput?.value) || 0.13;
-                const manejo = (10 / cantPagos);
-
-                const textoSeleccionado = formaPagoSelect.options[formaPagoSelect.selectedIndex]?.text?.trim();
-                const diasporpago = diasPorTipoPago[textoSeleccionado] || 30;
 
                 if (monto > 0 && tasa > 0 && cuotaInput) {
-                    // 1. Tasa diaria
-                    const tasaDiaria = (tasa / 360) / 100;
-
-                    // 2. Interés
-                    const interes = monto * tasaDiaria * diasporpago;
-
-                    // 3. Seguros
-                    const porcentajemonto = monto * 0.02;
-                    const segurodiario = porcentajemonto / 365;
-                    const microseguro = (segurodiario * diasporpago) * (1 + tasa_iva);
-
-                    // 4. IVA
-                    const iva = interes * tasa_iva;
-
-                    // 5. Cálculo cuota principal
-                    const tasadiariaparacuota = (tasa / 365) / 100;
-                    const tasaporperiodo = tasadiariaparacuota * diasporpago;
-                    const baseCalculo = Math.pow(1 + tasaporperiodo, cantPagos);
-                    const valorcuota = (monto * tasaporperiodo * baseCalculo) / (baseCalculo - 1);
-
-                    // 6. Cuota final
-                    const cuotaFinal = (valorcuota + iva + manejo - microseguro);
-
-                    capital = (cuotaFinal - interes - manejo - microseguro - iva);
-                    seguro = (interes + capital + iva);
-
-                    // Almacenar TODOS los datos en atributos data-* de la fila
-                    row.dataset.calculoDetalle = JSON.stringify({
-                        valorcuota: valorcuota,
-                        iva: iva,
-                        manejo: manejo,
-                        microseguro: microseguro,
-                        cuotaFinal: cuotaFinal,
-                        diasporpago: diasporpago,
-                        cantPagos: cantPagos,
-                        capital: capital,
-                        seguro: seguro,
-                    });
-
-                    // Asignar solo el valor final al input
-                    cuotaInput.value = cuotaFinal > 0 ? cuotaFinal.toFixed(2) : '0.00';
+                    const cuotaCalculada = calcularCuota(monto, tasa, row); // pasa la fila para guardar detalle
+                    cuotaInput.value = cuotaCalculada.toFixed(2);
                 } else {
                     cuotaInput.value = '0.00';
                 }
             }
+        // contenedorMiembrosGrupo.addEventListener('input', function (e) {
+        //     if (e.target.matches('input[name="monto"], input[name="tasa"], select[name="formaPago"], input[name="cantPagos"]')) {
+        //         const row = e.target.closest('tr');
+
+        //         // Obtener elementos
+        //         const montoInput = row.querySelector('input[name="monto"]');
+        //         const tasaInput = row.querySelector('input[name="tasa"]');
+        //         const cuotaInput = row.querySelector('input[name="cuota"]');
+        //         const formaPagoSelect = row.querySelector('select[name="formaPago"]') || document.getElementById('formaPago');
+        //         const cantPagoInput = row.querySelector('input[name="cantPagos"]') || document.getElementById('cantPagos');
+        //         const manejoInput = document.getElementById('manejo');
+        //         const tasaIvaInput = document.getElementById('tasa_iva');
+
+        //         // Valores con fallback
+        //         const monto = parseFloat(montoInput?.value) || 0;
+        //         const tasa = parseFloat(tasaInput?.value) || 0;
+        //         const cantPagos = parseInt(cantPagoInput?.value) || 12;
+        //         const tasa_iva = parseFloat(tasaIvaInput?.value) || 0.13;
+        //         const manejo = (10 / cantPagos);
+
+        //         const textoSeleccionado = formaPagoSelect.options[formaPagoSelect.selectedIndex]?.text?.trim();
+        //         const diasporpago = diasPorTipoPago[textoSeleccionado] || 30;
+
+        //         if (monto > 0 && tasa > 0 && cuotaInput) {
+        //             // 1. Tasa diaria
+        //             const tasaDiaria = (tasa / 360) / 100;
+
+        //             // 2. Interés
+        //             const interes = monto * tasaDiaria * diasporpago;
+
+        //             // 3. Seguros
+        //             const porcentajemonto = monto * 0.02;
+        //             const segurodiario = porcentajemonto / 365;
+        //             const microseguro = (segurodiario * diasporpago) * (1 + tasa_iva);
+
+        //             // 4. IVA
+        //             const iva = interes * tasa_iva;
+
+        //             // 5. Cálculo cuota principal
+        //             const tasadiariaparacuota = (tasa / 365) / 100;
+        //             const tasaporperiodo = tasadiariaparacuota * diasporpago;
+        //             const baseCalculo = Math.pow(1 + tasaporperiodo, cantPagos);
+        //             const valorcuota = (monto * tasaporperiodo * baseCalculo) / (baseCalculo - 1);
+
+        //             // 6. Cuota final
+        //             const cuotaFinal = (valorcuota + iva + manejo - microseguro);
+
+        //             capital = (cuotaFinal - interes - manejo - microseguro - iva);
+        //             seguro = (interes + capital + iva);
+
+        //             // Almacenar TODOS los datos en atributos data-* de la fila
+        //             row.dataset.calculoDetalle = JSON.stringify({
+        //                 valorcuota: valorcuota,
+        //                 iva: iva,
+        //                 manejo: manejo,
+        //                 microseguro: microseguro,
+        //                 cuotaFinal: cuotaFinal,
+        //                 diasporpago: diasporpago,
+        //                 cantPagos: cantPagos,
+        //                 capital: capital,
+        //                 seguro: seguro,
+        //             });
+
+        //             // Asignar solo el valor final al input
+        //             cuotaInput.value = cuotaFinal > 0 ? cuotaFinal.toFixed(2) : '0.00';
+        //         } else {
+        //             cuotaInput.value = '0.00';
+        //         }
+        //     }
 
         });
 
@@ -682,6 +699,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Obtener valores (no los elementos)
         const fechaVencimiento = document.getElementById('fechavencimiento')?.value || '';
         const fechaapertura = document.getElementById('fechaapertura')?.value || '';
+        const fechadebeser = document.getElementById('fechaprimerpagodebeser')?.value || '';
+        const grupoId = document.getElementById('grupo')?.value || '';
+        const centroId = document.getElementById('centro')?.value || '';
+        const formapago = document.getElementById('formaPago')?.value || '';
         const id_colector = document.getElementById('colector')?.value || '';
         const id_aprobador = document.getElementById('aprobadopor')?.value || '';
         const sucursal = document.getElementById('sucursal')?.value || '';
@@ -711,12 +732,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Datos globales
                     fechaVencimiento: detalleCalculo.fechavencimiento || fechaVencimiento,
                     fechaapertura: detalleCalculo.fechaapertura || fechaapertura,
+                    fechadebeser: detalleCalculo.fechadebeser || fechadebeser,
                     sucursal: detalleCalculo.sucursal || sucursal,
                     supervisor: detalleCalculo.supervisor || supervisor,
                     id_colector: detalleCalculo.id_colector || id_colector,
                     id_aprobador: detalleCalculo.id_aprobador || id_aprobador,
                     linea: detalleCalculo.linea || linea,
                     garantia_id: garantiaId,
+                    grupoId: grupoId,
+                    centroId: centroId,
+                    formapago: detalleCalculo.formapago || formapago,
 
 
 
@@ -725,12 +750,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         ...detalleCalculo,
                         fechavencimiento: detalleCalculo.fechavencimiento || fechaVencimiento,
                         fechaapertura: detalleCalculo.fechaapertura || fechaapertura,
+                        fechaDebeSer: detalleCalculo.fechadebeser || fechadebeser,
                         sucursal: detalleCalculo.sucursal || sucursal,
                         supervisor: detalleCalculo.supervisor || supervisor,
                         id_colector: detalleCalculo.id_colector || id_colector,
                         id_aprobador: detalleCalculo.id_aprobador || id_aprobador,
                         linea: detalleCalculo.linea || linea,
                         garantia_id: garantiaId,
+                        grupoId: grupoId,
+                        centroId: centroId,
+                        formapago: detalleCalculo.formapago || formapago,
+
 
 
 
