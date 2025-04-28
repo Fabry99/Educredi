@@ -297,21 +297,22 @@ class DesembolsoprestamoController extends Controller
 
     public function obtenerSaldoPrestamo($codigo)
     {
-        $prestamo = saldoprestamo::where('id_cliente', $codigo)
-            ->orderByDesc('id') // Traer el más reciente
-            ->first();
-    
+
+        $prestamo = saldoprestamo::where('id_cliente', $codigo)->first();
+
         if ($prestamo) {
             return response()->json([
                 'monto' => $prestamo->MONTO,
             ]);
         }
-    
+
         return response()->json(['monto' => null], 404);
     }
-    
     public function validarPassword(Request $request)
     {
+        // Log de los datos recibidos, mostrando el contenido del request como JSON
+        Log::info('Datos recibidos: ' . json_encode($request->all()));
+
         // Validación del input
         $request->validate([
             'password' => 'required|string',
@@ -331,9 +332,8 @@ class DesembolsoprestamoController extends Controller
         return response()->json(['valida' => false, 'mensaje' => 'Contraseña incorrecta'], 401);
     }
 
-  
- 
-    
+
+
     public function eliminarDesembolso($codigoCliente)
     {
         DB::beginTransaction();
