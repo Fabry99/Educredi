@@ -298,8 +298,10 @@ class DesembolsoprestamoController extends Controller
     public function obtenerSaldoPrestamo($codigo)
     {
 
-        $prestamo = saldoprestamo::where('id_cliente', $codigo)->first();
-
+        $prestamo = saldoprestamo::where('id_cliente', $codigo)
+        ->orderByDesc('id') // o ->latest('id')
+        ->first();
+    
         if ($prestamo) {
             return response()->json([
                 'monto' => $prestamo->MONTO,
