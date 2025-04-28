@@ -1,0 +1,209 @@
+:root{
+    --background:#eae9e9;
+    --navbar: #067016;
+    --sombra-navbar:rgba(9, 72, 9, 0.308);
+    --color-boton:rgba(12, 177, 26, 0.56);
+    --color-font:#fff;
+    --border-color-input: #159109;
+    --shadow-alert: #2b2424;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: auto;  /* Eliminar scroll global */
+    font-family: Arial, sans-serif;
+    background-color: var(--background);
+}
+
+.navbar {
+    width: 100%;
+    height: 70px;
+    background-color: var(--navbar);
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.navbar i {
+    display: none;
+}
+.sidebar{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+    height: 100%;
+    z-index: 1000;
+    background-color: var(--navbar);
+    box-shadow: 0px 0px 20px var(--sombra-navbar);
+
+}
+.sidebar .logo-img {
+    width: 90px; 
+    height: auto;
+    display: block; 
+    margin: 15px 10px 0px 8px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.sidebar h3{
+    color: var(--color-font);
+    text-align: center;
+    margin: 20px 10px 10px 10px;
+    font-size: 16px;
+    
+}
+.sidebar hr{
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.73);
+    margin-bottom: 15px;
+}
+.menu{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-grow: 1;
+}
+.menu .menu-item{
+    position: relative;
+    list-style: none;
+    overflow: hidden;
+    margin-right: 30px;
+}
+.menu-item .menu-link{
+    display: flex;
+    padding: 0.55rem 0;
+    text-decoration: none;
+    border-radius: 0.3rem;
+    color: var(--color-font);
+}
+ .menu-link span{
+    margin-top: 5px;
+}
+.menu-link img{
+    width: 25px;
+    height: 25px;
+    margin-right: 3px;
+    color: aqua;
+    padding-left: 10px;
+    padding-right: 5px;
+}
+.menu-item:hover .menu-link{
+    background-color: var(--color-boton);
+}
+.sub-menu{
+    list-style: none;
+    height: 0;
+    transition: all 0.3s ease;
+}
+.arrow{
+    transition: transform 0.3s ease;
+    margin-left: 10px;
+    font-weight: bold;
+}
+.menu-item.sub-menu-toggle .arrow{
+    transform: rotate(90deg);
+}
+.sub-menu .sub-menu-link{
+    display: flex;
+    text-decoration: none;
+    padding: 0.55rem 0.5rem;
+    color: var(--color-font);
+    margin-left: 25px;
+    margin-top: 5px;
+    border-radius: 5px;
+}
+.sub-menu .sub-menu-link:hover{
+    background-color: var(--color-boton);
+}
+.sub-menu::before{
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 0.07rem;
+    margin-left: 20px;
+    background-color: #fff;
+}
+.sidebar::-webkit-scrollbar {
+    width: 0px; 
+    background: transparent; 
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+#cerrarsesion{
+    list-style: none;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+
+#cerrarsesion hr{
+    width: 100%;
+    border: 1px solid white;
+    margin-bottom: 15px;
+}
+
+
+.notification{
+    position: fixed;
+    top: 15%;
+    right: 20px;
+    z-index: 9999;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.5s ease, visibility 0.5s ease, top 0.5s ease;
+    max-width: 300px;
+}
+.custom_success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.custom_error {
+    background-color: #f44336; /* Color rojo para error */
+    color: white;
+}
+
+#alert-notification {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 15px;
+    width: 80%;
+    max-width: 400px;
+    font-size: 16px;
+    text-align: center;
+    border-radius: 5px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#alert-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.error_notification {
+    background-color: red;
+    color: white;
+    box-shadow: 0 0 5px var(--shadow-alert);
+}
+
+.success_notification {
+    background-color: #4caf50;
+    color: white;
+    box-shadow: 0 0 5px var(--shadow-alert);
+}

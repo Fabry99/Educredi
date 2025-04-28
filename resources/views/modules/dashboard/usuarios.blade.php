@@ -1,0 +1,21 @@
+@extends('layouts/main')
+
+@section('titulo_pagina', 'Usuarios')
+
+@section('css')
+    @vite('resources/css/sidebar.css')
+    @vite('resources/css/container.css')
+    @vite('resources/css/cssAdministracion.css')
+@endsection
+
+@section('sidebar')
+    @include('modules.partial.sidebar')
+@endsection
+
+@section('contenido')
+@include('modules.partial.contentUsuarios')
+@endsection
+@section('js')
+    @vite('resources/js/appAdmin.js')
+    @vite('resources/js/notifications.js')
+@endsection
