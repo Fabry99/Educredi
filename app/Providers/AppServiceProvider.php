@@ -2,9 +2,15 @@
 
 namespace App\Providers;
 
+use App\Models\Asesores;
 use App\Models\Centros;
+use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
+use App\Models\debeser;
 use App\Models\Grupos;
+use App\Models\saldoprestamo;
+use App\Models\Supervisores;
+use App\Models\User;
 use App\Observers\BitacoraObserver;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,5 +32,11 @@ class AppServiceProvider extends ServiceProvider
         Centros::observe(BitacoraObserver::class); 
         Clientes::observe(BitacoraObserver::class);
         Grupos::observe(BitacoraObserver::class);
+        saldoprestamo::observe(BitacoraObserver::class);
+        debeser::observe(BitacoraObserver::class);
+        Centros_Grupos_Clientes::observe(BitacoraObserver::class);
+        Asesores::observe(BitacoraObserver::class);
+        Supervisores::observe(BitacoraObserver::class);
+        User::observe(BitacoraObserver::class);
     }
 }

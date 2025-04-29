@@ -6,10 +6,9 @@
         <h2>Validar Eliminación</h2>
         <form action="{{ route('centros.store') }}" method="POST">
             @csrf
-            <meta name="csrf-token" content="{{ csrf_token() }}">
             <div class="modal-ge">
                 <div class="input-group">
-                    <label for="nombre" class="nombre">Ingrese Contraseña Especial:
+                    <label for="password" class="password">Ingrese Contraseña Especial:
                     </label>
                     <input type="password" id="password" name="password" required>
 
@@ -137,7 +136,5 @@
         background: #0b7914;
     }
 
-    .btn-imprimir:hover {
-        background: #486c96;
-    }
+  
 </style>

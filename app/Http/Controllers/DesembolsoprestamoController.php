@@ -312,8 +312,6 @@ class DesembolsoprestamoController extends Controller
     }
     public function validarPassword(Request $request)
     {
-        // Log de los datos recibidos, mostrando el contenido del request como JSON
-        Log::info('Datos recibidos: ' . json_encode($request->all()));
 
         // Validación del input
         $request->validate([
@@ -331,7 +329,7 @@ class DesembolsoprestamoController extends Controller
         }
 
         // Si la contraseña no es válida, devolvemos un error con el mensaje correspondiente
-        return response()->json(['valida' => false, 'mensaje' => 'Contraseña incorrecta'], 401);
+        return response()->json(['valida' => false, 'mensaje' => 'Contraseña incorrecta']); // <- sin 401
     }
 
 

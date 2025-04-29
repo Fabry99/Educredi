@@ -16,4 +16,6 @@
 @endsection
 @section('js')
     @vite('resources/js/app.js')
+    @vite('resources/js/appAdmin.js')
+    @vite('resources/js/notifications.js')
 @endsection

@@ -833,13 +833,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
 
-
+    //Codio para vista Reversion de prestamos
     const modalreversionprestamo = document.getElementById('modalreversionprestamo');
     const btnreversionprestamo = document.getElementById('btn-abrirmodalreversion');
     const id_cliente = document.getElementById('codigo');
     const inputMonto = document.getElementById('monto');
     const btnAceptar = document.getElementById('btnAceptar');
     const inputPassword = document.getElementById('password');
+
 
     if (btnreversionprestamo) {
         btnreversionprestamo.addEventListener("click", function (event) {
@@ -928,6 +929,167 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 500); // 500 milisegundos de espera
         });
 
+    }
+
+});
+
+//Codigo Para Vista Mantenimiento de Asesor
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btnVerificarpassword = document.getElementById('btnAceptar');
+    const inputPassword = document.getElementById('password');
+    const btnaceptarActuAsesor = document.getElementById('btnaceptarActuAsesor');
+    const form = document.querySelector('#ModalEditarAsesor form');
+
+    // Verificamos si estamos en la vista correcta
+    if (document.getElementById('openModalBtnnuevoAsesor') && document.getElementById('tablaAsesores')) {
+
+
+
+        // Inicialización segura de DataTables
+        let tablaAsesores;
+
+        try {
+            // Verificamos si ya está inicializada
+            if ($.fn.DataTable.isDataTable('#tablaAsesores')) {
+                tablaAsesores = $('#tablaAsesores').DataTable();
+            } else {
+                tablaAsesores = $('#tablaAsesores').DataTable({
+                    responsive: true,
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'nombre' },
+                        { data: 'sucursal' },
+                        { data: 'created_at' },
+                        { data: 'updated_at' }
+                    ]
+                });
+            }
+
+            // Evento para selección de filas - VERSIÓN CORREGIDA
+            $('#tablaAsesores').on('click', 'tbody tr', function () {
+                // Obtener la instancia correcta de DataTable
+                const dt = $('#tablaAsesores').DataTable();
+                const rowData = dt.row(this).data();
+                const id_asesor = rowData[0];
+                const nombre_asesor = rowData[1];
+                const sucursalNombre = rowData[2];
+
+
+                $('#modalreversionprestamo h2').text('Validación para Actualización');
+                $('#modalreversionprestamo').fadeIn();
+
+                btnVerificarpassword.addEventListener('click', function (event) {
+                    event.preventDefault();
+
+                    const SpecialPassword = inputPassword.value.trim();
+                    const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+
+                    if (!csrfTokenElement) {
+                        return;
+                    }
+                    const csrfToken = csrfTokenElement.getAttribute('content');
+                    if (SpecialPassword === '') {
+                        mostrarAlerta("Por Favor Ingrese una Contraseña Correcta", "error");
+                        return;
+                    } fetch('/validar/password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ password: SpecialPassword })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Error de autenticación");
+                            }
+                            return response.json();
+                        }).then(data => {
+                            if (data.valida) {
+                                $('#modalreversionprestamo').fadeOut();
+
+                                $('#ModalEditarAsesor h2').text("Actualizar Asesor " + nombre_asesor);
+                                $('#ModalEditarAsesor #sucursalActua option').each(function () {
+                                    if ($(this).text().trim() === sucursalNombre) {
+                                        $('#ModalEditarAsesor #sucursalActua').val($(this).val());
+                                    }
+                                });
+                                $('#ModalEditarAsesor #nombreActua').val(nombre_asesor);
+                                $('#ModalEditarAsesor').fadeIn();
+
+                                
+                                form.addEventListener('keydown', function (event) {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault(); // Evitar que se envíe el formulario por defecto
+                                        btnaceptarActuAsesor.click(); // Llamar a la misma función que el clic en el botón
+                                    }
+                                });
+
+                                const nombreActualizacion = document.getElementById('nombreActua').value;
+                                const sucursalActualizacion = document.getElementById('sucursalActua').value;
+
+                                if (btnaceptarActuAsesor) {
+                                    btnaceptarActuAsesor.addEventListener('click', function (event) {
+                                        event.preventDefault();
+
+                                        // Captura actualizada aquí dentro
+                                        const nombreActualizacion = document.getElementById('nombreActua').value;
+                                        const sucursalActualizacion = document.getElementById('sucursalActua').value;
+
+                                        fetch('/update/asesor/' + id_asesor, {
+                                            method: 'PUT',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            },
+                                            body: JSON.stringify({
+                                                nombre: nombreActualizacion,
+                                                sucursal: sucursalActualizacion
+                                            })
+                                        })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                mostrarAlerta("Asesor Actualizado con éxito", "success");
+
+                                                // Redirigir a la misma página en lugar de recargar
+                                                setTimeout(() => {
+                                                    window.location.href = window.location.href;
+                                                }, 1000);
+                                            })
+                                            .catch(error => {
+                                                mostrarAlerta("Error al actualizar asesor:", "error");
+                                            });
+                                    });
+                                }
+
+                            } else {
+                                mostrarAlerta(data.mensaje || "Contraseña incorrecta", "error");
+                            }
+                        }).catch(error => {
+                            mostrarAlerta("Ocurrió un error: " + error.message, "error");
+                        });
+
+                });
+            });
+
+        } catch (error) {
+            mostrarAlerta('Error al inicializar DataTable:', "error");
+        }
+
+        // Resto de tu código para esta vista...
+        const modalNuevoAsesor = document.getElementById('ModalNuevoAsesor');
+        const btnAbrirModalNuevoAsesor = document.getElementById('openModalBtnnuevoAsesor');
+
+        btnAbrirModalNuevoAsesor.addEventListener("click", function (event) {
+            event.preventDefault();
+            modalNuevoAsesor.style.display = "block";
+        });
     }
 });
 

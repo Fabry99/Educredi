@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdministradorController;
+use App\Http\Controllers\AsesoresController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CentroController;
 use App\Http\Controllers\ClientesController;
@@ -42,7 +43,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     // Rutas Contador
     Route::get('/clientes', [AuthController::class, 'contador'])->name('contador');
     Route::get('/grupos', [AuthController::class, 'grupos'])->name('grupos');
-    Route::get('/asesores', [AuthController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
+    Route::get('/asesores', [AsesoresController::class, 'mantenimientoAsesores'])->name('mantenimientoAsesores');
     Route::get('/reversiones', [AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
     Route::get('/prestamos', [DesembolsoprestamoController::class,  'creditos'])->name('creditos');
     Route::get('/cambiardatos', [AuthController::class, 'cambiardatos'])->name('cambiardatos');
@@ -87,6 +88,9 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::POST('/validar/password', [DesembolsoprestamoController::class, 'validarPassword']);
     Route::delete('/eliminar/desembolsoprestamo/{codigoCliente}', [DesembolsoprestamoController::class, 'eliminarDesembolso']);
 
+    //Rutas Para Mantenimiento de Asesores
+    Route::post('/asesores/insert/', [AsesoresController::class, 'InsertarAsesor'])->name('asesor.insert');
+    Route::put('/update/asesor/{id}', [AsesoresController::class, 'updateAsesor']); 
     // Route::get('/generar-pdf', [pdfController::class, 'generarPdf']);
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
 });

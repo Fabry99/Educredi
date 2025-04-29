@@ -173,10 +173,7 @@ class AuthController extends Controller
             ->groupBy('id_centros')
             ->get();
         $contar = Centros::withCount('grupos')->get();
-        // $clienteporGrupo = Clientes::select('id_grupo', DB::raw('count(*) as cantidad_persona'))
-        //     ->with('grupo')  // Cargar la relación con el centro
-        //     ->groupBy('id_grupo')
-        //     ->get();
+  
         
         $clientesPorCentroYGrupo = Centros_Grupos_Clientes::select(
             'centro_id',
@@ -190,19 +187,7 @@ class AuthController extends Controller
         return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro', 'clientesPorCentroYGrupo', 'contar'));
     }
 
-    public function mantenimientoAsesores()
-    {
-        $rol = Auth::user()->rol;
 
-        // Verificar si el rol es 'contador'
-        if ($rol !== 'contador') {
-            // Si no es contador, redirigir o mostrar un mensaje de error
-            return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
-        }
-
-        // Si el rol es 'contador', cargar la vista
-        return view('modules.dashboard.mantenimientoasesor')->with('rol', $rol);
-    }
     public function reverliquidacion()
     {
         $rol = Auth::user()->rol;
