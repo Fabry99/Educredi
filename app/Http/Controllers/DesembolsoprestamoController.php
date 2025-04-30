@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Aprobacion;
+use App\Models\Asesores;
+use App\Models\bancos;
 use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
 use App\Models\Colector;
 use App\Models\debeser;
+use App\Models\Formapago;
 use App\Models\Linea;
 use App\Models\saldoprestamo;
 use App\Models\SpecialPassword;
@@ -25,16 +28,18 @@ class DesembolsoprestamoController extends Controller
     public function creditos()
     {
         $rol = Auth::user()->rol;
-        $clientes = Clientes::all();
+        $clientes = Clientes::with('saldoprestamo')->get();
         $sucursales = Sucursales::all();
         $linea = Linea::all();
         $supervisor = Supervisores::all();
         $colector = Colector::all();
         $aprobaciones = Aprobacion::all();
         $tipopago = Tipopago::all();
-
+        $formapago = Formapago::all();
+        $bancos = bancos::all();
+        $asesores = Asesores::all();
         if ($rol !== 'contador') {
-            return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
 
         // Si el rol es 'contador', cargar la vista
@@ -46,7 +51,10 @@ class DesembolsoprestamoController extends Controller
             'supervisor',
             'colector',
             'aprobaciones',
-            'tipopago'
+            'tipopago',
+            'formapago',
+            'bancos',
+            'asesores'
         ));
     }
 

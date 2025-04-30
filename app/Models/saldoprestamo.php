@@ -122,4 +122,8 @@ class saldoprestamo extends Model
         'orden',
         'id_aprobadopor',
     ];
+
+    public function clientes(){
+        return $this->belongsTo(Clientes::class, 'id_cliente');
+    }
 }

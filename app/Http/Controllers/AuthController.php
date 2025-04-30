@@ -152,6 +152,8 @@ class AuthController extends Controller
         // Recupera el cliente, lanza error si no se encuentra
         if ($rol == 'contador') {
             return view('modules.dashboard.home', compact('rol', 'clientes', 'centros_grupos_clientes', 'centros', 'grupo','departamentos'));
+        }else{
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
     }
 
@@ -195,7 +197,7 @@ class AuthController extends Controller
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
-            return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
 
         // Si el rol es 'contador', cargar la vista

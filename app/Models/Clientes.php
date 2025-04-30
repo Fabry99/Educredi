@@ -51,4 +51,13 @@ class Clientes extends Model
     {
         return $this->hasMany(Centros_Grupos_Clientes::class, 'cliente_id');
     }
+
+    public function saldoprestamo()
+    {
+        // return $this->hasOne(SaldoPrestamo::class, 'id_cliente')->latestOfMany('id');
+            return $this->hasOne(SaldoPrestamo::class, 'id_cliente')
+                ->orderBy('id', 'desc'); 
+    }
+
+    
 }
