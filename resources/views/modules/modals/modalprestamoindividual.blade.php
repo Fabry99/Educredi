@@ -9,23 +9,23 @@
             <hr class="separate-line">
 
             <!-- Datos del Préstamo -->
-            <div class="datos-prestamos seccion visible">
+            <div class="datos-prestamos ">
                 <div class="modal-gePrestamos" style="margin-top: 40px">
                     <div class="input-group1">
                         <label for="id" class="label1">Código:
-                            <input type="text" id="id" name="id" placeholder="ID:" readonly
+                            <input type="text" id="id_ind" name="id" placeholder="ID:" readonly
                                 style="width: 20%">
                         </label>
                     </div>
                     <div class="input-group1" style="margin-left: -80px;">
                         <label for="nombre" class="label1">Nombre:
-                            <input type="text" id="nombre" name="nombre" placeholder="NOMBRE:" readonly
+                            <input type="text" id="nombre_ind" name="nombre" placeholder="NOMBRE:" readonly
                                 style="width: 280px;">
                         </label>
                     </div>
                     <div class="input-group1">
                         <p style="white-space:nowrap;">Linea:</p>
-                        <select id="linea" name="linea" style="width:200px; margin-right:50px; margin-left:5px;"
+                        <select id="lineaind" name="linea" style="width:200px; margin-right:50px; margin-left:5px;"
                             required>
                             <option value="" disabled selected>Seleccionar:</option>
                             @foreach ($linea as $item)
@@ -39,7 +39,7 @@
                 <div class="modal-gePrestamos" style="margin-top: 20px;">
                     <div class="input-group1" style="margin-left: 60px">
                         <p style="white-space:nowrap;">Sucursal:</p>
-                        <select id="sucursal" name="sucursal" style="width:160px; margin-left:5px;">
+                        <select id="sucursalind" name="sucursal" style="width:160px; margin-left:5px;">
                             <option value="" disabled selected>Seleccionar:</option>
                             @foreach ($sucursales as $sucursal)
                                 <option value="{{ $sucursal->id }}">{{ $sucursal->nombre }}</option>
@@ -48,7 +48,7 @@
                     </div>
                     <div class="input-group1" style="margin-left: 20px">
                         <p style="white-space:nowrap;">Supervisor:</p>
-                        <select id="supervisor" name="supervisor"
+                        <select id="supervisorind" name="supervisor"
                             style="width:200px; margin-right:50px; margin-left:5px;">
                             <option value="" disabled selected>Seleccionar:</option>
                             @foreach ($supervisor as $supervisor)
@@ -58,7 +58,7 @@
                     </div>
                     <div class="input-group1" style="margin-left: 20px">
                         <p style="white-space:nowrap;">Asesor:</p>
-                        <select id="asesor" name="asesor" style="width:200px; margin-right:50px; margin-left:5px;">
+                        <select id="asesorind" name="asesor" style="width:200px; margin-right:50px; margin-left:5px;">
                             <option value="" disabled selected>Seleccionar:</option>
                             @foreach ($asesores as $asesor)
                                 <option value="{{ $asesor->id }}">{{ $asesor->nombre }}</option>
@@ -67,33 +67,32 @@
                     </div>
 
                 </div>
-                <div class="modal-gePrestamos" style="margin-top:20px;">
-                </div>
+            
                 <div class="modal-gePrestamos"
                     style="border: 1px solid var(--border-color-datosprestamos);
                     background:var(--background-datosprestamos); border-radius:4px; margin:20px 0px;">
                     <div class="group-datosPrestamos">
                         <div class="input-group1" style="margin: 10px 5px; ">
-                            <label for="montootorgar" class="label1">Monto a Otorgar:
-                                <input type="number" id="montootorgar" name="montootorgar" placeholder="0.00"
+                            <label for="montootorgarind" class="label1">Monto a Otorgar:
+                                <input type="number" id="montootorgarind" name="montootorgar" placeholder="0.00"
                                     style="width: 120px;" required step="0.01" min="0">
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
                             <label for="tasainteres" class="label1">Tasa de Interés:
-                                <input type="text" id="tasainteres" name="tasainteres" placeholder="0.00"
+                                <input type="text" id="tasainteresind" name="tasainteres" placeholder="0.00"
                                     style="width: 120px; margin-left:10px" required>
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
                             <label for="plazo" class="label1">Plazo:
-                                <input type="number" id="plazo" name="plazo" placeholder="0"
+                                <input type="number" id="plazoind" name="plazo" placeholder="0"
                                     style="width: 120px; margin-left:80px" required>
                             </label>
                         </div>
                         <div class="input-group1" style="margin: 10px 5px; ">
                             <p style="white-space:nowrap;">Forma de Pago:</p>
-                            <select id="formaPago" name="formaPago" style="width:142px; margin-left:15px;">
+                            <select id="tipo_pago" name="tipo_pago" style="width:142px; margin-left:15px;">
                                 <option value="" disabled selected>Seleccionar:</option>
                                 @foreach ($tipopago as $tipopago)
                                     <option value="{{ $tipopago->id }}">{{ $tipopago->nombre }}</option>
@@ -102,18 +101,18 @@
                         </div>
                         <div class="input-group1" style=" margin: 0px 5px; ">
                             <label for="frecuenciameses" class="label1">Frecuencia <br> en Meses:
-                                <input type="number" id="frecuenciameses" name="frecuenciameses" placeholder="0"
+                                <input type="number" id="frecuenciamesesind" name="frecuenciameses" placeholder="0"
                                     style="width: 120px; margin-left:50px" required>
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 0px 5px 20px 5px;">
                             <label for="frecuenciadias" class="label1">Frecuencia <br> en Días:
-                                <input type="number" id="frecuenciadias" name="frecuenciadias" placeholder="0"
+                                <input type="number" id="frecuenciadiasind" name="frecuenciadias" placeholder="0"
                                     style="width: 120px; margin-left:65px" required>
                             </label>
                         </div>
                         <div class="input-group1" style="margin: 20px 5px;">
-                            <input type="checkbox" name="microseguro" id="microseguro" value="1" checked
+                            <input type="checkbox" name="microseguro" id="microseguroind" value="1" checked
                                 disabled style="width: 16px; height: 16px; margin-left:10px;">
                             <span style="margin-left:-10px;">Cobrar Micro Seguro</span>
                         </div>
@@ -122,42 +121,42 @@
                     <div class="group-datosPrestamos">
                         <div class="input-group1" style="margin: 10px 5px; ">
                             <label for="fechaapertura" class="label1">Fecha Apertura:
-                                <input type="date" id="fechaapertura" name="fechaapertura" style="width: 120px;"
+                                <input type="date" id="fechaaperturaind" name="fechaapertura" style="width: 120px;"
                                     required>
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
                             <label for="fechaprimerpagodebeser" class="label1">Fecha Primer <br> Pago:
-                                <input type="date" id="fechaprimerpagodebeser" name="fechaprimerpagodebeser"
+                                <input type="date" id="fechaprimerpagodebeserind" name="fechaprimerpagodebeser"
                                     style="width: 120px; margin-left:75px" required>
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
                             <label for="fechavencimiento" class="label1">Fecha <br> Vencimiento:
-                                <input type="date" id="fechavencimiento" name="fechavencimiento"
+                                <input type="date" id="fechavencimientoind" name="fechavencimiento"
                                     style="width: 120px; margin-left:22px; color:red" required>
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 0px 5px 20px 5px;">
                             <label for="cuota" class="label1">Cuota:
-                                <input type="number" id="montootorgar" name="montootorgar" placeholder="0.00"
+                                <input type="number" id="cuotaind" name="cuotaind" placeholder="0.00"
                                     style="width: 120px; margin: 10px 0px 0px 68px" required step="0.01"
-                                    min="0">
+                                    min="0" readonly>
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 0px 5px 20px 5px;">
                             <label for="desembolso" class="label1">Desembolso:
-                                <input type="number" id="desembolso" name="desembolso" placeholder="0.00"
+                                <input type="number" id="desembolsoind" name="desembolso" placeholder="0.00"
                                     style="width: 120px; margin: 5px 0px 0px 23px" required step="0.01"
-                                    min="0">
+                                    min="0" readonly>
                             </label>
                         </div>
                         <div class="input-group1" style="margin: 20px 5px;">
                             <span>Tipo Cuota:</span>
-                            <input type="radio" name="garantia" id="fiduciaria" value="7"
+                            <input type="radio" name="Tipo_cuota" id="cuotafijaind" value="7"
                                     style="width: 16px; height: 16px; margin-left:20px;">
                                 <span style="margin-left:-10px;">Fija</span>
-                            <input type="radio" name="garantia" id="fiduciaria" value="7"
+                            <input type="radio" name="Tipo_cuota" id="cuotavariableind" value="7"
                                 style="width: 16px; height: 16px; margin-left:20px;">
                             <span style="margin-left:-10px;">Variable</span>
                         </div>
@@ -169,12 +168,12 @@
                         </div>
                         <div class="modal-gePrestamos">
                             <div class="input-group1" style="margin-top:20px; margin-left:5px">
-                                <input type="radio" name="garantia" id="pagare" value="1"
+                                <input type="radio" name="garantia" id="fiduciariaind" value="1"
                                     style="width: 16px; height: 16px; margin-left:10px;">
                                 <span style="margin-left:-10px;">Fiduciaria</span>
                             </div>
                             <div class="input-group1" style="margin-top:20px; margin-left:10px;">
-                                <input type="radio" name="garantia" id="aportaciones" value="4"
+                                <input type="radio" name="garantia" id="hipotecariaind" value="4"
                                     style="width: 16px; height: 16px; margin-left:0px;">
                                 <span style="margin-left:-10px;">Hipotecaria</span>
                             </div>
@@ -184,7 +183,7 @@
                         <div class="modal-gePrestamos">
 
                             <div class="input-group1" style="margin: 10px 5px;">
-                                <input type="radio" name="garantia" id="fiduciaria" value="7"
+                                <input type="radio" name="garantia" id="prendariaind" value="7"
                                     style="width: 16px; height: 16px; margin-left:0px;">
                                 <span style="margin-left:-10px;">Prendaria</span>
                             </div>
@@ -192,7 +191,7 @@
                         <hr>
                         <div class="input-group1" style="margin: 20px 5px; ">
                             <label for="colector" class="label1">Colector:
-                                <select id="colector" name="colector" style="width:200px; margin-left:42px;">
+                                <select id="colectorind" name="colector" style="width:200px; margin-left:42px;">
                                     <option value="" disabled selected>Seleccionar:</option>
                                     @foreach ($colector as $colector)
                                         <option value="{{ $colector->id }}">{{ $colector->nombrecolector }}</option>
@@ -202,7 +201,7 @@
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
                             <label for="aprobadorpor" class="label1">Aprobado por:
-                                <select id="aprobadopor" name="aprobadopor" style="width:200px; margin-left:5px;">
+                                <select id="aprobadoporind" name="aprobadopor" style="width:200px; margin-left:5px;">
                                     <option value="" disabled selected>Seleccionar:</option>
                                     @foreach ($aprobaciones as $aprobaciones)
                                         <option value="{{ $aprobaciones->id }}">{{ $aprobaciones->nombre }}</option>
@@ -212,7 +211,7 @@
                         </div>
                         <div class="input-group1" style="margin: 20px 5px; ">
                             <label for="banco" class="label1">Banco:
-                                <select id="banco" name="banco" style="width:200px; margin-left:56px;">
+                                <select id="bancoind" name="banco" style="width:200px; margin-left:56px;">
                                     <option value="" disabled selected>Seleccionar:</option>
                                     @foreach ($bancos as $banco)
                                         <option value="{{ $banco->id }}">{{ $banco->nombre_banco }}</option>
@@ -220,12 +219,14 @@
                                 </select>
                             </label>
                         </div>
+                        
+
                         <div class="input-group1" style="margin: 20px 5px; ">
-                            <label for="formapago" class="label1">Forma de <br> Pago:
-                                <select id="formapago" name="formapago" style="width:200px; margin-left:65px;">
+                            <label for="formapagoind" class="label1">Forma de <br> Pago:
+                                <select id="formapagoind" name="formapagoind" style="width:200px; margin-left:65px;">
                                     <option value="" disabled selected>Seleccionar:</option>
-                                    @foreach ($formapago as $formapago)
-                                        <option value="{{ $formapago->id }}">{{ $formapago->nombre_formapago }}</option>
+                                    @foreach ($formapago as $item_formapago)
+                                        <option value="{{ $item_formapago->id }}">{{ $item_formapago->nombre_formapago }}</option>
                                     @endforeach
                                 </select>
                             </label>
@@ -243,31 +244,7 @@
         </form>
     </div>
 </div>
-{{-- <script>
-    const links = document.querySelectorAll('.nav-links a');
-    const secciones = document.querySelectorAll('.seccion');
 
-
-    links.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            // Quitar clase .active de todos los enlaces
-            links.forEach(l => l.classList.remove('active'));
-            this.classList.add('active'); // Agregar al que se clickeó
-
-            // Ocultar todas las secciones
-            secciones.forEach(sec => sec.classList.remove('visible'));
-
-            // Mostrar la sección correspondiente
-            if (this.id === 'link-datos') {
-                document.querySelector('.datos-prestamos').classList.add('visible');
-            } else if (this.id === 'link-garantias') {
-                document.querySelector('.datos-Garantias-Fiadores').classList.add('visible');
-            }
-        });
-    });
-</script> --}}
 <style>
     :root {
         --background-inputs: #f7f7f7;
@@ -435,12 +412,4 @@
     }
 
 
-    .seccion {
-        display: none;
-        margin-top: 20px;
-    }
-
-    .seccion.visible {
-        display: block;
-    }
 </style>

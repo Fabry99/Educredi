@@ -43,16 +43,21 @@
                 </thead>
                 <tbody>
                     @foreach ($clientes as $cliente)
-                        <tr>
-                            <td>{{ $cliente->id }}</td>
-                            <td>{{ $cliente->nombre }} {{ $cliente->apellido }} </td>
-                            <td>{{ $cliente->dui }}</td>
-                            <td>{{ "$". $cliente->saldoprestamo->MONTO ?? '-' }}</td>                            
-                            <td>{{  $cliente->saldoprestamo->FECHAAPERTURA ?? '-' }}</td>                            
-                            <td> <button type="button" class="btn-prestamo" data-id="{{ $cliente->id }}"
-                                    data-name="{{ $cliente->nombre }} {{ $cliente->apellido }}">Préstamo</button></td>
-                        </tr>
-                    @endforeach
+                    <tr>
+                        <td>{{ $cliente->id }}</td>
+                        <td>{{ $cliente->nombre }} {{ $cliente->apellido }}</td>
+                        <td>{{ $cliente->dui }}</td>
+                        <td>{{ $cliente->saldoprestamo?->MONTO ?? '-' }}</td>
+                        <td>{{ $cliente->saldoprestamo?->FECHAAPERTURA ?? '-' }}</td>
+                        <td>
+                            <button type="button" class="btn-prestamo"
+                                data-id="{{ $cliente->id }}"
+                                data-name="{{ $cliente->nombre }} {{ $cliente->apellido }}">
+                                Préstamo
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
                 </tbody>
 
 

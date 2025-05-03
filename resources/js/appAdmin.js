@@ -776,6 +776,237 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        //Codigo para desembolso de prestamo Individual
+        const inputInteres_ind = document.getElementById('tasainteresind');  // Campo de tasa de interés
+        const selectLinea_ind = document.getElementById('lineaind');
+        const select_sucursal = document.getElementById('sucursalind');
+        const select_supervisor = document.getElementById('supervisorind');
+        const select_asesor = document.getElementById('asesorind');
+        const input_montoOtorgar = document.getElementById('montootorgarind');
+        const inputPlazo_ind = document.getElementById('plazoind');
+        const select_tipoPago = document.getElementById('tipo_pago');
+        const frecuenciamesesind = document.getElementById('frecuenciamesesind');
+        const frecuenciadiasind = document.getElementById('frecuenciadiasind');
+        const fechaaperturaind = document.getElementById('fechaaperturaind');
+        const fechaprimerpagodebeserind = document.getElementById('fechaprimerpagodebeserind');
+        const fechavencimientoind = document.getElementById('fechavencimientoind');
+        const input_cuota = document.getElementById('cuotaind');
+        const input_desembolso = document.getElementById('desembolsoind');
+        const select_colector = document.getElementById('colectorind');
+        const select_aprobadopor = document.getElementById('aprobadoporind');
+        const selectBanco = document.getElementById('bancoind');
+        const selectformapago = document.getElementById('formapagoind');
+
+        document.querySelector('.btn-prestamoindividual').addEventListener('click', function (event) {
+            event.preventDefault();
+            //    clienteId = this.getAttribute('data-id');
+            //    clienteNombre = this.getAttribute('data-name');
+            console.log('id_cliente', clienteId, clienteNombre);
+            $('#modalprestamoIndividual').fadeIn();
+            document.getElementById('id_ind').value = clienteId;
+            document.getElementById('nombre_ind').value = clienteNombre;
+
+
+        });
+
+        function actualizarFechaPrimerPago() {
+            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+            const frecuencia = parseInt(frecuenciamesesind.value);
+            const fechaInicio = new Date(fechaaperturaind.value);
+
+            console.log('Tipo de pago seleccionado:', textoTipoPago);
+            console.log('frecuenciamesesind:', frecuencia);
+            console.log('fechaaperturaind:', fechaaperturaind.value);
+
+
+
+            if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
+                const fechaPrimerPago = new Date(fechaInicio);
+                fechaPrimerPago.setMonth(fechaPrimerPago.getMonth() + frecuencia);
+                if (!fechaaperturaind.value || isNaN(frecuencia)) {
+                    fechaprimerpagodebeserind.value = '';
+                    return;
+                }
+
+                if (fechaPrimerPago.getDate() !== fechaInicio.getDate()) {
+                    fechaPrimerPago.setDate(0);
+                }
+
+                const fechaFormateada = fechaPrimerPago.toISOString().split('T')[0];
+                fechaprimerpagodebeserind.value = fechaFormateada;
+            } else if (['diario', 'semanal', 'catorcenal'].includes(textoTipoPago)) {
+                const diasFrecuencia = parseInt(frecuenciadiasind.value);
+                console.log('frecuenciadiasind:', diasFrecuencia);
+
+                if (fechaaperturaind.value && !isNaN(diasFrecuencia)) {
+                    const fechaInicioDias = new Date(fechaaperturaind.value);
+                    fechaInicioDias.setDate(fechaInicioDias.getDate() + diasFrecuencia);
+
+                    const fechaFormateadaDias = fechaInicioDias.toISOString().split('T')[0];
+                    fechaprimerpagodebeserind.value = fechaFormateadaDias;
+                } else {
+                    fechaprimerpagodebeserind.value = '';
+                }
+            }
+        }
+
+
+        function actualizarFechaFinal() {
+            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+            const plazo = parseInt(inputPlazo_ind.value);
+            const frecuenciaMeses = parseInt(frecuenciamesesind.value);
+
+            if (!fechaaperturaind.value) {
+                fechavencimientoind.value = '';
+                return;
+            }
+
+            const fechaInicio = new Date(fechaaperturaind.value);
+            if (isNaN(fechaInicio.getTime())) {
+                fechavencimientoind.value = '';
+                return;
+            }
+
+            // Casos de pagos por mes: mensual, bimensual, etc.
+            if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
+                if (isNaN(frecuenciaMeses) || isNaN(plazo)) {
+                    fechavencimientoind.value = '';
+                    return;
+                }
+
+                const mesesTotales = frecuenciaMeses * plazo;
+                const fechaFinal = new Date(fechaInicio);
+                fechaFinal.setMonth(fechaFinal.getMonth() + mesesTotales);
+
+                if (fechaFinal.getDate() !== fechaInicio.getDate()) {
+                    fechaFinal.setDate(0);
+                }
+
+                fechavencimientoind.value = fechaFinal.toISOString().split('T')[0];
+            }
+            // Casos de pagos por días
+            else if (['diario', 'semanal', 'catorcenal'].includes(textoTipoPago)) {
+                if (isNaN(plazo)) {
+                    fechavencimientoind.value = '';
+                    return;
+                }
+
+                const fechaFinal = new Date(fechaInicio);
+                fechaFinal.setMonth(fechaFinal.getMonth() + plazo);
+
+                if (fechaFinal.getDate() !== fechaInicio.getDate()) {
+                    fechaFinal.setDate(0);
+                }
+
+                fechavencimientoind.value = fechaFinal.toISOString().split('T')[0];
+            } else {
+                fechavencimientoind.value = '';
+            }
+        }
+        function calcularCuotas() {
+            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+            const cantDiasSelect = diasPorTipoPago[textoTipoPago];
+            const plazo = parseInt(inputPlazo_ind.value);
+
+            let manejo = 0;
+            let intereses = 0;
+            let micro_seguro = 0;
+            let iva = 0;
+            let tasa_iva = 0.13;
+            let Cuota = 0;
+            let Cuota_Final = 0;
+
+            if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
+                if (
+                    isNaN(parseFloat(input_montoOtorgar.value)) ||
+                    isNaN(parseFloat(inputInteres_ind.value)) ||
+                    isNaN(parseInt(inputPlazo_ind.value)) ||
+                    isNaN(parseInt(frecuenciamesesind.value))
+                ) {
+                    input_desembolso.value = "0.00";
+                    input_cuota.value = "0.00";
+                    return;
+                }
+
+                manejo = (10 / plazo);
+                const tasa_interes_mensuales = (parseFloat(inputInteres_ind.value) / 100) / 12;
+                intereses = input_montoOtorgar.value * tasa_interes_mensuales;
+                micro_seguro = (input_montoOtorgar.value * 1.252) / 100;
+                iva = intereses * tasa_iva;
+                Cuota = (input_montoOtorgar.value * tasa_interes_mensuales * Math.pow(1 + tasa_interes_mensuales, plazo)) / (Math.pow(1 + tasa_interes_mensuales, plazo) - 1);
+                Cuota_Final = (Cuota + iva + manejo + micro_seguro) * frecuenciamesesind.value;
+                console.log("Manejo:", manejo, "Intereses", intereses, "Microseguro", micro_seguro, 'IVA', iva);
+                console.log("Cuota:", Cuota.toFixed(2));
+                console.log("Cuota Final:", Cuota_Final.toFixed(2));
+
+                input_cuota.value = Cuota_Final.toFixed(2);
+                input_desembolso.value = input_montoOtorgar.value;
+
+            } else if (['diario', 'semanal', 'catorcenal'].includes(textoTipoPago)) {
+                if (
+                    isNaN(parseFloat(input_montoOtorgar.value)) ||
+                    isNaN(parseFloat(inputInteres_ind.value)) ||
+                    isNaN(parseInt(inputPlazo_ind.value)) ||
+                    isNaN(parseInt(frecuenciadiasind.value))
+                ) {
+                    input_desembolso.value = "0.00";
+                    input_cuota.value = "0.00";
+                    return;
+                }
+                manejo = (10 / plazo);
+                const tasa_interes_diaria = (parseFloat(inputInteres_ind.value) / 100) / 360;
+                intereses = input_montoOtorgar.value * tasa_interes_diaria * frecuenciadiasind.value;
+                micro_seguro = input_montoOtorgar.value * 0.00315;
+                iva = intereses * tasa_iva;
+                const tasa_diaria_cuota = (parseFloat(inputInteres_ind.value) / 100) / 365;
+                const tasa_calculo_cuota = tasa_diaria_cuota * frecuenciadiasind.value;
+                Cuota = (input_montoOtorgar.value * tasa_calculo_cuota * Math.pow(1 + tasa_calculo_cuota, plazo)) / (Math.pow(1 + tasa_calculo_cuota, plazo) - 1);
+                Cuota_Final = Cuota + iva + manejo + micro_seguro;
+                console.log("Manejo:", manejo, "tasa intere:", tasa_interes_diaria, "intereses:", intereses
+                    , "micro seguro:", micro_seguro, "iva:", iva, "cuota:", "cuota:", Cuota, "Cuota Final:", Cuota_Final);
+
+                input_cuota.value = Cuota_Final.toFixed(2);
+                input_desembolso.value = input_montoOtorgar.value;
+
+
+
+            }
+        }
+
+        input_montoOtorgar.addEventListener('input', calcularCuotas);
+        inputInteres_ind.addEventListener('input', calcularCuotas);
+        fechaaperturaind.addEventListener('change', actualizarFechaPrimerPago);
+        fechaaperturaind.addEventListener('change', actualizarFechaFinal);
+        inputPlazo_ind.addEventListener('input', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+        inputPlazo_ind.addEventListener('input', actualizarFechaFinal);
+        selectformapago.addEventListener('change', actualizarFechaFinal);
+        selectformapago.addEventListener('change', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+        frecuenciamesesind.addEventListener('input', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+        frecuenciamesesind.addEventListener('change', actualizarFechaFinal);
+        frecuenciadiasind.addEventListener('change', actualizarFechaFinal);
+        frecuenciadiasind.addEventListener('change', actualizarFechaPrimerPago);
+
+        frecuenciamesesind.addEventListener('change', function () {
+            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim();
+            const diasTipoPago = diasPorTipoPago[textoTipoPago];
+
+            const dato_frecuencia = this.value;
+            const totalCantDais = diasTipoPago / frecuenciamesesind.value;
+
+
+            console.log('frecuencia dia:', dato_frecuencia, diasTipoPago, inputPlazo_ind.value, totalCantDais);
+        });
+
+
         // Limpiar y cerrar modal prestamo grupal
         function limpiarModalPrestamoGrupal() {
             selectCentro.innerHTML = '<option value="" disabled selected>Centro:</option>';
@@ -811,23 +1042,65 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('link-datos').classList.add('active');
         }
 
+        function limpiarModalPrestamoIndividual() {
+            document.getElementById('lineaind').value = '';
+            document.getElementById('sucursalind').value = '';
+            document.getElementById('supervisorind').value = '';
+            document.getElementById('asesorind').value = '';
+            document.getElementById('montootorgarind').value = '';
+            document.getElementById('tasainteresind').value = '';
+            document.getElementById('plazoind').value = '';
+            document.getElementById('tipo_pago').value = '';
+            document.getElementById('frecuenciamesesind').value = '';
+            document.getElementById('frecuenciadiasind').value = '';
+            document.getElementById('microseguroind').value = '';
+            document.getElementById('fechaaperturaind').value = '';
+            document.getElementById('fechaprimerpagodebeserind').value = '';
+            document.getElementById('fechavencimientoind').value = '';
+            document.getElementById('cuotaind').value = '';
+            document.getElementById('desembolsoind').value = '';
+            document.getElementById('cuotafijaind').value = '';
+            document.getElementById('cuotavariableind').value = '';
+            document.getElementById('fiduciariaind').value = '';
+            document.getElementById('hipotecariaind').value = '';
+            document.getElementById('prendariaind').value = '';
+            document.getElementById('colectorind').value = '';
+            document.getElementById('aprobadoporind').value = '';
+            document.getElementById('bancoind').value = '';
+            document.getElementById('formapagoind').value = '';
+            const radios = document.querySelectorAll('input[name="garantia"]');
+            radios.forEach(radio => radio.checked = false);
+        }
         // Eventos para cerrar el modal
         $('.close-btn1').on('click', function () {
-            $('#modalprestamogrupal').fadeOut();
-            limpiarModalPrestamoGrupal();
+            if ($('#modalprestamogrupal').is(':visible')) {
+                $('#modalprestamogrupal').fadeOut();
+                limpiarModalPrestamoGrupal();
+            } else if ($('#modalprestamoIndividual').is(':visible')) {
+                $('#modalprestamoIndividual').fadeOut();
+                limpiarModalPrestamoIndividual();
+            }
         });
 
         $(window).on('click', function (event) {
             if ($(event.target).is('#modalprestamogrupal')) {
                 $('#modalprestamogrupal').fadeOut();
                 limpiarModalPrestamoGrupal();
+            } else if ($(event.target).is('#modalprestamoIndividual')) {
+                $('#modalprestamoIndividual').fadeOut();
+                limpiarModalPrestamoIndividual();
             }
         });
 
         $(document).on('keydown', function (event) {
             if (event.key === "Escape") {
-                $('#modalprestamogrupal').fadeOut();
-                limpiarModalPrestamoGrupal();
+                if ($('#modalprestamogrupal').is(':visible')) {
+                    $('#modalprestamogrupal').fadeOut();
+                    limpiarModalPrestamoGrupal();
+                } else if ($('#modalprestamoIndividual').is(':visible')) {
+                    $('#modalprestamoIndividual').fadeOut();
+                    limpiarModalPrestamoIndividual();
+                }
             }
         });
     }
@@ -1022,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 $('#ModalEditarAsesor #nombreActua').val(nombre_asesor);
                                 $('#ModalEditarAsesor').fadeIn();
 
-                                
+
                                 form.addEventListener('keydown', function (event) {
                                     if (event.key === 'Enter') {
                                         event.preventDefault(); // Evitar que se envíe el formulario por defecto
