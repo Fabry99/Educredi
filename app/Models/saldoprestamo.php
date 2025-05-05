@@ -9,6 +9,7 @@ class saldoprestamo extends Model
     protected $table = 'saldoprestamo';
     protected $fillable =[
         'id',
+        'id_cliente',
         'MONTO',
         'SALDO',
         'CUOTA',
@@ -121,6 +122,9 @@ class saldoprestamo extends Model
         'retro',
         'orden',
         'id_aprobadopor',
+        'MESES',
+        'DIAS',
+        'ID_BANCO',
     ];
 
     public function clientes(){

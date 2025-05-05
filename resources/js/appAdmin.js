@@ -796,15 +796,136 @@ document.addEventListener('DOMContentLoaded', function () {
         const select_aprobadopor = document.getElementById('aprobadoporind');
         const selectBanco = document.getElementById('bancoind');
         const selectformapago = document.getElementById('formapagoind');
+        const btn_prestamoindividual = document.getElementById('btnAceptarPrestamo');
+        const diasPorTipoPagoInd = {
+            'diario': 1,
+            'semanal': 7,
+            'catorcenal': 14,
+            'mensual': 30,
+            'bimensual': 60,
+            'trimestral': 90,
+            'semestral': 180,
+            'anual': 365
+        };
+
+        selectLinea_ind.addEventListener('change', function () {
+            const interes_ind = this.options[this.selectedIndex].dataset.interes;
+            if (interes_ind) {
+                inputInteres_ind.value = parseFloat(interes_ind).toFixed(2);  // Asignar el valor al input de interés
+                actualizarTasaEnTabla(inputInteres_ind.value);  // Actualizar la tasa en la tabla
+            } else {
+                inputInteres_ind.value = '';  // Limpiar el valor si no hay tasa
+            }
+        });
 
         document.querySelector('.btn-prestamoindividual').addEventListener('click', function (event) {
             event.preventDefault();
-            //    clienteId = this.getAttribute('data-id');
-            //    clienteNombre = this.getAttribute('data-name');
             console.log('id_cliente', clienteId, clienteNombre);
             $('#modalprestamoIndividual').fadeIn();
             document.getElementById('id_ind').value = clienteId;
             document.getElementById('nombre_ind').value = clienteNombre;
+
+
+            const form = document.getElementById('formPrestamoIndividual');
+
+            btn_prestamoindividual.addEventListener('click', function (event) {
+                event.preventDefault();
+                const garantiaSeleccionada = document.querySelector('input[name="garantia_ind"]:checked');
+                const garantia = garantiaSeleccionada ? garantiaSeleccionada.value : null;
+                const textoTipoPagoIndi = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+                const cantDiasSelectind = diasPorTipoPagoInd[textoTipoPagoIndi];
+
+                console.log("dias", cantDiasSelectind);
+                const datosPrestamo = {
+                    id_cliente: clienteId,
+                    nombre:clienteNombre,
+                    montoOtorgar: input_montoOtorgar.value,
+                    interes: inputInteres_ind.value,
+                    linea: selectLinea_ind.value,
+                    sucursal: select_sucursal.value,
+                    supervisor: select_supervisor.value,
+                    asesor: select_asesor.value,
+                    plazo: inputPlazo_ind.value,
+                    tipoPago: select_tipoPago.value,
+                    frecuenciaMeses: frecuenciamesesind.value,
+                    frecuenciaDias: frecuenciadiasind.value,
+                    fechaApertura: fechaaperturaind.value,
+                    fechaPrimerPago: fechaprimerpagodebeserind.value,
+                    fechaVencimiento: fechavencimientoind.value,
+                    cuota: input_cuota.value,
+                    desembolso: input_desembolso.value,
+                    colector: select_colector.value,
+                    aprobadoPor: select_aprobadopor.value,
+                    banco: selectBanco.value,
+                    formaPago: selectformapago.value,
+                    garantia: garantia,
+                    manejo: manejo,
+                    micro_seguro: micro_seguro,
+                    iva: iva,
+                    cantDiasSelect: cantDiasSelectind,
+                    textoTipoPagoIndi: textoTipoPagoIndi,
+
+                };
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    return;
+                }
+
+                fetch('/guardarprestamoindividual', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(datosPrestamo)
+
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            mostrarAlerta("Prestamo Realizado Correctamente", "success");
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1200);
+                            // Descargar el PDF
+                            if (data.pdf) {
+                                const pdfWindow = window.open("");
+                                if (pdfWindow) {
+                                    pdfWindow.document.write(`
+                                        <!DOCTYPE html>
+                                        <html>
+                                            <head>
+                                                <title>Comprobante de Préstamo Individual</title>
+                                                <style>
+                                                    html, body {
+                                                        margin: 0;
+                                                        padding: 0;
+                                                        height: 100%;
+                                                    }
+                                                    embed {
+                                                        width: 100%;
+                                                        height: 100%;
+                                                    }
+                                                </style>
+                                            </head>
+                                            <body>
+                                                <embed src="data:application/pdf;base64,${data.pdf}" type="application/pdf" />
+                                            </body>
+                                        </html>
+                                    `);
+                                } else {
+                                    mostrarAlerta("No se pudo abrir la ventana del PDF. Verifica que no esté bloqueada por el navegador.", "warning");
+                                }
+                            }
+                        } else {
+                            mostrarAlerta("Error al Realizar el Prestamo", "error");
+                        }
+
+                    }).catch(error => {
+                        mostrarAlerta("Error al guardar el préstamo:", "error");
+                    });
+
+
+            });
 
 
         });
@@ -892,29 +1013,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 const fechaFinal = new Date(fechaInicio);
-                fechaFinal.setMonth(fechaFinal.getMonth() + plazo);
+                fechaFinal.setDate(fechaFinal.getDate() + (frecuenciadiasind.value * plazo));
 
-                if (fechaFinal.getDate() !== fechaInicio.getDate()) {
-                    fechaFinal.setDate(0);
-                }
 
                 fechavencimientoind.value = fechaFinal.toISOString().split('T')[0];
             } else {
                 fechavencimientoind.value = '';
             }
         }
+        let manejo = 0;
+        let intereses = 0;
+        let micro_seguro = 0;
+        let iva = 0;
+        let tasa_iva = 0.13;
+        let Cuota = 0;
+        let Cuota_Final = 0;
+
         function calcularCuotas() {
             const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
             const cantDiasSelect = diasPorTipoPago[textoTipoPago];
             const plazo = parseInt(inputPlazo_ind.value);
 
-            let manejo = 0;
-            let intereses = 0;
-            let micro_seguro = 0;
-            let iva = 0;
-            let tasa_iva = 0.13;
-            let Cuota = 0;
-            let Cuota_Final = 0;
+
 
             if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
                 if (
@@ -956,8 +1076,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 manejo = (10 / plazo);
                 const tasa_interes_diaria = (parseFloat(inputInteres_ind.value) / 100) / 360;
                 intereses = input_montoOtorgar.value * tasa_interes_diaria * frecuenciadiasind.value;
+
                 micro_seguro = input_montoOtorgar.value * 0.00315;
+
                 iva = intereses * tasa_iva;
+
                 const tasa_diaria_cuota = (parseFloat(inputInteres_ind.value) / 100) / 365;
                 const tasa_calculo_cuota = tasa_diaria_cuota * frecuenciadiasind.value;
                 Cuota = (input_montoOtorgar.value * tasa_calculo_cuota * Math.pow(1 + tasa_calculo_cuota, plazo)) / (Math.pow(1 + tasa_calculo_cuota, plazo) - 1);
@@ -981,8 +1104,14 @@ document.addEventListener('DOMContentLoaded', function () {
             actualizarFechaPrimerPago();
             calcularCuotas();
         });
-        inputPlazo_ind.addEventListener('input', actualizarFechaFinal);
-        selectformapago.addEventListener('change', actualizarFechaFinal);
+        inputPlazo_ind.addEventListener('input', () => {
+            actualizarFechaFinal();
+            calcularCuota();
+        });
+        selectformapago.addEventListener('change', () => {
+            calcularCuota();
+            actualizarFechaFinal();
+        });
         selectformapago.addEventListener('change', () => {
             actualizarFechaPrimerPago();
             calcularCuotas();
@@ -991,20 +1120,19 @@ document.addEventListener('DOMContentLoaded', function () {
             actualizarFechaPrimerPago();
             calcularCuotas();
         });
-        frecuenciamesesind.addEventListener('change', actualizarFechaFinal);
-        frecuenciadiasind.addEventListener('change', actualizarFechaFinal);
-        frecuenciadiasind.addEventListener('change', actualizarFechaPrimerPago);
-
-        frecuenciamesesind.addEventListener('change', function () {
-            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim();
-            const diasTipoPago = diasPorTipoPago[textoTipoPago];
-
-            const dato_frecuencia = this.value;
-            const totalCantDais = diasTipoPago / frecuenciamesesind.value;
-
-
-            console.log('frecuencia dia:', dato_frecuencia, diasTipoPago, inputPlazo_ind.value, totalCantDais);
+        frecuenciamesesind.addEventListener('change', () => {
+            calcularCuota();
+            actualizarFechaFinal();
         });
+        frecuenciadiasind.addEventListener('change', () => {
+            actualizarFechaFinal();
+            calcularCuota();
+        });
+        frecuenciadiasind.addEventListener('change', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+
 
 
         // Limpiar y cerrar modal prestamo grupal
@@ -1156,6 +1284,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 setTimeout(() => {
                                                     location.reload();
                                                 }, 1000);
+                                                
                                             } else {
                                                 mostrarAlerta("Error al eliminar cliente", "error");
                                             }

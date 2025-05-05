@@ -84,6 +84,8 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/prestamos/obtener-centros-grupos-clientes/{id}', [DesembolsoprestamoController::class, 'obtenerCentrosGruposClientes']);
     Route::get('/prestamos/obtenergrupos-clientes/{centro_id}/{grupo_id}', [DesembolsoprestamoController::class, 'obtenergruposclientes']);
     Route::post('/guardarprestamogrupal', [DesembolsoprestamoController::class,'almacenarPrestamos']);
+    Route::post('/guardarprestamoindividual', [DesembolsoprestamoController::class,'almacenarPrestamoIndividual']);
+
     Route::get('/consulta/reversion/{codigo}', [DesembolsoprestamoController::class, 'obtenerSaldoPrestamo']);
     Route::POST('/validar/password', [DesembolsoprestamoController::class, 'validarPassword']);
     Route::delete('/eliminar/desembolsoprestamo/{codigoCliente}', [DesembolsoprestamoController::class, 'eliminarDesembolso']);

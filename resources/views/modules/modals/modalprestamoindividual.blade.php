@@ -3,7 +3,7 @@
     <div class="modal-contentPrestamosGrupal">
         <span class="close-btn1">&times;</span>
         <h2>Desembolso de Préstamo Individual</h2>
-        <form action="" method="POST">
+        <form action="" method="POST" id="formPrestamoIndividual">
             @csrf
             <meta name="csrf-token" content="{{ csrf_token() }}">
             <hr class="separate-line">
@@ -102,13 +102,13 @@
                         <div class="input-group1" style=" margin: 0px 5px; ">
                             <label for="frecuenciameses" class="label1">Frecuencia <br> en Meses:
                                 <input type="number" id="frecuenciamesesind" name="frecuenciameses" placeholder="0"
-                                    style="width: 120px; margin-left:50px" required>
+                                    style="width: 120px; margin-left:50px" >
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 0px 5px 20px 5px;">
                             <label for="frecuenciadias" class="label1">Frecuencia <br> en Días:
                                 <input type="number" id="frecuenciadiasind" name="frecuenciadias" placeholder="0"
-                                    style="width: 120px; margin-left:65px" required>
+                                    style="width: 120px; margin-left:65px" >
                             </label>
                         </div>
                         <div class="input-group1" style="margin: 20px 5px;">
@@ -153,10 +153,10 @@
                         </div>
                         <div class="input-group1" style="margin: 20px 5px;">
                             <span>Tipo Cuota:</span>
-                            <input type="radio" name="Tipo_cuota" id="cuotafijaind" value="7"
-                                    style="width: 16px; height: 16px; margin-left:20px;">
+                            <input type="radio" name="Tipo_cuota" id="cuotafijaind" value="1"
+                                    style="width: 16px; height: 16px; margin-left:20px;" checked>
                                 <span style="margin-left:-10px;">Fija</span>
-                            <input type="radio" name="Tipo_cuota" id="cuotavariableind" value="7"
+                            <input type="radio" name="Tipo_cuota" id="cuotavariableind" value="2"
                                 style="width: 16px; height: 16px; margin-left:20px;">
                             <span style="margin-left:-10px;">Variable</span>
                         </div>
@@ -168,12 +168,12 @@
                         </div>
                         <div class="modal-gePrestamos">
                             <div class="input-group1" style="margin-top:20px; margin-left:5px">
-                                <input type="radio" name="garantia" id="fiduciariaind" value="1"
+                                <input type="radio" name="garantia_ind" id="fiduciariaind" value="7"
                                     style="width: 16px; height: 16px; margin-left:10px;">
                                 <span style="margin-left:-10px;">Fiduciaria</span>
                             </div>
                             <div class="input-group1" style="margin-top:20px; margin-left:10px;">
-                                <input type="radio" name="garantia" id="hipotecariaind" value="4"
+                                <input type="radio" name="garantia_ind" id="hipotecariaind" value="3"
                                     style="width: 16px; height: 16px; margin-left:0px;">
                                 <span style="margin-left:-10px;">Hipotecaria</span>
                             </div>
@@ -183,7 +183,7 @@
                         <div class="modal-gePrestamos">
 
                             <div class="input-group1" style="margin: 10px 5px;">
-                                <input type="radio" name="garantia" id="prendariaind" value="7"
+                                <input type="radio" name="garantia_ind" id="prendariaind" value="4"
                                     style="width: 16px; height: 16px; margin-left:0px;">
                                 <span style="margin-left:-10px;">Prendaria</span>
                             </div>
@@ -237,7 +237,7 @@
 
                 </div>
                 <div class="botones">
-                    <button type="submit" class="btn-aceptar" id="btnAceptar"><img
+                    <button type="submit" class="btn-aceptarPrestamo" id="btnAceptarPrestamo"><img
                             src="{{ asset('img/aceptar.svg') }}" alt=""></button>
                 </div>
             </div>
@@ -354,7 +354,7 @@
         margin-top: 20px;
     }
 
-    .btn-aceptar {
+    .btn-aceptarPrestamo {
         background: var(--background-color-verde);
         padding: 5px 25px;
         border-radius: 4px;
@@ -368,7 +368,7 @@
         height: 35px;
     }
 
-    .btn-aceptar:hover {
+    .btn-aceptarPrestamo:hover {
         background: #03880e;
         box-shadow: 0 0 5px var(--verde-shadow);
     }

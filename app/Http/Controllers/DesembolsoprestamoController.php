@@ -17,6 +17,7 @@ use App\Models\Sucursales;
 use App\Models\Supervisores;
 use App\Models\Tipopago;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,7 @@ class DesembolsoprestamoController extends Controller
         $formapago = Formapago::all();
         $bancos = bancos::all();
         $asesores = Asesores::all();
+        // dd($clientes);
         if ($rol !== 'contador') {
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
@@ -307,9 +309,9 @@ class DesembolsoprestamoController extends Controller
     {
 
         $prestamo = saldoprestamo::where('id_cliente', $codigo)
-        ->orderByDesc('id') // o ->latest('id')
-        ->first();
-    
+            ->orderByDesc('id') // o ->latest('id')
+            ->first();
+
         if ($prestamo) {
             return response()->json([
                 'monto' => $prestamo->MONTO,
@@ -345,23 +347,23 @@ class DesembolsoprestamoController extends Controller
     public function eliminarDesembolso($codigoCliente)
     {
         DB::beginTransaction();
-    
+
         try {
             // Buscar el último desembolso
             $cliente = Saldoprestamo::where('id_cliente', $codigoCliente)
                 ->latest('id')
                 ->first();
-    
+
             if (!$cliente) {
                 return response()->json([
                     'success' => false,
                     'mensaje' => 'No se encontró el desembolso para este cliente'
                 ], 404);
             }
-    
+
             // Eliminar el registro de saldoprestamo
             $cliente->delete();
-    
+
             // Eliminar el último registro de debeser
             DB::table('debeser')
                 ->where('id_cliente', $codigoCliente)
@@ -371,22 +373,210 @@ class DesembolsoprestamoController extends Controller
                         ->where('id_cliente', $codigoCliente);
                 })
                 ->delete();
-    
+
             DB::commit();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Eliminación exitosa'
             ]);
-    
         } catch (\Exception $e) {
             DB::rollBack();
-    
+
             return response()->json([
                 'success' => false,
                 'mensaje' => 'Error al eliminar el desembolso: ' . $e->getMessage()
             ], 500);
         }
     }
+
+
+
     
+    public function almacenarPrestamoIndividual(Request $request)
+    {
+
+        DB::beginTransaction();
+
+        try {
+            $id_cliente = $request->input('id_cliente');
+            $prestamo = Saldoprestamo::where('id_cliente', $id_cliente)->first();
+            $datos = [
+                'id_cliente' => $id_cliente,
+                'MONTO' => $request->input('montoOtorgar'),
+                'SALDO' => $request->input('montoOtorgar'),
+                'CUOTA' => $request->input('cuota'),
+                'GARANTIA' => $request->input('garantia'),
+                'FECHAAPERTURA' => $request->input('fechaApertura'),
+                'FECHAVENCIMIENTO' => $request->input('fechaVencimiento'),
+                'ULTIMA_FECHA_PAGADA' => $request->input('fechaPrimerPago'),
+                'PLAZO' => $request->input('plazo'),
+                'INTERES' => $request->input('interes'),
+                'COLECTOR' => $request->input('colector'),
+                'MANEJO' => $request->input('colector'),
+                'groupsolid' => 1,
+                'centro' => 1,
+                'sucursal' => $request->input('sucursal'),
+                'supervisor' => $request->input('supervisor'),
+                'segu_d' => $request->input('micro_seguro'),
+                'id_aprobadopor' => $request->input('aprobadoPor'),
+                'tip_pago' => $request->input('tipoPago'),
+                'asesor' => $request->input('asesor'),
+                'formapago' => $request->input('formaPago'),
+                'MESES' => $request->input('frecuenciaMeses'),
+                'DIAS' => $request->input('frecuenciaDias'),
+                'ID_BANCO' => $request->input('banco'),
+            ];
+
+            if ($prestamo) {
+                $prestamo->update($datos);
+            } else {
+                Saldoprestamo::create($datos);
+            }
+
+
+            $segundaFila = true;
+            $fechaApertura = Carbon::parse($request->input('fechaApertura'));
+            $fechaPago = Carbon::parse($request->input('fechaPrimerPago')); // NUEVO
+            $fechaFinal = Carbon::parse($request->input('fechaVencimiento'));
+            $diasPorPago = (int) $request->input('cantDiasSelect');
+            $frecuenciasdias = (int) $request->input('frecuenciaDias');
+            $frecuenciasmeses = (int) $request->input('frecuenciaMeses');
+            $interes = $request->input('interes');
+            $monto = $request->input('montoOtorgar');
+            $tasa = $request->input('interes');
+            $manejo = $request->input('manejo');
+            $micro_seguro = $request->input('micro_seguro');
+            $cuota = $request->input('cuota');
+            $frecuenciaSeleccionada = strtolower($request->input('textoTipoPagoIndi'));
+            $plazo = $request->input('plazo');
+            $montoRestante = $monto;
+
+            $montoRestante = $montoRestante;
+            $tasa_diaria = ($tasa / 360) / 100;
+
+            $frecuenciasLargas = ['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'];
+            $frecuenciasCortas = ['diario', 'semanal', 'catorcenal'];
+            $tasa_interes_mensuales = ($tasa / 100) / 12;
+            // $intereses = $monto * $tasa_interes_mensuales;
+            $tasa_iva = 0.13;
+            $contador = 1;
+
+            $existePrestamoDebeser = DB::table('debeser')
+                ->where('id_cliente', $id_cliente)
+                ->exists();
+
+            if ($existePrestamoDebeser) {
+                DB::table('debeser')
+                    ->where('id_cliente', $id_cliente)
+                    ->delete();
+            }
+
+            $nuevosPagos = [];
+
+            while ($fechaPago->lte($fechaFinal)) {
+
+                if (in_array($frecuenciaSeleccionada, $frecuenciasLargas)) {
+                    $interesesCalculado = $montoRestante * $tasa_interes_mensuales;
+                    $iva = $interesesCalculado * $tasa_iva;
+                    $capital = $cuota - $interesesCalculado - $manejo - $micro_seguro - $iva;
+                    if ($montoRestante < $capital) {
+                        $capital = $montoRestante;
+                        $cuota = $capital + $interesesCalculado + $manejo + $micro_seguro + $iva;
+                    }
+                    $montoRestante -= $capital;
+                } else if (in_array($frecuenciaSeleccionada, $frecuenciasCortas)) {
+                    $interesesCalculado = $montoRestante * $tasa_diaria * $frecuenciasdias;
+                    $iva = $interesesCalculado * $tasa_iva;
+                    $capital = $cuota - $interesesCalculado - $manejo - $micro_seguro - $iva;
+
+                    if ($montoRestante < $capital) {
+                        $capital = $montoRestante;
+                        $cuota = $capital + $interesesCalculado + $manejo + $micro_seguro + $iva;
+                    }
+                    $montoRestante -= $capital;
+                } else {
+                    $interesesCalculado = 0;
+                }
+                $nuevosPagos[] = [
+                    'id_cliente' => $id_cliente,
+                    'fecha' => $fechaPago->toDateString(),
+                    'cuota' => $cuota,
+                    'saldo' => $montoRestante,
+                    'tasa_interes' => $tasa,
+                    'dias' => $diasPorPago,
+                    'manejo' => $manejo,
+                    'seguro' => $micro_seguro,
+                    'capital' => $capital,
+                    'iva' => $iva,
+                    'intereses' => $interesesCalculado,
+
+                ];
+
+         
+                $montoRestante = max(0, $montoRestante); // prevenir negativos por redondeo
+
+                // 👇 Sumar al final
+                if (in_array($frecuenciaSeleccionada, $frecuenciasLargas)) {
+                    $fechaPago->addMonths($frecuenciasmeses); // ⬅️ correctamente modifica la fecha
+                } else if (in_array($frecuenciaSeleccionada, $frecuenciasCortas)) {
+                    $fechaPago->addDays($frecuenciasdias); // ⬅️ aquí era el error
+                }
+
+
+                $contador++;
+            }
+            $datosPdf=[
+                'id_cliente' => $id_cliente,
+                'nombre' => $request->input('nombre'),
+                'MONTO' => $request->input('montoOtorgar'),
+                'SALDO' => $request->input('montoOtorgar'),
+                'CUOTA' => $request->input('cuota'),
+                'GARANTIA' => $request->input('garantia'),
+                'FECHAAPERTURA' => $request->input('fechaApertura'),
+                'FECHAVENCIMIENTO' => $request->input('fechaVencimiento'),
+                'ULTIMA_FECHA_PAGADA' => $request->input('fechaPrimerPago'),
+                'PLAZO' => $request->input('plazo'),
+                'INTERES' => $request->input('interes'),
+                'COLECTOR' => $request->input('colector'),
+                'MANEJO' => $request->input('colector'),
+                'groupsolid' => 1,
+                'centro' => 1,
+                'sucursal' => $request->input('sucursal'),
+                'supervisor' => $request->input('supervisor'),
+                'segu_d' => $request->input('micro_seguro'),
+                'id_aprobadopor' => $request->input('aprobadoPor'),
+                'tip_pago' => $request->input('tipoPago'),
+                'asesor' => $request->input('asesor'),
+                'formapago' => $request->input('formaPago'),
+                'MESES' => $request->input('frecuenciaMeses'),
+                'DIAS' => $request->input('frecuenciaDias'),
+                'ID_BANCO' => $request->input('banco'),
+                ];
+
+            DB::table('debeser')->insert($nuevosPagos);
+            DB::commit();
+            
+              // Generar el PDF
+              $pdf = PDF::loadView('PDF.desembolsoPrestamoIndividual', ['prestamo' => $datosPdf])
+              ->setPaper('a4', 'portrait')
+              ->setOptions(['defaultFont' => 'sans-serif']);
+              $pdfContent = $pdf->output();
+              $pdfBase64 = base64_encode($pdfContent);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Datos insertados correctamente',
+                'pdf' => $pdfBase64
+            ]);
+        } catch (\Exception $e) {
+            // DB::rollBack();
+            Log::error("Error al guardar préstamo individual: " . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Hubo un error al guardar los datos.',
+            ], 500);
+        }
+    }
 }
