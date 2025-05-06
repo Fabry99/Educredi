@@ -10,6 +10,8 @@
     --background-prestamo:#5ba433ed;
     --background-prestamo-hover:#17850d;
     --border-btn-prestamo:#0e616e;
+    --background-color-verde: #0b7914;
+
 }
 
 .container {
@@ -334,4 +336,96 @@ table.dataTable tbody tr:hover {
     background-color: var(--background-prestamo-hover);
     border-color: var(--verde-shadow);
     box-shadow: 0 0 3px var(--verde-shadow);
+}
+
+
+/*ESTILOS PARA LA VISTA TRANSFERENCIA DE CARTERA */
+.row-selected td {
+    background-color: rgba(38, 165, 13, 0.101) !important;
+    border: 1px solid rgba(255, 255, 255, 0.582) !important;
+}
+.contenedor {
+    background: #f0f0f0;
+    border-radius: 10px;
+    max-width: 75%;
+    padding: 6px; /* Espacio superior interno */
+    margin-top: 40px;
+    justify-self: center;
+    border: 1px solid rgba(0, 0, 0, 0.305);
+    box-shadow: 0 0 5px var(--verde-shadow);
+}
+
+.tittle h2{
+    margin-left: 15px;
+    
+}
+.contain-option{
+    max-width: 100%;
+    display: flex;
+    gap: 0px;
+
+}
+.option {
+    display: flex;
+    align-items: center; /* Opcional, para alinear verticalmente */
+    gap: 10px; /* Ajusta según el espacio deseado */
+}
+.option span{
+    margin-left: 15px;
+}
+.option select{
+    width: 200px;
+    margin-left: 0px;
+    border-radius: 4px;
+    height: 30px;
+    margin-right: 10px;
+}
+.contenedor-conteo{
+    display: flex;
+    max-width: 100%;
+    margin: 40px 15px 60px 15px;
+    gap: 40px;
+}
+.conteo input{
+    width: 80px;
+    border-radius: 4px;
+    height: 24px;
+    margin-left: 10px;
+}
+.contenedor input:hover{
+    box-shadow: 0 0 5px var(--verde-shadow);
+}   
+.contenedor select:hover{
+    box-shadow: 0 0 5px var(--verde-shadow);
+}
+.contenedor .table1{
+    margin-top: 10px;
+}
+.tabla{
+    margin: 0px 15px 0px 15px;
+}
+.contenedor-footer{
+    display: flex;
+    margin: 40px 15px 30px 15px;
+    width: 100%;
+    justify-content: space-between;
+}
+.botones{
+margin-right: 30px;
+}
+.botones button img {
+    width: 35px;
+    height: 35px;
+}
+.btn-guardar {
+    background: var(--background-color-verde);
+    padding: 5px 25px;
+    border-radius: 4px;
+    color: var(--color-font);
+    text-decoration: none;
+    border: 1px solid black;
+}
+.btn-guardar:hover {
+    background: #03880e;
+    box-shadow: 0 0 5px var(--verde-shadow);
 }

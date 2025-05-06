@@ -636,6 +636,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const supervisor = document.getElementById('supervisor')?.value || '';
             const linea = document.getElementById('linea')?.value || '';
             const garantiaId = obtenerGarantiaSeleccionada();
+            const asesor = document.getElementById('asesor')?.value || '';
 
             // Validar que se seleccionó una garantía
             if (!garantiaId) {
@@ -669,6 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         grupoId: grupoId,
                         centroId: centroId,
                         formapago: detalleCalculo.formapago || formapago,
+                        asesor: asesor,
 
 
 
@@ -687,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             grupoId: grupoId,
                             centroId: centroId,
                             formapago: detalleCalculo.formapago || formapago,
-
+                            asesor:asesor,
 
 
 
@@ -707,6 +709,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const colector = document.getElementById("colector").value;
             const aprobado = document.getElementById("aprobadopor").value;
             const garantiaSeleccionada = document.querySelector('input[name="garantia"]:checked');
+            const asesor = document.getElementById('asesor');
 
             const prestamos = obtenerTodosLosDatos();
             // Verificamos si los valores son números válidos y mayores que 0
@@ -720,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 || selectCentro === "" || selectGrupo === "" || colector === "" || aprobado === ""
                 || formaPago === "" || inputInteres === "" || cantPago === "" || inputFecha.value === ""
                 || fechaPrimerPago.value === "" || fechaDebeSer.value === ""
-                || fechavencimiento.value === "" || !garantiaSeleccionada
+                || fechavencimiento.value === "" || !garantiaSeleccionada || asesor === ""
             ) {
                 mostrarAlerta("Por Favor Ingrese los Datos Correctamente.", "error");
             } else {
@@ -844,7 +847,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     linea: selectLinea_ind.value,
                     sucursal: select_sucursal.value,
                     supervisor: select_supervisor.value,
-                    asesor: select_asesor.value,
+                    id_asesor: select_asesor.value,
                     plazo: inputPlazo_ind.value,
                     tipoPago: select_tipoPago.value,
                     frecuenciaMeses: frecuenciamesesind.value,

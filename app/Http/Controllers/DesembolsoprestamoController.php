@@ -39,8 +39,7 @@ class DesembolsoprestamoController extends Controller
         $formapago = Formapago::all();
         $bancos = bancos::all();
         $asesores = Asesores::all();
-        // dd($clientes);
-        if ($rol !== 'contador') {
+        if ($rol !== 'contador' && $rol !== 'administrador') {
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
 
@@ -98,7 +97,6 @@ class DesembolsoprestamoController extends Controller
 
     public function almacenarPrestamos(Request $request)
     {
-
         // Array para almacenar todos los datos a insertar
         $datosAInsertar = [];
         $datosSaldoprestamo = [];
@@ -144,6 +142,7 @@ class DesembolsoprestamoController extends Controller
             $id_colector = $prestamo['detalleCalculo']['id_colector'];
             $grupo_id = $prestamo['detalleCalculo']['grupoId'];
             $centro_id = $prestamo['detalleCalculo']['centroId'];
+            $asesor = $prestamo['asesor'];
 
             $grupo = DB::table('grupos')->where('id', $grupo_id)->first(); // Asegúrate de que 'grupos' sea la tabla correcta
             $centro = DB::table('centros')->where('id', $centro_id)->first(); // Asegúrate de que 'centros' sea la tabla correcta
@@ -199,6 +198,7 @@ class DesembolsoprestamoController extends Controller
                 'segu_d' => $manejo,
                 'id_aprobadopor' => $id_aprobado,
                 'tip_pago' => $id_formapago,
+                'asesor' => $asesor,
             ];
             $datosParaPDF[] = [
                 'id_cliente' => $prestamo['id'],
@@ -395,13 +395,16 @@ class DesembolsoprestamoController extends Controller
     
     public function almacenarPrestamoIndividual(Request $request)
     {
-
         DB::beginTransaction();
 
         try {
             $id_cliente = $request->input('id_cliente');
             $prestamo = Saldoprestamo::where('id_cliente', $id_cliente)->first();
-            $datos = [
+            $prestamo2 = Centros_Grupos_Clientes::where('centro_id', 1)
+            ->where('grupo_id', 1)
+            ->where('cliente_id', $id_cliente)
+            ->first();
+                    $datos = [
                 'id_cliente' => $id_cliente,
                 'MONTO' => $request->input('montoOtorgar'),
                 'SALDO' => $request->input('montoOtorgar'),
@@ -421,11 +424,11 @@ class DesembolsoprestamoController extends Controller
                 'segu_d' => $request->input('micro_seguro'),
                 'id_aprobadopor' => $request->input('aprobadoPor'),
                 'tip_pago' => $request->input('tipoPago'),
-                'asesor' => $request->input('asesor'),
                 'formapago' => $request->input('formaPago'),
                 'MESES' => $request->input('frecuenciaMeses'),
                 'DIAS' => $request->input('frecuenciaDias'),
                 'ID_BANCO' => $request->input('banco'),
+                'ASESOR' => $request->input('id_asesor'),
             ];
 
             if ($prestamo) {
@@ -433,7 +436,21 @@ class DesembolsoprestamoController extends Controller
             } else {
                 Saldoprestamo::create($datos);
             }
-
+            if ($prestamo2) {
+                // Por ejemplo, actualizas un campo específico
+                $prestamo2->update([
+                    'centro_id' => 1,
+                    'grupo_id' => 1,
+                    'cliente_id' => $id_cliente,
+                ]);
+            } else {
+                Centros_Grupos_Clientes::create([
+                    'centro_id' => 1,
+                    'grupo_id' => 1,
+                    'cliente_id' => $id_cliente,
+                    // Otros campos requeridos para la creación
+                ]);
+            }
 
             $segundaFila = true;
             $fechaApertura = Carbon::parse($request->input('fechaApertura'));
@@ -547,7 +564,7 @@ class DesembolsoprestamoController extends Controller
                 'segu_d' => $request->input('micro_seguro'),
                 'id_aprobadopor' => $request->input('aprobadoPor'),
                 'tip_pago' => $request->input('tipoPago'),
-                'asesor' => $request->input('asesor'),
+                'asesor' => $request->input('id_asesor'),
                 'formapago' => $request->input('formaPago'),
                 'MESES' => $request->input('frecuenciaMeses'),
                 'DIAS' => $request->input('frecuenciaDias'),
@@ -571,7 +588,6 @@ class DesembolsoprestamoController extends Controller
             ]);
         } catch (\Exception $e) {
             // DB::rollBack();
-            Log::error("Error al guardar préstamo individual: " . $e->getMessage());
 
             return response()->json([
                 'status' => 'error',

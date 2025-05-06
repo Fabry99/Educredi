@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Asesores;
 use App\Models\Centros;
 use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
@@ -223,14 +224,16 @@ class AuthController extends Controller
     public function transferenciadecartera()
     {
         $rol = Auth::user()->rol;
-
+        $centro = Centros::all();
+        $asesor = Asesores::all();
+        $grupos =Grupos::all();
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
-            return redirect()->route('home')->with('error', 'No tienes acceso a esta sección.');
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
 
         // Si el rol es 'contador', cargar la vista
-        return view('modules.dashboard.transferencia')->with('rol', $rol);
+        return view('modules.dashboard.transferencia', compact('rol','centro','asesor','grupos'));
     }
 }

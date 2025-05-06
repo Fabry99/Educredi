@@ -9,6 +9,7 @@ use App\Http\Controllers\DesembolsoprestamoController;
 use App\Http\Controllers\DesemsolsoprestamoController;
 use App\Http\Controllers\GruposController;
 use App\Http\Controllers\pdfController;
+use App\Http\Controllers\TransferenciacarteraController;
 use App\Http\Controllers\UserController;
 use App\Models\Grupos;
 use App\Models\Municipios;
@@ -93,6 +94,11 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     //Rutas Para Mantenimiento de Asesores
     Route::post('/asesores/insert/', [AsesoresController::class, 'InsertarAsesor'])->name('asesor.insert');
     Route::put('/update/asesor/{id}', [AsesoresController::class, 'updateAsesor']); 
+
+    //Rutas Para Transferencia de cartera
+    Route::get('/trasferencia/obtenergrupos/{id_centro}',[TransferenciacarteraController::class, 'obtenerGrupos']); 
+    Route::get('/transferencia/obtenerPrestamos/{id_asesor}/{id_grupo}/{id_centro}',[TransferenciacarteraController::class,'obtenerDatosTabla']);
+
     // Route::get('/generar-pdf', [pdfController::class, 'generarPdf']);
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
 });
