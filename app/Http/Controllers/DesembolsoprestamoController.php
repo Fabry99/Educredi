@@ -102,7 +102,6 @@ class DesembolsoprestamoController extends Controller
         $datosSaldoprestamo = [];
         $datosParaPDF = [];
 
-
         // Recuperar todos los clientes de una vez
         $idsClientes = array_map(function ($prestamo) {
             return $prestamo['id'];
@@ -115,7 +114,6 @@ class DesembolsoprestamoController extends Controller
             ->mapWithKeys(function ($item) {
                 return [$item->id => $item->nombre . ' ' . $item->apellido];
             });
-
 
         // Preparar los datos a insertar
         foreach ($request->prestamos as $prestamo) {
@@ -185,6 +183,7 @@ class DesembolsoprestamoController extends Controller
                 'cuota' => $cuotaFinal,
                 'fechaapertura' => $fechaApertura,
                 'fechavencimiento' => $fechaVencimiento,
+                'ultima_fecha_pagada' => $fechaDebeSer,
                 'garantia' => $garantia_id,
                 'plazo' => $plazo,
                 'interes' => $tasa,
@@ -280,8 +279,25 @@ class DesembolsoprestamoController extends Controller
 
         // Intentar insertar todos los registros de una sola vez
         try {
+            foreach ($datosAInsertar as $dato) {
+                DB::table('debeser')
+                    ->where('id_cliente', $dato['id_cliente'])
+                    ->delete();
+            }
             DB::table('debeser')->insert($datosAInsertar);
-            DB::table('saldoprestamo')->insert($datosSaldoprestamo);
+
+            // Guardar o actualizar los saldos de préstamo
+            foreach ($datosSaldoprestamo as $saldo) {
+                $existe = DB::table('saldoprestamo')->where('id_cliente', $saldo['id_cliente'])->exists();
+
+                if ($existe) {
+                    DB::table('saldoprestamo')
+                        ->where('id_cliente', $saldo['id_cliente'])
+                        ->update($saldo);
+                } else {
+                    DB::table('saldoprestamo')->insert($saldo);
+                }
+            }
 
             // Generar el PDF
             $pdf = PDF::loadView('PDF.desembolsoPrestamoGrupal', ['prestamos' => $datosParaPDF])
@@ -392,7 +408,7 @@ class DesembolsoprestamoController extends Controller
 
 
 
-    
+
     public function almacenarPrestamoIndividual(Request $request)
     {
         DB::beginTransaction();
@@ -401,10 +417,10 @@ class DesembolsoprestamoController extends Controller
             $id_cliente = $request->input('id_cliente');
             $prestamo = Saldoprestamo::where('id_cliente', $id_cliente)->first();
             $prestamo2 = Centros_Grupos_Clientes::where('centro_id', 1)
-            ->where('grupo_id', 1)
-            ->where('cliente_id', $id_cliente)
-            ->first();
-                    $datos = [
+                ->where('grupo_id', 1)
+                ->where('cliente_id', $id_cliente)
+                ->first();
+            $datos = [
                 'id_cliente' => $id_cliente,
                 'MONTO' => $request->input('montoOtorgar'),
                 'SALDO' => $request->input('montoOtorgar'),
@@ -530,7 +546,7 @@ class DesembolsoprestamoController extends Controller
 
                 ];
 
-         
+
                 $montoRestante = max(0, $montoRestante); // prevenir negativos por redondeo
 
                 // 👇 Sumar al final
@@ -543,7 +559,7 @@ class DesembolsoprestamoController extends Controller
 
                 $contador++;
             }
-            $datosPdf=[
+            $datosPdf = [
                 'id_cliente' => $id_cliente,
                 'nombre' => $request->input('nombre'),
                 'MONTO' => $request->input('montoOtorgar'),
@@ -569,17 +585,17 @@ class DesembolsoprestamoController extends Controller
                 'MESES' => $request->input('frecuenciaMeses'),
                 'DIAS' => $request->input('frecuenciaDias'),
                 'ID_BANCO' => $request->input('banco'),
-                ];
+            ];
 
             DB::table('debeser')->insert($nuevosPagos);
             DB::commit();
-            
-              // Generar el PDF
-              $pdf = PDF::loadView('PDF.desembolsoPrestamoIndividual', ['prestamo' => $datosPdf])
-              ->setPaper('a4', 'portrait')
-              ->setOptions(['defaultFont' => 'sans-serif']);
-              $pdfContent = $pdf->output();
-              $pdfBase64 = base64_encode($pdfContent);
+
+            // Generar el PDF
+            $pdf = PDF::loadView('PDF.desembolsoPrestamoIndividual', ['prestamo' => $datosPdf])
+                ->setPaper('a4', 'portrait')
+                ->setOptions(['defaultFont' => 'sans-serif']);
+            $pdfContent = $pdf->output();
+            $pdfBase64 = base64_encode($pdfContent);
 
             return response()->json([
                 'status' => 'success',
