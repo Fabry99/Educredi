@@ -16,7 +16,7 @@
             </div>
         @endif
         <div id="alert-notification" class="alert"
-            style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
+            style="display: none; position: fixed; top: 40px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
             <span id="alert-notification-message"></span>
         </div>
 
@@ -82,9 +82,11 @@
             <div class="contenedor-footer">
                 <div class="option">
                     <span>Asesor a Transferir:</span>
-                    <select name="asesorcartera" id="asesorcartea">
-                        <option value="">1</option>
-                        <option value="">2</option>
+                    <select name="aseso Receptor" id="asesorRecibe">
+                       <option value="" disabled selected>Seleccionar</option>
+                       @foreach ($asesor as $asesorRecibe)
+                           <option value="{{$asesorRecibe->id}}">{{$asesorRecibe->nombre}}</option>
+                       @endforeach
                     </select>
                 </div>
                 {{-- <div class="botones">

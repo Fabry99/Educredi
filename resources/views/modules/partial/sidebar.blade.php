@@ -45,6 +45,17 @@
 
                         </ul>
                     </li>
+                    <li class="menu-item menu-item-dropdown">
+                        <a href="javascript:void(0);" class="menu-link"><img src="{{ asset('img/icon-tecnico.svg') }}"
+                                alt=""><span>Tecnico</span> <span class="arrow">></span></a>
+
+                        <ul class="sub-menu">
+                            <li><a href="{{ route('reverliquidacion') }}" class="sub-menu-link">Revertir desembolso de
+                                    prestamo</a></li>
+                            <li><a href="{{ route('transferenciadecartera') }}" class="sub-menu-link">Transferencia de cartera
+                                    entre asesores</a></li>
+                        </ul>
+                    </li>
                     
                 @break
 

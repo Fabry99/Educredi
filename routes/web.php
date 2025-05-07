@@ -48,7 +48,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/reversiones', [AuthController::class, 'reverliquidacion'])->name('reverliquidacion');
     Route::get('/prestamos', [DesembolsoprestamoController::class,  'creditos'])->name('creditos');
     Route::get('/cambiardatos', [AuthController::class, 'cambiardatos'])->name('cambiardatos');
-    Route::get('/transferenciadecartera', [AuthController::class, 'transferenciadecartera'])->name('transferenciadecartera');
+    Route::get('/transferenciadecartera', [TransferenciacarteraController::class, 'transferenciadecartera'])->name('transferenciadecartera');
     Route::post('/centros/guardar', [CentroController::class, 'store'])->name('centros.store');
     Route::post('7grupos/guardar', [GruposController::class, 'savegroup'])->name('grupos.savegroup');
     Route::get('/grupos-por-centro', [GruposController::class, 'obtenerGruposPorCentro']);
@@ -98,7 +98,9 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     //Rutas Para Transferencia de cartera
     Route::get('/trasferencia/obtenergrupos/{id_centro}',[TransferenciacarteraController::class, 'obtenerGrupos']); 
     Route::get('/transferencia/obtenerPrestamos/{id_asesor}/{id_grupo}/{id_centro}',[TransferenciacarteraController::class,'obtenerDatosTabla']);
+    Route::post('/transferencia/transferircartera', [TransferenciacarteraController::class, 'transferirCartera']);
 
+    
     // Route::get('/generar-pdf', [pdfController::class, 'generarPdf']);
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
 });

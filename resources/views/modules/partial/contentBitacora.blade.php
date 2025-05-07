@@ -42,29 +42,59 @@
                             $datos = json_decode($item->datos, true);
 
                             // Formatear fechas si existen
-                            $created_at = !empty($datos['created_at'])
-                                ? \Carbon\Carbon::parse($datos['created_at'])->timezone('America/Guatemala')->format('d/m/Y H:i:s')
-                                : '';
+                            $created_at = '';
+                            $updated_at = '';
 
-                            $updated_at = !empty($datos['updated_at'])
-                                ? \Carbon\Carbon::parse($datos['updated_at'])->timezone('America/Guatemala')->format('d/m/Y H:i:s')
-                                : '';
+                            if (!empty($datos['created_at'])) {
+                                $created_at = \Carbon\Carbon::parse($datos['created_at'])
+                                    ->timezone('America/Guatemala')
+                                    ->format('d/m/Y H:i:s');
+                            } elseif (!empty($datos['cambios']['created_at'])) {
+                                $created_at = \Carbon\Carbon::parse($datos['cambios']['created_at'])
+                                    ->timezone('America/Guatemala')
+                                    ->format('d/m/Y H:i:s');
+                            }
+
+                            if (!empty($datos['updated_at'])) {
+                                $updated_at = \Carbon\Carbon::parse($datos['updated_at'])
+                                    ->timezone('America/Guatemala')
+                                    ->format('d/m/Y H:i:s');
+                            } elseif (!empty($datos['cambios']['updated_at'])) {
+                                $updated_at = \Carbon\Carbon::parse($datos['cambios']['updated_at'])
+                                    ->timezone('America/Guatemala')
+                                    ->format('d/m/Y H:i:s');
+                            }
                         @endphp
 
                         <tr>
                             <td hidden>{{ $item->id }}</td>
-                            <td>{{ strtoupper(optional($item->user)->name ?? '') }} {{ strtoupper(optional($item->user)->last_name ?? '') }}</td>
+                            <td>{{ strtoupper(optional($item->user)->name ?? '') }}
+                                {{ strtoupper(optional($item->user)->last_name ?? '') }}</td>
                             <td>{{ strtoupper($item->tabla_afectada) }}</td>
                             <td>{{ $item->accion }}</td>
                             <td>
                                 <ul>
                                     @if ($item->accion === 'UPDATE')
                                         @foreach ($datos as $campo => $valor)
-                                            <li><strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong> {{ $valor }}</li>
+                                            @if (is_array($valor))
+                                                <li>
+                                                    <strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
+                                                    <ul>
+                                                        @foreach ($valor as $subCampo => $subValor)
+                                                            <li><strong>{{ ucfirst(str_replace('_', ' ', $subCampo)) }}:</strong>
+                                                                {{ $subValor }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </li>
+                                            @else
+                                                <li><strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
+                                                    {{ $valor }}</li>
+                                            @endif
                                         @endforeach
                                     @else
                                         <li><strong>Nombre:</strong> {{ $datos['nombre'] ?? 'No disponible' }}</li>
-                                        <li><strong>ID Asesor:</strong> {{ $datos['id_asesor'] ?? 'No disponible' }}</li>
+                                        <li><strong>ID Asesor:</strong> {{ $datos['id_asesor'] ?? 'No disponible' }}
+                                        </li>
                                     @endif
 
                                     @if (!empty($created_at))

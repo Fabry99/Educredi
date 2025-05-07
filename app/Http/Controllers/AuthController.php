@@ -196,7 +196,7 @@ class AuthController extends Controller
         $rol = Auth::user()->rol;
 
         // Verificar si el rol es 'contador'
-        if ($rol !== 'contador') {
+        if ($rol !== 'contador' && $rol !=='administrador')  {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
@@ -221,19 +221,5 @@ class AuthController extends Controller
         return view('modules.dashboard.cambiodatos')->with('rol', $rol);
     }
 
-    public function transferenciadecartera()
-    {
-        $rol = Auth::user()->rol;
-        $centro = Centros::all();
-        $asesor = Asesores::all();
-        $grupos =Grupos::all();
-        // Verificar si el rol es 'contador'
-        if ($rol !== 'contador') {
-            // Si no es contador, redirigir o mostrar un mensaje de error
-            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
-        }
-
-        // Si el rol es 'contador', cargar la vista
-        return view('modules.dashboard.transferencia', compact('rol','centro','asesor','grupos'));
-    }
+  
 }

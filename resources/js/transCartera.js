@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let id_centro = null;
     let id_grupo = null;
     let id_asesor = null;
-
+    const btnGuardarTransferencia = document.getElementById('btnGuardarTransferencia');
     selectCentro.addEventListener('change', obtenergrupos);
 
     function obtenergrupos() {
@@ -122,91 +122,150 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     selectAsesorCartera.addEventListener('change', obtenerDatosTabla);
+    selectGrupo.addEventListener('change', obtenerDatosTabla);
+    selectCentro.addEventListener('change', obtenerDatosTabla);
     let dataTable;
     function obtenerDatosTabla() {
-        id_asesor = selectAsesorCartera.value;
-        id_grupo = selectGrupo.value;
-    
+        const id_asesor = selectAsesorCartera.value;
+        const id_grupo = selectGrupo.value;
+        const id_centro = selectCentro.value;
+
+        // Validar que todos los selects tengan un valor válido (no vacío ni null)
+        if (!id_asesor || !id_grupo || !id_centro) {
+            return;
+        }
+
         fetch(`/transferencia/obtenerPrestamos/${id_asesor}/${id_grupo}/${id_centro}`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById('monto_total').value = `$${data.total_monto.toFixed(2)}`;
                 document.getElementById('creditos').value = data.total_registros;
-    
+
                 const tabla = $('#tablaTransCartera');
                 const tablaBody = tabla.find("tbody");
-                tablaBody.empty(); // Limpiar el cuerpo de la tabla
-    
-                const rowsData = []; // Contendrá las filas que se agregarán a DataTable
-    
+                tablaBody.empty();
+
+                const rowsData = [];
+
                 data.datos.forEach(prestamo => {
                     const fila = [
-                        `<input type="checkbox" class="select_row" style="transform: scale(1.5);">`, // Columna 1 (checkbox)
-                        prestamo.id, // Columna 2 (id)
-                        `$${Number(prestamo.monto).toFixed(2)}`, // Columna 3 (monto)
-                        prestamo.cliente_nombre, // Columna 4 (cliente nombre)
-                        prestamo.fecha_apertura, // Columna 5 (fecha apertura)
-                        `$${Number(prestamo.monto).toFixed(2)}` // Columna 6 (monto)
+                        `<input type="checkbox" class="select_row" style="transform: scale(1.5);">`,
+                        prestamo.id,
+                        `$${Number(prestamo.monto).toFixed(2)}`,
+                        prestamo.cliente_nombre,
+                        prestamo.fecha_apertura,
+                        `$${Number(prestamo.monto).toFixed(2)}`
                     ];
-                    rowsData.push(fila); // Agregar la fila al array de filas
+                    rowsData.push(fila);
                 });
-    
-                // Verifica si la tabla ya está inicializada
+
                 if ($.fn.DataTable.isDataTable('#tablaTransCartera')) {
-                    // Si ya está inicializada, destruimos la instancia anterior
                     tabla.DataTable().clear().rows.add(rowsData).draw();
                 } else {
-                    // Si no está inicializada, la inicializamos
                     tabla.DataTable({
                         data: rowsData,
                         responsive: true,
-                        "paging": true,
-                        "lengthChange": true,
-                        "searching": true,
-                        "ordering": true,
-                        "info": true,
-                        "autoWidth": false,
-                        "colReorder": true,
-                        "order": [[0, "desc"]],
-                        "language": {
-                            "decimal": ",",
-                            "thousands": ".",
-                            "lengthMenu": "Mostrar _MENU_ registros por página",
-                            "zeroRecords": "No se encontraron resultados",
-                            "info": "Mostrando página _PAGE_ de _PAGES_",
-                            "infoEmpty": "No hay registros disponibles",
-                            "infoFiltered": "(filtrado de _MAX_ registros totales)",
-                            "search": "Buscar:",
-                            "paginate": {
-                                "first": "Primera",
-                                "previous": "Anterior",
-                                "next": "Siguiente",
-                                "last": "Última"
+                        paging: true,
+                        lengthChange: true,
+                        searching: true,
+                        ordering: true,
+                        info: true,
+                        autoWidth: false,
+                        colReorder: true,
+                        order: [[0, "desc"]],
+                        language: {
+                            decimal: ",",
+                            thousands: ".",
+                            lengthMenu: "Mostrar _MENU_ registros por página",
+                            zeroRecords: "No se encontraron resultados",
+                            info: "Mostrando página _PAGE_ de _PAGES_",
+                            infoEmpty: "No hay registros disponibles",
+                            infoFiltered: "(filtrado de _MAX_ registros totales)",
+                            search: "Buscar:",
+                            paginate: {
+                                first: "Primera",
+                                previous: "Anterior",
+                                next: "Siguiente",
+                                last: "Última"
                             },
-                            "aria": {
-                                "sortAscending": ": activar para ordenar la columna de manera ascendente",
-                                "sortDescending": ": activar para ordenar la columna de manera descendente"
+                            aria: {
+                                sortAscending: ": activar para ordenar la columna de manera ascendente",
+                                sortDescending: ": activar para ordenar la columna de manera descendente"
                             }
                         },
-                        "lengthMenu": [5, 10, 25, 50, 100],
-                        "pageLength": 5,
-                        "columnDefs": [
+                        lengthMenu: [5, 10, 25, 50, 100],
+                        pageLength: 5,
+                        columnDefs: [
                             {
-                                "targets": 0,  // Índice de la columna que contiene los checkboxes
-                                "orderable": false  // Desactivar ordenación en esa columna
+                                targets: 0,
+                                orderable: false
                             }
                         ]
                     });
                 }
-    
-                // Ocultar la columna 1 (segunda columna con índice 1)
+
                 tabla.DataTable().column(1).visible(false);
             })
             .catch(error => {
-                console.error("Error al obtener los préstamos:", error);
+                mostrarAlerta("Error al obtener los préstamos:");
             });
     }
-    
+
+    btnGuardarTransferencia.addEventListener('click', function (event) {
+        event.preventDefault();
+        const tabla = $('#tablaTransCartera').DataTable();
+        const idsSeleccionados = [];
+        const selectAsesorReceptor = document.getElementById('asesorRecibe');
+
+        tabla.rows().every(function () {
+            const row = this.node();
+            const checkbox = row.querySelector('.select_row');
+            if (checkbox && checkbox.checked) {
+                const data = this.data();
+                const id = data[1];
+                idsSeleccionados.push(id);
+            }
+        });
+        if (idsSeleccionados.length > 0 && selectAsesorReceptor.value !== '') {
+            mostrarAlerta("Hola", "success");
+            const datos = {
+                ids_clientes: idsSeleccionados,
+                id_asesorReceptor: selectAsesorReceptor.value
+            }
+            fetch('/transferencia/transferircartera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(datos)
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en la transferencia");
+                    return response.json(); // o .text() si no esperas JSON
+                })
+                .then(data => {
+                    mostrarAlerta("Transferencia realizada con éxito", "success");
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                })
+                .catch(error => {
+                    mostrarAlerta("Ocurrió un error en la transferencia", "error");
+                });
+
+
+
+        } else {
+            if (idsSeleccionados.length === 0) {
+                mostrarAlerta("Debe seleccionar al menos un Cliente.", "error");
+            }
+            if (selectAsesorReceptor.value === '') {
+                mostrarAlerta("Por Favor Seleccione un Receptor", "error");
+            }
+        }
+
+    });
 
 
 });

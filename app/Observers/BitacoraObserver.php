@@ -14,7 +14,7 @@ class BitacoraObserver
             'usuario' => Auth::user()->name,  // Nombre del usuario autenticado
             'tabla_afectada' => $model->getTable(),  // Dinámicamente se toma el nombre de la tabla del modelo
             'accion' => 'INSERT',
-            'datos' => json_encode($model), // Los datos insertados
+            'datos' => json_encode($model->toArray()), // ✅ Convierte correctamente a string JSON
             'fecha' => Carbon::now()->format('Y-m-d H:i:s'),  // Formato estándar de fecha y hora
             'id_asesor' => Auth::user()->id,
         ]);
@@ -27,7 +27,7 @@ class BitacoraObserver
             'usuario' => Auth::user()->name,
             'tabla_afectada' => $model->getTable(),
             'accion' => 'UPDATE',
-            'datos' => json_encode($model->getChanges()),  // Los datos modificados
+            'datos' => json_encode($model->toArray()), // ✅ Convierte correctamente a string JSON
             'fecha' => Carbon::now()->format('Y-m-d H:i:s'),  // Formato estándar de fecha y hora
             'id_asesor' => Auth::user()->id,
         ]);
@@ -40,7 +40,7 @@ class BitacoraObserver
             'usuario' => Auth::user()->name,
             'tabla_afectada' => $model->getTable(),
             'accion' => 'DELETE',
-            'datos' => json_encode($model),  // Los datos eliminados
+            'datos' => json_encode($model->toArray()), // ✅ Convierte correctamente a string JSON
             'fecha' => Carbon::now()->format('Y-m-d H:i:s'),  // Formato estándar de fecha y hora
             'id_asesor' => Auth::user()->id,
         ]);
