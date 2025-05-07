@@ -288,15 +288,11 @@ class DesembolsoprestamoController extends Controller
 
             // Guardar o actualizar los saldos de préstamo
             foreach ($datosSaldoprestamo as $saldo) {
-                $existe = DB::table('saldoprestamo')->where('id_cliente', $saldo['id_cliente'])->exists();
-
-                if ($existe) {
-                    DB::table('saldoprestamo')
-                        ->where('id_cliente', $saldo['id_cliente'])
-                        ->update($saldo);
-                } else {
-                    DB::table('saldoprestamo')->insert($saldo);
-                }
+                // Verificar si el saldo de préstamo ya existe y actualizar o insertar
+                SaldoPrestamo::updateOrCreate(
+                    ['id_cliente' => $saldo['id_cliente']], // Condición para buscar el registro
+                    $saldo // Datos a insertar o actualizar
+                );
             }
 
             // Generar el PDF
@@ -415,11 +411,11 @@ class DesembolsoprestamoController extends Controller
 
         try {
             $id_cliente = $request->input('id_cliente');
-            $prestamo = Saldoprestamo::where('id_cliente', $id_cliente)->first();
-            $prestamo2 = Centros_Grupos_Clientes::where('centro_id', 1)
-                ->where('grupo_id', 1)
-                ->where('cliente_id', $id_cliente)
-                ->first();
+            // $prestamo = Saldoprestamo::where('id_cliente', $id_cliente)->first();
+            // $prestamo2 = Centros_Grupos_Clientes::where('centro_id', 1)
+            //     ->where('grupo_id', 1)
+            //     ->where('cliente_id', $id_cliente)
+            //     ->first();
             $datos = [
                 'id_cliente' => $id_cliente,
                 'MONTO' => $request->input('montoOtorgar'),
@@ -446,27 +442,46 @@ class DesembolsoprestamoController extends Controller
                 'ID_BANCO' => $request->input('banco'),
                 'ASESOR' => $request->input('id_asesor'),
             ];
+             // Usando Eloquent para crear o actualizar el préstamo
+        SaldoPrestamo::updateOrCreate(
+            ['id_cliente' => $id_cliente],
+            $datos
+        );
+        // Crear o actualizar relación en Centros_Grupos_Clientes
+        Centros_Grupos_Clientes::updateOrCreate(
+            [
+                'cliente_id' => $id_cliente,
+                'centro_id' => 1,
+                'grupo_id' => 1,
+            ],
+            [
+                'cliente_id' => $id_cliente,
+                'centro_id' => 1,
+                'grupo_id' => 1,
+                // Puedes agregar más campos si son requeridos
+            ]
+        );
 
-            if ($prestamo) {
-                $prestamo->update($datos);
-            } else {
-                Saldoprestamo::create($datos);
-            }
-            if ($prestamo2) {
-                // Por ejemplo, actualizas un campo específico
-                $prestamo2->update([
-                    'centro_id' => 1,
-                    'grupo_id' => 1,
-                    'cliente_id' => $id_cliente,
-                ]);
-            } else {
-                Centros_Grupos_Clientes::create([
-                    'centro_id' => 1,
-                    'grupo_id' => 1,
-                    'cliente_id' => $id_cliente,
-                    // Otros campos requeridos para la creación
-                ]);
-            }
+            // if ($prestamo) {
+            //     $prestamo->update($datos);
+            // } else {
+            //     Saldoprestamo::create($datos);
+            // }
+            // if ($prestamo2) {
+            //     // Por ejemplo, actualizas un campo específico
+            //     $prestamo2->update([
+            //         'centro_id' => 1,
+            //         'grupo_id' => 1,
+            //         'cliente_id' => $id_cliente,
+            //     ]);
+            // } else {
+            //     Centros_Grupos_Clientes::create([
+            //         'centro_id' => 1,
+            //         'grupo_id' => 1,
+            //         'cliente_id' => $id_cliente,
+            //         // Otros campos requeridos para la creación
+            //     ]);
+            // }
 
             $segundaFila = true;
             $fechaApertura = Carbon::parse($request->input('fechaApertura'));

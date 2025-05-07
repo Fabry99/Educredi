@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
         Clientes::observe(BitacoraObserver::class);
         Grupos::observe(BitacoraObserver::class);
         saldoprestamo::observe(BitacoraObserver::class);
-        debeser::observe(BitacoraObserver::class);
+        // debeser::observe(BitacoraObserver::class);
         Centros_Grupos_Clientes::observe(BitacoraObserver::class);
         Asesores::observe(BitacoraObserver::class);
         Supervisores::observe(BitacoraObserver::class);
