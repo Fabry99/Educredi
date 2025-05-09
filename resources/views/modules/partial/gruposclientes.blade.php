@@ -13,14 +13,15 @@
     <div class="main-content">
         <div class="container mt-4">
             <h1>Mantenimiento de Grupos</h1>
+            @if (Auth::check() && (Auth::user()->rol === 'administrador' || Auth::user()->rol === 'contador'))
             <div class="btn-grupos" style="display: flex; margin-bottom: 10px; margin-top: 10px; margin-left: 10px;">
                 <a href="#" id="openModalBtnnuevocentro" class="btn-agregar"
                     style="margin-right: 15px;"><span>Nuevo
                         Centro</span></a>
                 <a href="#" id="openModalBtnnuevogrupo" class="btn-eliminar"><span>Nuevo
                         Grupo</span></a>
-
             </div>
+            @endif
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
                     <div class="notification custom_error">
