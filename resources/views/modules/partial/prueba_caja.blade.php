@@ -1,4 +1,5 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
+@include('modules.modals.modalreporte')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
@@ -46,10 +47,18 @@
                 
             </table>
             <div class="btn-grupos" style="display: flex; margin-bottom: 10px; margin-left: 10px;">
-                <a href="#" id="openModalBtn" class="btn-agregar"
+                <a href="#" id="openModalBtn" class="btn-reporte"
                     style="margin-right: 15px;"><span>Reporte préstamos</span></a>
             </div>
         </div>
     </div>
 
 </div>
+
+<script>
+    document.getElementById('openModalBtn').addEventListener('click', function (e) {
+        e.preventDefault();
+        const myModal = new bootstrap.Modal(document.getElementById('myModal'));
+        myModal.show();
+    });
+</script>
