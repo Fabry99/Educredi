@@ -335,3 +335,7 @@ table.dataTable tbody tr:hover {
     border-color: var(--verde-shadow);
     box-shadow: 0 0 3px var(--verde-shadow);
 }
+
+.btn-reporte {
+    background-color: var(--color-base);
+}

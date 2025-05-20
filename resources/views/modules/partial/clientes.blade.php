@@ -8,8 +8,6 @@
             <div class="btn-clientes">
                 <a href="" id="openModalBtn"><img src="{{ asset('img/icon-clientes.svg') }}"
                         alt=""><span>Agregar Cliente</span></a>
-
-
             </div>
             @if ($errors->any())
                 @foreach ($errors->all() as $error)

@@ -38,7 +38,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     // Rutas caja
     Route::get('/caja', [AuthController::class, 'caja'])->name('caja');
-
+    Route::get('/mov_caja',[AuthController::class, 'mov_caja'])->name('mov_caja');
     // Rutas Contador
     Route::get('/clientes', [AuthController::class, 'contador'])->name('contador');
     Route::get('/grupos', [AuthController::class, 'grupos'])->name('grupos');
