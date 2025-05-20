@@ -8,6 +8,8 @@
     <title>@yield('titulo_pagina')</title>
     <link rel="icon" href="{{ asset('img/logoeducredi.jpeg') }}" type="image/x-icon">
     @yield('css')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 
 </head>
 

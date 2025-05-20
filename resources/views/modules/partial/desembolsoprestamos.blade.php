@@ -1,6 +1,7 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
 @include('modules.modals.modalEleccionTipoPrestamo')
 @include('modules.modals.modalPrestamoGrupal')
+@include('modules.modals.modalprestamoindividual')
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
@@ -33,6 +34,8 @@
                         <th>Codigo</th>
                         <th>Nombre</th>
                         <th>DUI</th>
+                        <th>Prestamo</th>
+                        <th>Fecha Prestamo</th>
                         <th></th>
 
 
@@ -40,14 +43,21 @@
                 </thead>
                 <tbody>
                     @foreach ($clientes as $cliente)
-                        <tr>
-                            <td>{{ $cliente->id }}</td>
-                            <td>{{ $cliente->nombre }} {{ $cliente->apellido }} </td>
-                            <td>{{ $cliente->dui }}</td>
-                            <td> <button type="button" class="btn-prestamo" data-id="{{ $cliente->id }}"
-                                    data-name="{{ $cliente->nombre }} {{ $cliente->apellido }}">Préstamo</button></td>
-                        </tr>
-                    @endforeach
+                    <tr>
+                        <td>{{ $cliente->id }}</td>
+                        <td>{{ $cliente->nombre }} {{ $cliente->apellido }}</td>
+                        <td>{{ $cliente->dui }}</td>
+                        <td>{{ $cliente->saldoprestamo?->MONTO ?? '-' }}</td>
+                        <td>{{ $cliente->saldoprestamo?->FECHAAPERTURA ?? '-' }}</td>
+                        <td>
+                            <button type="button" class="btn-prestamo"
+                                data-id="{{ $cliente->id }}"
+                                data-name="{{ $cliente->nombre }} {{ $cliente->apellido }}">
+                                Préstamo
+                            </button>
+                        </td>
+                    </tr>
+                @endforeach
                 </tbody>
 
 

@@ -12,5 +12,7 @@ class Sucursales extends Model
         'id',
         'nombre'
     ];
-
+    public function asesores(){
+        return $this->hasMany(Asesores::class, 'id_sucursal');
+    }
 }

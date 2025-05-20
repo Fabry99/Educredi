@@ -1,22 +1,15 @@
 <?php return array(
     'root' => array(
         'name' => 'laravel/laravel',
-<<<<<<< HEAD
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '70d02c2c3af7bb623007247dedc3d6baa3e35bed',
-=======
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => 'e7869563b0deba77270804d8195e7f55a1475210',
->>>>>>> 70d02c2c3af7bb623007247dedc3d6baa3e35bed
+        'reference' => '1f92bf35f7d8afa350caad974a2d8d0a9bec88be',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
-<<<<<<< HEAD
         'barryvdh/laravel-dompdf' => array(
             'pretty_version' => 'v3.1.1',
             'version' => '3.1.1.0',
@@ -26,8 +19,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-=======
->>>>>>> 70d02c2c3af7bb623007247dedc3d6baa3e35bed
         'brick/math' => array(
             'pretty_version' => '0.12.3',
             'version' => '0.12.3.0',
@@ -85,7 +76,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-<<<<<<< HEAD
         'dompdf/dompdf' => array(
             'pretty_version' => 'v3.1.0',
             'version' => '3.1.0.0',
@@ -113,8 +103,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-=======
->>>>>>> 70d02c2c3af7bb623007247dedc3d6baa3e35bed
         'dragonmantank/cron-expression' => array(
             'pretty_version' => 'v3.4.0',
             'version' => '3.4.0.0',
@@ -434,15 +422,9 @@
             'dev_requirement' => false,
         ),
         'laravel/laravel' => array(
-<<<<<<< HEAD
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '70d02c2c3af7bb623007247dedc3d6baa3e35bed',
-=======
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => 'e7869563b0deba77270804d8195e7f55a1475210',
->>>>>>> 70d02c2c3af7bb623007247dedc3d6baa3e35bed
+            'reference' => '1f92bf35f7d8afa350caad974a2d8d0a9bec88be',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -565,7 +547,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-<<<<<<< HEAD
         'masterminds/html5' => array(
             'pretty_version' => '2.9.0',
             'version' => '2.9.0.0',
@@ -575,8 +556,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-=======
->>>>>>> 70d02c2c3af7bb623007247dedc3d6baa3e35bed
         'mockery/mockery' => array(
             'pretty_version' => '1.6.12',
             'version' => '1.6.12.0',
@@ -908,7 +887,6 @@
                 0 => '4.7.6',
             ),
         ),
-<<<<<<< HEAD
         'sabberworm/php-css-parser' => array(
             'pretty_version' => 'v8.8.0',
             'version' => '8.8.0.0',
@@ -918,8 +896,6 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
-=======
->>>>>>> 70d02c2c3af7bb623007247dedc3d6baa3e35bed
         'sebastian/cli-parser' => array(
             'pretty_version' => '3.0.2',
             'version' => '3.0.2.0',

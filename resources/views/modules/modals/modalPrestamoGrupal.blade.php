@@ -60,7 +60,15 @@
                         </select>
                     </div>
 
-
+                    <div class="input-group1" style="margin-left: 20px">
+                        <p style="white-space:nowrap;">Asesor:</p>
+                        <select id="asesor" name="asesor" style="width:200px; margin-right:50px; margin-left:5px;">
+                            <option value="" disabled selected>Seleccionar:</option>
+                            @foreach ($asesores as $asesor)
+                                <option value="{{ $asesor->id }}">{{ $asesor->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-gePrestamos" style="margin-top:20px;">
                     <div class="input-group1">

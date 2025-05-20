@@ -315,7 +315,6 @@ $('#tablagrupos tbody').on('click', 'tr', function (event) {
             $('#tablaclientesgrupos tbody').empty();
 
             response.forEach(grupos => {
-                console.log(grupos);
                 $('#tablaclientesgrupos tbody').append(`
                                 <tr>
                                     <td>${grupos.clientes.id}</td>
@@ -344,7 +343,6 @@ $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
     const clienteId = $(this).data('id');
     const centroId = $(this).data('centro_id');
     const grupoId = $(this).data('grupo_id');
-    console.log(clienteId, centroId, grupoId);
 
     $('#tablaclientesgrupos tbody').empty();
 
@@ -377,16 +375,13 @@ $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
             // Cierra el modal
             $('#modalmostrarcliente').fadeOut();
 
-            console.log('Cliente eliminado:', data);
 
             // Refresca la página luego de mostrar todo (si querés)
             setTimeout(() => {
                 location.reload();
             }, 1200); // Esperamos a que se vea la alerta
-            console.log(data)
         })
         .catch(error => {
-            console.error('Error al eliminar cliente:', error);
             $('#custom-alert-message').text('Hubo un error al eliminar el cliente.');
             $('#custom-alert').removeClass('alert-success').addClass('alert-error');
             $('#custom-alert').fadeIn().delay(5000).fadeOut();

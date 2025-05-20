@@ -175,7 +175,7 @@
             <div class="modal-ge1">
                 <div class="input-group1">
                     <p style="white-space:nowrap;">Centro:</p>
-                    <select id="id_centroeditar" name="id_centroeditar" required>
+                    <select id="id_centroeditar" name="id_centroeditar" >
                         <option value="" disabled selected>Seleccione un Centro</option>
                         @foreach ($centros as $centro)
                             <option value="{{ $centro->id }}">{{ $centro->nombre }}</option>
@@ -185,7 +185,7 @@
                 </div>
                 <div class="input-group1">
                     <p style="white-space:nowrap;">Grupo:</p>
-                    <select id="id_grupoeditar" name="id_grupoeditar" required>
+                    <select id="id_grupoeditar" name="id_grupoeditar" >
                         <option value="" disabled selected>Seleccione un Grupo</option>
                     </select>
                 </div>

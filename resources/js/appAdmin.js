@@ -636,6 +636,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const supervisor = document.getElementById('supervisor')?.value || '';
             const linea = document.getElementById('linea')?.value || '';
             const garantiaId = obtenerGarantiaSeleccionada();
+            const asesor = document.getElementById('asesor')?.value || '';
 
             // Validar que se seleccionó una garantía
             if (!garantiaId) {
@@ -669,6 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         grupoId: grupoId,
                         centroId: centroId,
                         formapago: detalleCalculo.formapago || formapago,
+                        asesor: asesor,
 
 
 
@@ -687,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             grupoId: grupoId,
                             centroId: centroId,
                             formapago: detalleCalculo.formapago || formapago,
-
+                            asesor:asesor,
 
 
 
@@ -707,6 +709,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const colector = document.getElementById("colector").value;
             const aprobado = document.getElementById("aprobadopor").value;
             const garantiaSeleccionada = document.querySelector('input[name="garantia"]:checked');
+            const asesor = document.getElementById('asesor');
 
             const prestamos = obtenerTodosLosDatos();
             // Verificamos si los valores son números válidos y mayores que 0
@@ -720,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 || selectCentro === "" || selectGrupo === "" || colector === "" || aprobado === ""
                 || formaPago === "" || inputInteres === "" || cantPago === "" || inputFecha.value === ""
                 || fechaPrimerPago.value === "" || fechaDebeSer.value === ""
-                || fechavencimiento.value === "" || !garantiaSeleccionada
+                || fechavencimiento.value === "" || !garantiaSeleccionada || asesor === ""
             ) {
                 mostrarAlerta("Por Favor Ingrese los Datos Correctamente.", "error");
             } else {
@@ -776,6 +779,365 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        //Codigo para desembolso de prestamo Individual
+        const inputInteres_ind = document.getElementById('tasainteresind');  // Campo de tasa de interés
+        const selectLinea_ind = document.getElementById('lineaind');
+        const select_sucursal = document.getElementById('sucursalind');
+        const select_supervisor = document.getElementById('supervisorind');
+        const select_asesor = document.getElementById('asesorind');
+        const input_montoOtorgar = document.getElementById('montootorgarind');
+        const inputPlazo_ind = document.getElementById('plazoind');
+        const select_tipoPago = document.getElementById('tipo_pago');
+        const frecuenciamesesind = document.getElementById('frecuenciamesesind');
+        const frecuenciadiasind = document.getElementById('frecuenciadiasind');
+        const fechaaperturaind = document.getElementById('fechaaperturaind');
+        const fechaprimerpagodebeserind = document.getElementById('fechaprimerpagodebeserind');
+        const fechavencimientoind = document.getElementById('fechavencimientoind');
+        const input_cuota = document.getElementById('cuotaind');
+        const input_desembolso = document.getElementById('desembolsoind');
+        const select_colector = document.getElementById('colectorind');
+        const select_aprobadopor = document.getElementById('aprobadoporind');
+        const selectBanco = document.getElementById('bancoind');
+        const selectformapago = document.getElementById('formapagoind');
+        const btn_prestamoindividual = document.getElementById('btnAceptarPrestamo');
+        const diasPorTipoPagoInd = {
+            'diario': 1,
+            'semanal': 7,
+            'catorcenal': 14,
+            'mensual': 30,
+            'bimensual': 60,
+            'trimestral': 90,
+            'semestral': 180,
+            'anual': 365
+        };
+
+        selectLinea_ind.addEventListener('change', function () {
+            const interes_ind = this.options[this.selectedIndex].dataset.interes;
+            if (interes_ind) {
+                inputInteres_ind.value = parseFloat(interes_ind).toFixed(2);  // Asignar el valor al input de interés
+                actualizarTasaEnTabla(inputInteres_ind.value);  // Actualizar la tasa en la tabla
+            } else {
+                inputInteres_ind.value = '';  // Limpiar el valor si no hay tasa
+            }
+        });
+
+        document.querySelector('.btn-prestamoindividual').addEventListener('click', function (event) {
+            event.preventDefault();
+            console.log('id_cliente', clienteId, clienteNombre);
+            $('#modalprestamoIndividual').fadeIn();
+            document.getElementById('id_ind').value = clienteId;
+            document.getElementById('nombre_ind').value = clienteNombre;
+
+
+            const form = document.getElementById('formPrestamoIndividual');
+
+            btn_prestamoindividual.addEventListener('click', function (event) {
+                event.preventDefault();
+                const garantiaSeleccionada = document.querySelector('input[name="garantia_ind"]:checked');
+                const garantia = garantiaSeleccionada ? garantiaSeleccionada.value : null;
+                const textoTipoPagoIndi = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+                const cantDiasSelectind = diasPorTipoPagoInd[textoTipoPagoIndi];
+
+                console.log("dias", cantDiasSelectind);
+                const datosPrestamo = {
+                    id_cliente: clienteId,
+                    nombre:clienteNombre,
+                    montoOtorgar: input_montoOtorgar.value,
+                    interes: inputInteres_ind.value,
+                    linea: selectLinea_ind.value,
+                    sucursal: select_sucursal.value,
+                    supervisor: select_supervisor.value,
+                    id_asesor: select_asesor.value,
+                    plazo: inputPlazo_ind.value,
+                    tipoPago: select_tipoPago.value,
+                    frecuenciaMeses: frecuenciamesesind.value,
+                    frecuenciaDias: frecuenciadiasind.value,
+                    fechaApertura: fechaaperturaind.value,
+                    fechaPrimerPago: fechaprimerpagodebeserind.value,
+                    fechaVencimiento: fechavencimientoind.value,
+                    cuota: input_cuota.value,
+                    desembolso: input_desembolso.value,
+                    colector: select_colector.value,
+                    aprobadoPor: select_aprobadopor.value,
+                    banco: selectBanco.value,
+                    formaPago: selectformapago.value,
+                    garantia: garantia,
+                    manejo: manejo,
+                    micro_seguro: micro_seguro,
+                    iva: iva,
+                    cantDiasSelect: cantDiasSelectind,
+                    textoTipoPagoIndi: textoTipoPagoIndi,
+
+                };
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    return;
+                }
+
+                fetch('/guardarprestamoindividual', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(datosPrestamo)
+
+                }).then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            mostrarAlerta("Prestamo Realizado Correctamente", "success");
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1200);
+                            // Descargar el PDF
+                            if (data.pdf) {
+                                const pdfWindow = window.open("");
+                                if (pdfWindow) {
+                                    pdfWindow.document.write(`
+                                        <!DOCTYPE html>
+                                        <html>
+                                            <head>
+                                                <title>Comprobante de Préstamo Individual</title>
+                                                <style>
+                                                    html, body {
+                                                        margin: 0;
+                                                        padding: 0;
+                                                        height: 100%;
+                                                    }
+                                                    embed {
+                                                        width: 100%;
+                                                        height: 100%;
+                                                    }
+                                                </style>
+                                            </head>
+                                            <body>
+                                                <embed src="data:application/pdf;base64,${data.pdf}" type="application/pdf" />
+                                            </body>
+                                        </html>
+                                    `);
+                                } else {
+                                    mostrarAlerta("No se pudo abrir la ventana del PDF. Verifica que no esté bloqueada por el navegador.", "warning");
+                                }
+                            }
+                        } else {
+                            mostrarAlerta("Error al Realizar el Prestamo", "error");
+                        }
+
+                    }).catch(error => {
+                        mostrarAlerta("Error al guardar el préstamo:", "error");
+                    });
+
+
+            });
+
+
+        });
+
+        function actualizarFechaPrimerPago() {
+            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+            const frecuencia = parseInt(frecuenciamesesind.value);
+            const fechaInicio = new Date(fechaaperturaind.value);
+
+            console.log('Tipo de pago seleccionado:', textoTipoPago);
+            console.log('frecuenciamesesind:', frecuencia);
+            console.log('fechaaperturaind:', fechaaperturaind.value);
+
+
+
+            if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
+                const fechaPrimerPago = new Date(fechaInicio);
+                fechaPrimerPago.setMonth(fechaPrimerPago.getMonth() + frecuencia);
+                if (!fechaaperturaind.value || isNaN(frecuencia)) {
+                    fechaprimerpagodebeserind.value = '';
+                    return;
+                }
+
+                if (fechaPrimerPago.getDate() !== fechaInicio.getDate()) {
+                    fechaPrimerPago.setDate(0);
+                }
+
+                const fechaFormateada = fechaPrimerPago.toISOString().split('T')[0];
+                fechaprimerpagodebeserind.value = fechaFormateada;
+            } else if (['diario', 'semanal', 'catorcenal'].includes(textoTipoPago)) {
+                const diasFrecuencia = parseInt(frecuenciadiasind.value);
+                console.log('frecuenciadiasind:', diasFrecuencia);
+
+                if (fechaaperturaind.value && !isNaN(diasFrecuencia)) {
+                    const fechaInicioDias = new Date(fechaaperturaind.value);
+                    fechaInicioDias.setDate(fechaInicioDias.getDate() + diasFrecuencia);
+
+                    const fechaFormateadaDias = fechaInicioDias.toISOString().split('T')[0];
+                    fechaprimerpagodebeserind.value = fechaFormateadaDias;
+                } else {
+                    fechaprimerpagodebeserind.value = '';
+                }
+            }
+        }
+
+
+        function actualizarFechaFinal() {
+            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+            const plazo = parseInt(inputPlazo_ind.value);
+            const frecuenciaMeses = parseInt(frecuenciamesesind.value);
+
+            if (!fechaaperturaind.value) {
+                fechavencimientoind.value = '';
+                return;
+            }
+
+            const fechaInicio = new Date(fechaaperturaind.value);
+            if (isNaN(fechaInicio.getTime())) {
+                fechavencimientoind.value = '';
+                return;
+            }
+
+            // Casos de pagos por mes: mensual, bimensual, etc.
+            if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
+                if (isNaN(frecuenciaMeses) || isNaN(plazo)) {
+                    fechavencimientoind.value = '';
+                    return;
+                }
+
+                const mesesTotales = frecuenciaMeses * plazo;
+                const fechaFinal = new Date(fechaInicio);
+                fechaFinal.setMonth(fechaFinal.getMonth() + mesesTotales);
+
+                if (fechaFinal.getDate() !== fechaInicio.getDate()) {
+                    fechaFinal.setDate(0);
+                }
+
+                fechavencimientoind.value = fechaFinal.toISOString().split('T')[0];
+            }
+            // Casos de pagos por días
+            else if (['diario', 'semanal', 'catorcenal'].includes(textoTipoPago)) {
+                if (isNaN(plazo)) {
+                    fechavencimientoind.value = '';
+                    return;
+                }
+
+                const fechaFinal = new Date(fechaInicio);
+                fechaFinal.setDate(fechaFinal.getDate() + (frecuenciadiasind.value * plazo));
+
+
+                fechavencimientoind.value = fechaFinal.toISOString().split('T')[0];
+            } else {
+                fechavencimientoind.value = '';
+            }
+        }
+        let manejo = 0;
+        let intereses = 0;
+        let micro_seguro = 0;
+        let iva = 0;
+        let tasa_iva = 0.13;
+        let Cuota = 0;
+        let Cuota_Final = 0;
+
+        function calcularCuotas() {
+            const textoTipoPago = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
+            const cantDiasSelect = diasPorTipoPago[textoTipoPago];
+            const plazo = parseInt(inputPlazo_ind.value);
+
+
+
+            if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
+                if (
+                    isNaN(parseFloat(input_montoOtorgar.value)) ||
+                    isNaN(parseFloat(inputInteres_ind.value)) ||
+                    isNaN(parseInt(inputPlazo_ind.value)) ||
+                    isNaN(parseInt(frecuenciamesesind.value))
+                ) {
+                    input_desembolso.value = "0.00";
+                    input_cuota.value = "0.00";
+                    return;
+                }
+
+                manejo = (10 / plazo);
+                const tasa_interes_mensuales = (parseFloat(inputInteres_ind.value) / 100) / 12;
+                intereses = input_montoOtorgar.value * tasa_interes_mensuales;
+                micro_seguro = (input_montoOtorgar.value * 1.252) / 100;
+                iva = intereses * tasa_iva;
+                Cuota = (input_montoOtorgar.value * tasa_interes_mensuales * Math.pow(1 + tasa_interes_mensuales, plazo)) / (Math.pow(1 + tasa_interes_mensuales, plazo) - 1);
+                Cuota_Final = (Cuota + iva + manejo + micro_seguro) * frecuenciamesesind.value;
+                console.log("Manejo:", manejo, "Intereses", intereses, "Microseguro", micro_seguro, 'IVA', iva);
+                console.log("Cuota:", Cuota.toFixed(2));
+                console.log("Cuota Final:", Cuota_Final.toFixed(2));
+
+                input_cuota.value = Cuota_Final.toFixed(2);
+                input_desembolso.value = input_montoOtorgar.value;
+
+            } else if (['diario', 'semanal', 'catorcenal'].includes(textoTipoPago)) {
+                if (
+                    isNaN(parseFloat(input_montoOtorgar.value)) ||
+                    isNaN(parseFloat(inputInteres_ind.value)) ||
+                    isNaN(parseInt(inputPlazo_ind.value)) ||
+                    isNaN(parseInt(frecuenciadiasind.value))
+                ) {
+                    input_desembolso.value = "0.00";
+                    input_cuota.value = "0.00";
+                    return;
+                }
+                manejo = (10 / plazo);
+                const tasa_interes_diaria = (parseFloat(inputInteres_ind.value) / 100) / 360;
+                intereses = input_montoOtorgar.value * tasa_interes_diaria * frecuenciadiasind.value;
+
+                micro_seguro = input_montoOtorgar.value * 0.00315;
+
+                iva = intereses * tasa_iva;
+
+                const tasa_diaria_cuota = (parseFloat(inputInteres_ind.value) / 100) / 365;
+                const tasa_calculo_cuota = tasa_diaria_cuota * frecuenciadiasind.value;
+                Cuota = (input_montoOtorgar.value * tasa_calculo_cuota * Math.pow(1 + tasa_calculo_cuota, plazo)) / (Math.pow(1 + tasa_calculo_cuota, plazo) - 1);
+                Cuota_Final = Cuota + iva + manejo + micro_seguro;
+                console.log("Manejo:", manejo, "tasa intere:", tasa_interes_diaria, "intereses:", intereses
+                    , "micro seguro:", micro_seguro, "iva:", iva, "cuota:", "cuota:", Cuota, "Cuota Final:", Cuota_Final);
+
+                input_cuota.value = Cuota_Final.toFixed(2);
+                input_desembolso.value = input_montoOtorgar.value;
+
+
+
+            }
+        }
+
+        input_montoOtorgar.addEventListener('input', calcularCuotas);
+        inputInteres_ind.addEventListener('input', calcularCuotas);
+        fechaaperturaind.addEventListener('change', actualizarFechaPrimerPago);
+        fechaaperturaind.addEventListener('change', actualizarFechaFinal);
+        inputPlazo_ind.addEventListener('input', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+        inputPlazo_ind.addEventListener('input', () => {
+            actualizarFechaFinal();
+            calcularCuota();
+        });
+        selectformapago.addEventListener('change', () => {
+            calcularCuota();
+            actualizarFechaFinal();
+        });
+        selectformapago.addEventListener('change', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+        frecuenciamesesind.addEventListener('input', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+        frecuenciamesesind.addEventListener('change', () => {
+            calcularCuota();
+            actualizarFechaFinal();
+        });
+        frecuenciadiasind.addEventListener('change', () => {
+            actualizarFechaFinal();
+            calcularCuota();
+        });
+        frecuenciadiasind.addEventListener('change', () => {
+            actualizarFechaPrimerPago();
+            calcularCuotas();
+        });
+
+
+
         // Limpiar y cerrar modal prestamo grupal
         function limpiarModalPrestamoGrupal() {
             selectCentro.innerHTML = '<option value="" disabled selected>Centro:</option>';
@@ -811,35 +1173,78 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('link-datos').classList.add('active');
         }
 
+        function limpiarModalPrestamoIndividual() {
+            document.getElementById('lineaind').value = '';
+            document.getElementById('sucursalind').value = '';
+            document.getElementById('supervisorind').value = '';
+            document.getElementById('asesorind').value = '';
+            document.getElementById('montootorgarind').value = '';
+            document.getElementById('tasainteresind').value = '';
+            document.getElementById('plazoind').value = '';
+            document.getElementById('tipo_pago').value = '';
+            document.getElementById('frecuenciamesesind').value = '';
+            document.getElementById('frecuenciadiasind').value = '';
+            document.getElementById('microseguroind').value = '';
+            document.getElementById('fechaaperturaind').value = '';
+            document.getElementById('fechaprimerpagodebeserind').value = '';
+            document.getElementById('fechavencimientoind').value = '';
+            document.getElementById('cuotaind').value = '';
+            document.getElementById('desembolsoind').value = '';
+            document.getElementById('cuotafijaind').value = '';
+            document.getElementById('cuotavariableind').value = '';
+            document.getElementById('fiduciariaind').value = '';
+            document.getElementById('hipotecariaind').value = '';
+            document.getElementById('prendariaind').value = '';
+            document.getElementById('colectorind').value = '';
+            document.getElementById('aprobadoporind').value = '';
+            document.getElementById('bancoind').value = '';
+            document.getElementById('formapagoind').value = '';
+            const radios = document.querySelectorAll('input[name="garantia"]');
+            radios.forEach(radio => radio.checked = false);
+        }
         // Eventos para cerrar el modal
         $('.close-btn1').on('click', function () {
-            $('#modalprestamogrupal').fadeOut();
-            limpiarModalPrestamoGrupal();
+            if ($('#modalprestamogrupal').is(':visible')) {
+                $('#modalprestamogrupal').fadeOut();
+                limpiarModalPrestamoGrupal();
+            } else if ($('#modalprestamoIndividual').is(':visible')) {
+                $('#modalprestamoIndividual').fadeOut();
+                limpiarModalPrestamoIndividual();
+            }
         });
 
         $(window).on('click', function (event) {
             if ($(event.target).is('#modalprestamogrupal')) {
                 $('#modalprestamogrupal').fadeOut();
                 limpiarModalPrestamoGrupal();
+            } else if ($(event.target).is('#modalprestamoIndividual')) {
+                $('#modalprestamoIndividual').fadeOut();
+                limpiarModalPrestamoIndividual();
             }
         });
 
         $(document).on('keydown', function (event) {
             if (event.key === "Escape") {
-                $('#modalprestamogrupal').fadeOut();
-                limpiarModalPrestamoGrupal();
+                if ($('#modalprestamogrupal').is(':visible')) {
+                    $('#modalprestamogrupal').fadeOut();
+                    limpiarModalPrestamoGrupal();
+                } else if ($('#modalprestamoIndividual').is(':visible')) {
+                    $('#modalprestamoIndividual').fadeOut();
+                    limpiarModalPrestamoIndividual();
+                }
             }
         });
     }
 
 
-
+    //Codio para vista Reversion de prestamos
     const modalreversionprestamo = document.getElementById('modalreversionprestamo');
     const btnreversionprestamo = document.getElementById('btn-abrirmodalreversion');
     const id_cliente = document.getElementById('codigo');
     const inputMonto = document.getElementById('monto');
     const btnAceptar = document.getElementById('btnAceptar');
     const inputPassword = document.getElementById('password');
+
 
     if (btnreversionprestamo) {
         btnreversionprestamo.addEventListener("click", function (event) {
@@ -882,6 +1287,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 setTimeout(() => {
                                                     location.reload();
                                                 }, 1000);
+                                                
                                             } else {
                                                 mostrarAlerta("Error al eliminar cliente", "error");
                                             }
@@ -928,6 +1334,167 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 500); // 500 milisegundos de espera
         });
 
+    }
+
+});
+
+//Codigo Para Vista Mantenimiento de Asesor
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btnVerificarpassword = document.getElementById('btnAceptar');
+    const inputPassword = document.getElementById('password');
+    const btnaceptarActuAsesor = document.getElementById('btnaceptarActuAsesor');
+    const form = document.querySelector('#ModalEditarAsesor form');
+
+    // Verificamos si estamos en la vista correcta
+    if (document.getElementById('openModalBtnnuevoAsesor') && document.getElementById('tablaAsesores')) {
+
+
+
+        // Inicialización segura de DataTables
+        let tablaAsesores;
+
+        try {
+            // Verificamos si ya está inicializada
+            if ($.fn.DataTable.isDataTable('#tablaAsesores')) {
+                tablaAsesores = $('#tablaAsesores').DataTable();
+            } else {
+                tablaAsesores = $('#tablaAsesores').DataTable({
+                    responsive: true,
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/es-ES.json'
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'nombre' },
+                        { data: 'sucursal' },
+                        { data: 'created_at' },
+                        { data: 'updated_at' }
+                    ]
+                });
+            }
+
+            // Evento para selección de filas - VERSIÓN CORREGIDA
+            $('#tablaAsesores').on('click', 'tbody tr', function () {
+                // Obtener la instancia correcta de DataTable
+                const dt = $('#tablaAsesores').DataTable();
+                const rowData = dt.row(this).data();
+                const id_asesor = rowData[0];
+                const nombre_asesor = rowData[1];
+                const sucursalNombre = rowData[2];
+
+
+                $('#modalreversionprestamo h2').text('Validación para Actualización');
+                $('#modalreversionprestamo').fadeIn();
+
+                btnVerificarpassword.addEventListener('click', function (event) {
+                    event.preventDefault();
+
+                    const SpecialPassword = inputPassword.value.trim();
+                    const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+
+                    if (!csrfTokenElement) {
+                        return;
+                    }
+                    const csrfToken = csrfTokenElement.getAttribute('content');
+                    if (SpecialPassword === '') {
+                        mostrarAlerta("Por Favor Ingrese una Contraseña Correcta", "error");
+                        return;
+                    } fetch('/validar/password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ password: SpecialPassword })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error("Error de autenticación");
+                            }
+                            return response.json();
+                        }).then(data => {
+                            if (data.valida) {
+                                $('#modalreversionprestamo').fadeOut();
+
+                                $('#ModalEditarAsesor h2').text("Actualizar Asesor " + nombre_asesor);
+                                $('#ModalEditarAsesor #sucursalActua option').each(function () {
+                                    if ($(this).text().trim() === sucursalNombre) {
+                                        $('#ModalEditarAsesor #sucursalActua').val($(this).val());
+                                    }
+                                });
+                                $('#ModalEditarAsesor #nombreActua').val(nombre_asesor);
+                                $('#ModalEditarAsesor').fadeIn();
+
+
+                                form.addEventListener('keydown', function (event) {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault(); // Evitar que se envíe el formulario por defecto
+                                        btnaceptarActuAsesor.click(); // Llamar a la misma función que el clic en el botón
+                                    }
+                                });
+
+                                const nombreActualizacion = document.getElementById('nombreActua').value;
+                                const sucursalActualizacion = document.getElementById('sucursalActua').value;
+
+                                if (btnaceptarActuAsesor) {
+                                    btnaceptarActuAsesor.addEventListener('click', function (event) {
+                                        event.preventDefault();
+
+                                        // Captura actualizada aquí dentro
+                                        const nombreActualizacion = document.getElementById('nombreActua').value;
+                                        const sucursalActualizacion = document.getElementById('sucursalActua').value;
+
+                                        fetch('/update/asesor/' + id_asesor, {
+                                            method: 'PUT',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            },
+                                            body: JSON.stringify({
+                                                nombre: nombreActualizacion,
+                                                sucursal: sucursalActualizacion
+                                            })
+                                        })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                mostrarAlerta("Asesor Actualizado con éxito", "success");
+
+                                                // Redirigir a la misma página en lugar de recargar
+                                                setTimeout(() => {
+                                                    window.location.href = window.location.href;
+                                                }, 1000);
+                                            })
+                                            .catch(error => {
+                                                mostrarAlerta("Error al actualizar asesor:", "error");
+                                            });
+                                    });
+                                }
+
+                            } else {
+                                mostrarAlerta(data.mensaje || "Contraseña incorrecta", "error");
+                            }
+                        }).catch(error => {
+                            mostrarAlerta("Ocurrió un error: " + error.message, "error");
+                        });
+
+                });
+            });
+
+        } catch (error) {
+            mostrarAlerta('Error al inicializar DataTable:', "error");
+        }
+
+        // Resto de tu código para esta vista...
+        const modalNuevoAsesor = document.getElementById('ModalNuevoAsesor');
+        const btnAbrirModalNuevoAsesor = document.getElementById('openModalBtnnuevoAsesor');
+
+        btnAbrirModalNuevoAsesor.addEventListener("click", function (event) {
+            event.preventDefault();
+            modalNuevoAsesor.style.display = "block";
+        });
     }
 });
 

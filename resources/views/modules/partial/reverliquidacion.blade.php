@@ -33,12 +33,7 @@
                 </div>
             </div>
             <div class="section-container2">
-                <select name="" id="">
-                    <option value="">Seleccione una opcion</option>
-                    <option value="">Opcion 1</option>
-                    <option value="">Opcion 2</option>
-                    <option value="">Opcion 3</option>
-                </select>
+            
                 <a href="" id="btn-abrirmodalreversion">Realizar la Reversión</a>
             </div>
         </div>

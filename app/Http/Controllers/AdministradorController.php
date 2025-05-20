@@ -17,32 +17,54 @@ class AdministradorController extends Controller
     public function home()
     {
         $rol = Auth::user()->rol; // Obtener el rol del usuario autenticado
-        return view('modules.dashboard.home')->with('rol', $rol); // Pasar el rol a la vista
+        $departamentos = Departamentos::all();
+
+        $centros = Centros::all();
+        $grupo = Grupos::all();
+        $centros_grupos_clientes = Centros_Grupos_Clientes::with('clientes', 'grupos', 'centros')->get();
+        $clientes = Clientes::with('departamento', 'municipio', 'Centros_Grupos_Clientes.grupos', 'Centros_Grupos_Clientes.centros')->get();
+        if($rol == 'administrador'){
+            return view('modules.dashboard.home', compact('rol', 'clientes', 'centros_grupos_clientes', 'centros', 'grupo','departamentos')); // Pasar el rol a la vista
+
+        }else{
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
+
+        }
     }
-    public function clientesadmin(){
+    public function clientesadmin()
+    {
         $rol = Auth::user()->rol;
         $departamentos = Departamentos::all();
         $centros = Centros::all();
         $grupo = Grupos::all();
-        $centros_grupos_clientes = Centros_Grupos_Clientes::with('clientes','grupos','centros')->get();
-        $clientes = Clientes::with('departamento', 'municipio','Centros_Grupos_Clientes.grupos','Centros_Grupos_Clientes.centros')->get();
-        return view('modules.dashboard.clientesAdmin', compact('rol', 'departamentos', 'clientes','centros_grupos_clientes','centros','grupo'));
+        $centros_grupos_clientes = Centros_Grupos_Clientes::with('clientes', 'grupos', 'centros')->get();
+        $clientes = Clientes::with('departamento', 'municipio', 'Centros_Grupos_Clientes.grupos', 'Centros_Grupos_Clientes.centros')->get();
+        if ($rol == 'administrador') {
+            return view('modules.dashboard.clientesAdmin', compact('rol', 'departamentos', 'clientes', 'centros_grupos_clientes', 'centros', 'grupo'));
+        } else {
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
+        }
     }
-    public function bitacora(){
+    public function bitacora()
+    {
 
         $rol = Auth::user()->rol;
         $bitacora = Bitacora::with('user:id,name,last_name')->get();
         if ($rol == 'administrador') {
-            return view('modules.dashboard.bitacora', compact('rol','bitacora'));
+            return view('modules.dashboard.bitacora', compact('rol', 'bitacora'));
+        } else {
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
     }
 
-    public function usuarios(){
+    public function usuarios()
+    {
         $rol = Auth::user()->rol;
         $usuarios = User::with('latestSession')->get(); // Carga solo la última sesión
         if ($rol == 'administrador') {
-            return view('modules.dashboard.usuarios',compact('rol', 'usuarios'));
+            return view('modules.dashboard.usuarios', compact('rol', 'usuarios'));
+        } else {
+            return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
     }
-
 }
