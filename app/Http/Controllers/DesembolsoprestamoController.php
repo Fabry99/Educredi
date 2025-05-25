@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Aprobacion;
 use App\Models\Asesores;
 use App\Models\bancos;
+use App\Models\Bitacora;
 use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
 use App\Models\Colector;
@@ -183,7 +184,6 @@ class DesembolsoprestamoController extends Controller
                 'cuota' => $cuotaFinal,
                 'fechaapertura' => $fechaApertura,
                 'fechavencimiento' => $fechaVencimiento,
-                'ultima_fecha_pagada' => $fechaDebeSer,
                 'garantia' => $garantia_id,
                 'plazo' => $plazo,
                 'interes' => $tasa,
@@ -241,7 +241,7 @@ class DesembolsoprestamoController extends Controller
             while ($fechaActual < $fechaFinal) {
                 $fechaActual->addDays($diasPorPago);
 
-                $primeraFila = false;
+
 
                 if ($segundaFila) {
                     $interesesCalculado = $interes;
@@ -279,20 +279,41 @@ class DesembolsoprestamoController extends Controller
 
         // Intentar insertar todos los registros de una sola vez
         try {
+            $datosAInsertarFiltrados = array_filter($datosAInsertar, function ($fila) {
+                return $fila['cuota'] != 0;
+            });
             foreach ($datosAInsertar as $dato) {
                 DB::table('debeser')
                     ->where('id_cliente', $dato['id_cliente'])
                     ->delete();
             }
-            DB::table('debeser')->insert($datosAInsertar);
+            DB::table('debeser')->insert($datosAInsertarFiltrados);
 
-            // Guardar o actualizar los saldos de préstamo
             foreach ($datosSaldoprestamo as $saldo) {
-                // Verificar si el saldo de préstamo ya existe y actualizar o insertar
-                SaldoPrestamo::updateOrCreate(
-                    ['id_cliente' => $saldo['id_cliente']], // Condición para buscar el registro
-                    $saldo // Datos a insertar o actualizar
-                );
+                // Intentamos hacer update
+                $affected = DB::table('saldoprestamo')
+                    ->where('id_cliente', $saldo['id_cliente'])
+                    ->update($saldo);
+
+                $accion = '';
+
+                if ($affected) {
+                    $accion = 'update';
+                } else {
+                    // Si no se actualizó, se inserta
+                    DB::table('saldoprestamo')->insert($saldo);
+                    $accion = 'insert';
+                }
+
+                // Registrar en la bitácora
+                Bitacora::create([
+                    'usuario' => Auth::user()->name, // Asegúrate de tener esta variable
+                    'tabla_afectada' => 'saldoprestamo',
+                    'accion' => strtoupper($accion),
+                    'datos' => json_encode($saldo),
+                    'fecha' => Carbon::now(), // usa Carbon para fecha y hora actual
+                    'id_asesor' => Auth::user()->id, // Asegúrate de tener esta variable
+                ]);
             }
 
             // Generar el PDF
@@ -411,11 +432,7 @@ class DesembolsoprestamoController extends Controller
 
         try {
             $id_cliente = $request->input('id_cliente');
-            // $prestamo = Saldoprestamo::where('id_cliente', $id_cliente)->first();
-            // $prestamo2 = Centros_Grupos_Clientes::where('centro_id', 1)
-            //     ->where('grupo_id', 1)
-            //     ->where('cliente_id', $id_cliente)
-            //     ->first();
+
             $datos = [
                 'id_cliente' => $id_cliente,
                 'MONTO' => $request->input('montoOtorgar'),
@@ -424,7 +441,6 @@ class DesembolsoprestamoController extends Controller
                 'GARANTIA' => $request->input('garantia'),
                 'FECHAAPERTURA' => $request->input('fechaApertura'),
                 'FECHAVENCIMIENTO' => $request->input('fechaVencimiento'),
-                'ULTIMA_FECHA_PAGADA' => $request->input('fechaPrimerPago'),
                 'PLAZO' => $request->input('plazo'),
                 'INTERES' => $request->input('interes'),
                 'COLECTOR' => $request->input('colector'),
@@ -442,46 +458,25 @@ class DesembolsoprestamoController extends Controller
                 'ID_BANCO' => $request->input('banco'),
                 'ASESOR' => $request->input('id_asesor'),
             ];
-             // Usando Eloquent para crear o actualizar el préstamo
-        SaldoPrestamo::updateOrCreate(
-            ['id_cliente' => $id_cliente],
-            $datos
-        );
-        // Crear o actualizar relación en Centros_Grupos_Clientes
-        Centros_Grupos_Clientes::updateOrCreate(
-            [
-                'cliente_id' => $id_cliente,
-                'centro_id' => 1,
-                'grupo_id' => 1,
-            ],
-            [
-                'cliente_id' => $id_cliente,
-                'centro_id' => 1,
-                'grupo_id' => 1,
-                // Puedes agregar más campos si son requeridos
-            ]
-        );
-
-            // if ($prestamo) {
-            //     $prestamo->update($datos);
-            // } else {
-            //     Saldoprestamo::create($datos);
-            // }
-            // if ($prestamo2) {
-            //     // Por ejemplo, actualizas un campo específico
-            //     $prestamo2->update([
-            //         'centro_id' => 1,
-            //         'grupo_id' => 1,
-            //         'cliente_id' => $id_cliente,
-            //     ]);
-            // } else {
-            //     Centros_Grupos_Clientes::create([
-            //         'centro_id' => 1,
-            //         'grupo_id' => 1,
-            //         'cliente_id' => $id_cliente,
-            //         // Otros campos requeridos para la creación
-            //     ]);
-            // }
+            // Usando Eloquent para crear o actualizar el préstamo
+            SaldoPrestamo::updateOrCreate(
+                ['id_cliente' => $id_cliente],
+                $datos
+            );
+            // Crear o actualizar relación en Centros_Grupos_Clientes
+            Centros_Grupos_Clientes::updateOrCreate(
+                [
+                    'cliente_id' => $id_cliente,
+                    'centro_id' => 1,
+                    'grupo_id' => 1,
+                ],
+                [
+                    'cliente_id' => $id_cliente,
+                    'centro_id' => 1,
+                    'grupo_id' => 1,
+                    // Puedes agregar más campos si son requeridos
+                ]
+            );
 
             $segundaFila = true;
             $fechaApertura = Carbon::parse($request->input('fechaApertura'));
@@ -583,7 +578,6 @@ class DesembolsoprestamoController extends Controller
                 'GARANTIA' => $request->input('garantia'),
                 'FECHAAPERTURA' => $request->input('fechaApertura'),
                 'FECHAVENCIMIENTO' => $request->input('fechaVencimiento'),
-                'ULTIMA_FECHA_PAGADA' => $request->input('fechaPrimerPago'),
                 'PLAZO' => $request->input('plazo'),
                 'INTERES' => $request->input('interes'),
                 'COLECTOR' => $request->input('colector'),

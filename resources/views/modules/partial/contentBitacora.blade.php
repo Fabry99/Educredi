@@ -74,28 +74,22 @@
                             <td>{{ $item->accion }}</td>
                             <td>
                                 <ul>
-                                    @if ($item->accion === 'UPDATE')
-                                        @foreach ($datos as $campo => $valor)
-                                            @if (is_array($valor))
-                                                <li>
-                                                    <strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
-                                                    <ul>
-                                                        @foreach ($valor as $subCampo => $subValor)
-                                                            <li><strong>{{ ucfirst(str_replace('_', ' ', $subCampo)) }}:</strong>
-                                                                {{ $subValor }}</li>
-                                                        @endforeach
-                                                    </ul>
-                                                </li>
-                                            @else
-                                                <li><strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
-                                                    {{ $valor }}</li>
-                                            @endif
-                                        @endforeach
-                                    @else
-                                        <li><strong>Nombre:</strong> {{ $datos['nombre'] ?? 'No disponible' }}</li>
-                                        <li><strong>ID Asesor:</strong> {{ $datos['id_asesor'] ?? 'No disponible' }}
-                                        </li>
-                                    @endif
+                                    @foreach ($datos as $campo => $valor)
+                                        @if (is_array($valor))
+                                            <li>
+                                                <strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
+                                                <ul>
+                                                    @foreach ($valor as $subCampo => $subValor)
+                                                        <li><strong>{{ ucfirst(str_replace('_', ' ', $subCampo)) }}:</strong>
+                                                            {{ $subValor }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </li>
+                                        @else
+                                            <li><strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
+                                                {{ $valor }}</li>
+                                        @endif
+                                    @endforeach
 
                                     @if (!empty($created_at))
                                         <li><strong>Fecha de Creación:</strong> {{ $created_at }}</li>
@@ -106,7 +100,10 @@
                                     @endif
                                 </ul>
                             </td>
-                            <td>{{ $created_at ?: $updated_at }}</td>
+
+                            <td>
+                                {{ $created_at ?: ($updated_at ?: \Carbon\Carbon::parse($item->fecha)->timezone('America/Guatemala')->format('d/m/Y H:i:s')) }}
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

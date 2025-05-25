@@ -2,83 +2,89 @@
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
-            <h1>Ingreso de pagos</h1>
-            <div class="input-group">
-                    <label for="fecha" class="label1">
+            <div class="contenedor-header" style="width: 100%; margin-bottom: 30px">
+                <h1 style="margin-left: 20px">Caja</h1>
+                <div class="input-group">
+                    <label for="fecha" class="label1"><span style="margin-right: 5px">Fecha:</span>
                         <input type="date" id="fecha" name="fecha" placeholder="Fecha:">
                     </label>
-                    <label for="fcontable" class="label1">
+                    <label for="fcontable" class="label1"><span style="margin-right: 5px">Fecha Contable:</span>
                         <input type="date" id="fcontable" name="fcontable" placeholder="F.Contable:">
                     </label>
-                    <label for="fabono" class="label1">
+                    <label for="fabono" class="label1"><span style="margin-right: 5px">Fecha Abono:</span>
                         <input type="date" id="fabono" name="fabono" placeholder="F.Abono:">
                     </label>
-                    <label for="comprobante" class="label1">
-                        <input type="" id="comprobante" name="comprobante" placeholder="Comprobante:">
-                    </label>
+                    <div style="display: flex; align-items:center;">
+                        <span style="margin-right: 5px">Comprobante:</span>
+                        <label for="comprobante" class="label1">
+                            <input type="" id="comprobante" name="comprobante" placeholder="Comprobante:">
+                        </label>
+                    </div>
+                </div>
+                <div class="valores-calculo">
                     <label>
                         <input type="radio" name="tipo_calculo" value="calculo">Aplicar Valor Cálculo
                     </label>
                     <label style="margin-left: 10px;">
-                        <input type="radio" name="tipo_calculo" value="fijo">
+                        <input type="radio" name="tipo_calculo" value="fijo" checked>
                         Aplicar Valor Fijo
                     </label>
                     <label>
                         <input type="checkbox" name="habilitar_manual">
                         Habilitar Cálculo Manual
                     </label>
-            </div>
-            <div class="modal-ge select">
-                <div class="input-group select">
-                    <select id="id_sfdm" name="id_sfdm" required>
-                        <option value="" disabled selected>SFDM</option>
-                        <option value="Opcion1">Opcion1</option>      
-                    </select>
                 </div>
-                <div class="input-group select">
-                    <select id="id_grupo" name="id_grupo" required>
-                        <option value="" disabled selected>Grupo</option>
-                        <option value="Opcion1">Opcion1</option>      
-                    </select>
-                </div>
-                <div class="input-group select">
-                    <select id="id_cuenta" name="id_cuenta" required>
-                        <option value="" disabled selected>Cuenta</option>
-                        <option value="Opcion1">Opcion1</option>      
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="cuotatotal" class="label1">
-                        <input type="" id="cuotatotal" name="cuotatotal" placeholder="Cuota Total:">
-                    </label>
-                    <label for="numcuota" class="label1">
-                        <input type="" id="numcuota" name="numcuota" placeholder="Numero Cuota:">
-                    </label>
-                </div>
-            </div>
-            <div class="input-group" style="margin-top: 10px;">
-                <label for="comprobante" class="label1">
-                    <input type="" id="comprobante" name="comprobante" placeholder="Saldo total:">
-                </label>
-            </div>
-            <div class="btn-grupos" style="display: flex; margin-bottom: 10px; margin-left: 10px;">
-                <a href="#" id="openModalBtn" class="btn-agregar"
-                    style="margin-right: 15px;"><span>Confirmar</span></a>
-                <a href="#" id="openModalBtn" class="btn-agregar"
-                    style="margin-right: 15px;"><span>Reimprimir</span></a>
-                <a href="#" id="openModalBtn" class="btn-agregar"
-                    style="margin-right: 15px;"><span>Debe ser</span></a>
-                <a href="#" id="openModalBtn" class="btn-agregar"
-                    style="margin-right: 15px;"><span>Est. Cuenta</span></a>
-                <a href="#" id="openModalBtn" class="btn-agregar"
-                    style="margin-right: 15px;"><span>Actualizar</span></a>
-            </div>
 
-            <table id="mitabla" class="table table-striped" style="width:100%">
+                <div class="modal-ge select">
+                    <div class="information">
+                        <span>SFDM:</span>
+                        <select name="Centro" id="id_centro" style="width: 180px;">
+                            <option value="" disabled selected>Seleccionar:</option>
+                            @foreach ($centro as $item)
+                                <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="information">
+                        <span>Grupo:</span>
+                        <select name="Grupo" id="id_grupo" style="width: 180px;">
+                            <option value="" disabled selected>Seleccionar</option>
+                        </select>
+                    </div>
+                    <div class="information">
+                        <span>Cuenta:</span>
+                        <select name="Cuenta" id="id_cuenta" style="width: 180px;">
+                            <option value="" disabled selected>Seleccionar</option>
+                        </select>
+                    </div>
+                    <div class="information">
+                        <span>Cuota Total:</span>
+                        <input type="text" value="" disabled>
+                    </div>
+                    <div class="information">
+                        <span>Num Cuota:</span>
+                        <input type="text" id="input_cuota_total" value="" disabled 
+                        style="text-align: center; font-weight: bold; width: 75px; font-size: 14px">
+                    </div>
+                </div>
+                <div class="btn-grupos" style="display: flex; margin:15px; justify-content: center">
+                    <a href="#" id="openModalBtn" class="btn-agregar"
+                        style="margin-right: 15px;"><span>Confirmar</span></a>
+                    <a href="#" id="openModalBtn" class="btn-agregar"
+                        style="margin-right: 15px;"><span>Reimprimir</span></a>
+                    <a href="#" id="openModalBtn" class="btn-agregar" style="margin-right: 15px;"><span>Debe
+                            ser</span></a>
+                    <a href="#" id="openModalBtn" class="btn-agregar" style="margin-right: 15px;"><span>Est.
+                            Cuenta</span></a>
+                    <a href="#" id="openModalBtn" class="btn-agregar"
+                        style="margin-right: 15px;"><span>Actualizar</span></a>
+                </div>
+            </div>
+            <table id="tablaCaja" class="table table-striped table1" style="width:100%">
                 <thead>
                     <tr>
                         <th>Codigo</th>
-                        <th>Nombre</th>
+                        <th style="width: 500px">Nombre</th>
                         <th>Saldo</th>
                         <th>Ultim Movimiento</th>
                         <th>Poximo Pago</th>
@@ -95,26 +101,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Nombre</td>
-                        <td>zxczxczxczxcasdasdasdasdasdasd</td>
-                        <td>Saldo</td>
-                        <td>Ultim Movimiento</td>
-                        <td>Poximo Pago</td>
-                        <td>Valor</td>
-                        <td>Int. Normal</td>
-                        <td>Int. Morator</td>
-                        <td>Micro seg</td>
-                        <td>Seguro</td>
-                        <td>IVA</td>
-                        <td>Capital</td>
-                        <td>Frecuencia</td>
-                        <td>Apertura</td>
-                        <td>Vencimiento</td>
-                    </tr>
-                   
+
+
                 </tbody>
-                
+
             </table>
         </div>
     </div>
@@ -221,40 +211,39 @@
         border: 1px solid black;
     }
 
-    .btn-imprimir {
-        background: var(--azul);
-        padding: 5px 25px;
-        border-radius: 4px;
-        color: var(--color-font);
-        text-decoration: none;
-        margin-right: 10px;
-        border: 1px solid black;
-    }
-
-    .botones button img {
-        width: 35px;
-        height: 35px;
-    }
-
     .btn-aceptar:hover {
         background: #0b7914;
     }
-
-    .btn-imprimir:hover {
-        background: #486c96;
-    }
-    .close-btn1 {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
-
-  .close-btn1:hover,
-  .close-btn1:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
+    /* Forzamos la columna "Nombre" (segunda columna) a un ancho fijo */
+#tablaCaja th:nth-child(2),
+#tablaCaja td:nth-child(2) {
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: table-cell !important;
+}
+#tablaCaja th:nth-child(3),
+#tablaCaja td:nth-child(3) {
+    width: 100px !important;
+    min-width: 100px !important;
+    max-width: 100px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: table-cell !important;
+}
+#tablaCaja th:nth-child(5),
+#tablaCaja td:nth-child(5) {
+    width: 110px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: table-cell !important;
+}
+#tablaCaja th{
+    text-align: center;
+}
+  
 </style>

@@ -21,7 +21,7 @@
             
             @break
         @case('caja')
-            @include('modules.partial.prueba_caja')
+            @include('modules.partial.movimientocaja')
             @break
         @default
     @endswitch
@@ -29,4 +29,5 @@
 @section('js')
     @vite('resources/js/app.js')
     @vite('resources/js/notifications.js')
+    @vite('resources/js/appCaja.js')
 @endsection

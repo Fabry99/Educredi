@@ -61,14 +61,14 @@
 
                 @case('caja')
                     <li class="menu-item menu-item-static"><a href="{{ route('caja') }}" class="menu-link"><img
-                                src="{{ asset('img/icon-prestamo.svg') }}" alt=""><span>Préstamos</span></a>
+                                src="{{ asset('img/icon-caja.svg') }}" alt=""><span>Caja</span></a>
                     </li>
                     <li class="menu-item menu-item-static"><a href="{{ route('grupos') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-grupo.svg') }}" alt=""><span>Grupos</span></a>
                     </li>
-                    <li class="menu-item menu-item-static"><a href="{{ route('mov_caja') }}" class="menu-link"><img
+                    {{-- <li class="menu-item menu-item-static"><a href="{{ route('mov_caja') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-caja.svg') }}" alt=""><span>Caja</span></a>
-                    </li>
+                    </li> --}}
                 @break
 
                 @case('contador')

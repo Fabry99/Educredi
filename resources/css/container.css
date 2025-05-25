@@ -7,9 +7,9 @@
     --hover-background-editar: #08065a9f;
     --verde-shadow: rgba(43, 255, 0, 0.938);
     --border-color-input: #159109;
-    --background-prestamo:#5ba433ed;
-    --background-prestamo-hover:#17850d;
-    --border-btn-prestamo:#0e616e;
+    --background-prestamo: #5ba433ed;
+    --background-prestamo-hover: #17850d;
+    --border-btn-prestamo: #0e616e;
     --background-color-verde: #0b7914;
 
 }
@@ -93,6 +93,7 @@ table.dataTable tbody tr:hover {
     align-items: center;
     justify-content: center;
 }
+
 /* Contenido del Modal */
 .modal-content {
     background-color: #fff;
@@ -217,7 +218,8 @@ table.dataTable tbody tr:hover {
     margin-left: 10px;
     background-color: #f1f1f1;
 }
-.form-reversion input:hover{
+
+.form-reversion input:hover {
     border-color: var(--verde-shadow);
     box-shadow: 0 0 5px var(--verde-shadow);
 }
@@ -307,6 +309,7 @@ table.dataTable tbody tr:hover {
     height: auto;
     max-height: 100%;
 }
+
 .close-btn1 {
     color: #aaa;
     float: right;
@@ -347,79 +350,97 @@ table.dataTable tbody tr:hover {
     background-color: rgba(38, 165, 13, 0.101) !important;
     border: 1px solid rgba(255, 255, 255, 0.582) !important;
 }
+
 .contenedor {
     background: #f0f0f0;
     border-radius: 10px;
     max-width: 75%;
-    padding: 6px; /* Espacio superior interno */
+    padding: 6px;
+    /* Espacio superior interno */
     margin-top: 40px;
     justify-self: center;
     border: 1px solid rgba(0, 0, 0, 0.305);
     box-shadow: 0 0 5px var(--verde-shadow);
 }
 
-.tittle h2{
+.tittle h2 {
     margin-left: 15px;
-    
+
 }
-.contain-option{
+
+.contain-option {
     max-width: 100%;
     display: flex;
     gap: 0px;
 
 }
+
 .option {
     display: flex;
-    align-items: center; /* Opcional, para alinear verticalmente */
-    gap: 10px; /* Ajusta según el espacio deseado */
+    align-items: center;
+    /* Opcional, para alinear verticalmente */
+    gap: 10px;
+    /* Ajusta según el espacio deseado */
 }
-.option span{
+
+.option span {
     margin-left: 15px;
 }
-.option select{
+
+.option select {
     width: 200px;
     margin-left: 0px;
     border-radius: 4px;
     height: 30px;
     margin-right: 10px;
 }
-.contenedor-conteo{
+
+.contenedor-conteo {
     display: flex;
     max-width: 100%;
     margin: 40px 15px 60px 15px;
     gap: 40px;
 }
-.conteo input{
+
+.conteo input {
     width: 80px;
     border-radius: 4px;
     height: 24px;
     margin-left: 10px;
 }
-.contenedor input:hover{
-    box-shadow: 0 0 5px var(--verde-shadow);
-}   
-.contenedor select:hover{
+
+.contenedor input:hover {
     box-shadow: 0 0 5px var(--verde-shadow);
 }
-.contenedor .table1{
+
+.contenedor select:hover {
+    box-shadow: 0 0 5px var(--verde-shadow);
+}
+
+.contenedor .table1 {
     margin-top: 10px;
 }
-.tabla{
+
+.tabla {
     margin: 0px 15px 0px 15px;
 }
-.contenedor-footer{
+
+.contenedor-footer {
     display: flex;
     margin: 40px 15px 30px 15px;
     width: 100%;
     justify-content: space-between;
 }
-.botones{
-margin-right: 30px;
+
+.botones {
+    margin-right: 30px;
 }
+
 .botones button img {
     width: 35px;
     height: 35px;
 }
+
 .btn-guardar {
     background: var(--background-color-verde);
     padding: 5px 25px;
@@ -428,7 +449,56 @@ margin-right: 30px;
     text-decoration: none;
     border: 1px solid black;
 }
+
 .btn-guardar:hover {
     background: #03880e;
+    box-shadow: 0 0 5px var(--verde-shadow);
+}
+
+/* ESTILOS PARA LA VISTA MOVIMIENTO DE CAJA */
+.contenedor-header {
+    width: 100%;
+    background: #f0f0f0;
+    margin-top: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 3px var(--verde-shadow);
+
+}
+
+.valores-calculo {
+    margin: 20px 20px 0px 20px;
+    justify-content: center;
+    display: flex;
+}
+
+.valores-calculo label {
+    margin-right: 50px;
+    font-size: 17px;
+}
+
+.information {
+    margin-left: 20px;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.information input {
+    border-radius: 4px;
+    height: 30px;
+    width: 100px;
+    background-color: #f4f4f4;
+}
+.contenedor-header label:hover {
+    box-shadow: 0 0 5px var(--verde-shadow);
+}
+.contenedor-header select:hover{
+    box-shadow: 0 0 5px var(--verde-shadow);
+}
+.contenedor-header input:hover{
+    box-shadow: 0 0 5px var(--verde-shadow);
+}
+.contenedor-header a:hover{
     box-shadow: 0 0 5px var(--verde-shadow);
 }

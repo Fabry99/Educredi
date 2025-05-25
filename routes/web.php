@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\DesembolsoprestamoController;
 use App\Http\Controllers\DesemsolsoprestamoController;
 use App\Http\Controllers\GruposController;
+use App\Http\Controllers\MovimientocajaController;
 use App\Http\Controllers\pdfController;
 use App\Http\Controllers\TransferenciacarteraController;
 use App\Http\Controllers\UserController;
@@ -39,7 +40,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
 
     // Rutas caja
-    Route::get('/caja', [AuthController::class, 'caja'])->name('caja');
+    Route::get('/caja', [MovimientocajaController::class, 'caja'])->name('caja');
     Route::get('/mov_caja',[AuthController::class, 'mov_caja'])->name('mov_caja');
     // Rutas Contador
     Route::get('/clientes', [AuthController::class, 'contador'])->name('contador');
@@ -100,9 +101,13 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/transferencia/obtenerPrestamos/{id_asesor}/{id_grupo}/{id_centro}',[TransferenciacarteraController::class,'obtenerDatosTabla']);
     Route::post('/transferencia/transferircartera', [TransferenciacarteraController::class, 'transferirCartera']);
 
-    
+    //Rutas para manejo de caja
+    Route::post('/caja/obtenerPrestamos',[MovimientocajaController::class, 'obtenerPrestamos']);
     // Route::get('/generar-pdf', [pdfController::class, 'generarPdf']);
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
+    Route::post('/caja/obtenerconteocuotas',[MovimientocajaController::class, 'obtenerConteoCuotas']);
+        
+
 });
 
 
