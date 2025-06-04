@@ -19,7 +19,7 @@ class MovimientocajaController extends Controller
         $centro = Centros::all();
         $grupos = Grupos::all();
 
-        if ($rol !== 'caja') {
+        if ($rol !== 'caja' ) {
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
         return view('modules.dashboard.home', compact('rol', 'centro', 'grupos'));

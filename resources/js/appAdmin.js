@@ -245,7 +245,14 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 fechaDebeSer.value = '';
             }
+
+            // ✅ Asignar la misma fecha a todos los inputs .fechaMiembros
+            const inputsFechaMiembros = document.querySelectorAll('.fechaMiembros');
+            inputsFechaMiembros.forEach(input => {
+                input.value = fechaDebeSer.value;
+            });
         }
+
 
         function calcularFechaFinal() {
             const textoSeleccionado = formaPago.options[formaPago.selectedIndex]?.text?.trim();
@@ -253,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const cantidadPagos = parseInt(cantPago.value);
             const fechaInicio = new Date(inputFecha.value); // Convierte el string yyyy-mm-dd en Date
             fechaPrimerPago.value = inputFecha.value;
+
 
 
             if (!isNaN(diasporpago) && !isNaN(cantidadPagos) && inputFecha.value) {
@@ -551,6 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <th style="padding: 8px; border: 1px solid #ccc;">Monto</th>
                             <th style="padding: 8px; border: 1px solid #ccc;">Tasa</th>
                             <th style="padding: 8px; border: 1px solid #ccc;">Cuota</th>
+                            <th style="padding: 8px; border: 1px solid #ccc;">Primer Fecha Pago</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -579,7 +588,10 @@ document.addEventListener('DOMContentLoaded', function () {
         <input type="number" step="0.01" name="cuota" value="${(typeof miembro.cuota === 'number' && !isNaN(miembro.cuota)) ? miembro.cuota : ''}" 
         " style="width: 100%; border: none; outline: none; background: transparent;">
     </td>
-`;
+    <td style="padding: 8px; border: 1px solid #ccc;">
+        <input type="date" name="fecha" class="fechaMiembros" style="width: 100%; border: none; outline: none; background: transparent;">
+    </td>
+    `;
                         tbody.appendChild(fila);
                     });
 
@@ -655,6 +667,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         monto: getValue('input[name="monto"]'),
                         tasa: getValue('input[name="tasa"]'),
                         cuota: getValue('input[name="cuota"]'),
+                        fechaMiembro: row.querySelector('input.fechaMiembros')?.value || '',
+
                         // Datos globales
                         fechaVencimiento: detalleCalculo.fechavencimiento || fechaVencimiento,
                         fechaapertura: detalleCalculo.fechaapertura || fechaapertura,
@@ -821,7 +835,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.querySelector('.btn-prestamoindividual').addEventListener('click', function (event) {
             event.preventDefault();
-            console.log('id_cliente', clienteId, clienteNombre);
             $('#modalprestamoIndividual').fadeIn();
             document.getElementById('id_ind').value = clienteId;
             document.getElementById('nombre_ind').value = clienteNombre;
@@ -836,7 +849,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const textoTipoPagoIndi = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
                 const cantDiasSelectind = diasPorTipoPagoInd[textoTipoPagoIndi];
 
-                console.log("dias", cantDiasSelectind);
                 const datosPrestamo = {
                     id_cliente: clienteId,
                     nombre: clienteNombre,
@@ -936,10 +948,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const frecuencia = parseInt(frecuenciamesesind.value);
             const fechaInicio = new Date(fechaaperturaind.value);
 
-            console.log('Tipo de pago seleccionado:', textoTipoPago);
-            console.log('frecuenciamesesind:', frecuencia);
-            console.log('fechaaperturaind:', fechaaperturaind.value);
-
 
 
             if (['mensual', 'bimensual', 'trimestral', 'semestral', 'anual'].includes(textoTipoPago)) {
@@ -958,7 +966,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 fechaprimerpagodebeserind.value = fechaFormateada;
             } else if (['diario', 'semanal', 'catorcenal'].includes(textoTipoPago)) {
                 const diasFrecuencia = parseInt(frecuenciadiasind.value);
-                console.log('frecuenciadiasind:', diasFrecuencia);
 
                 if (fechaaperturaind.value && !isNaN(diasFrecuencia)) {
                     const fechaInicioDias = new Date(fechaaperturaind.value);
@@ -1056,9 +1063,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 iva = intereses * tasa_iva;
                 Cuota = (input_montoOtorgar.value * tasa_interes_mensuales * Math.pow(1 + tasa_interes_mensuales, plazo)) / (Math.pow(1 + tasa_interes_mensuales, plazo) - 1);
                 Cuota_Final = (Cuota + iva + manejo + micro_seguro) * frecuenciamesesind.value;
-                console.log("Manejo:", manejo, "Intereses", intereses, "Microseguro", micro_seguro, 'IVA', iva);
-                console.log("Cuota:", Cuota.toFixed(2));
-                console.log("Cuota Final:", Cuota_Final.toFixed(2));
+
 
                 input_cuota.value = Cuota_Final.toFixed(2);
                 input_desembolso.value = input_montoOtorgar.value;
@@ -1086,8 +1091,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const tasa_calculo_cuota = tasa_diaria_cuota * frecuenciadiasind.value;
                 Cuota = (input_montoOtorgar.value * tasa_calculo_cuota * Math.pow(1 + tasa_calculo_cuota, plazo)) / (Math.pow(1 + tasa_calculo_cuota, plazo) - 1);
                 Cuota_Final = Cuota + iva + manejo + micro_seguro;
-                console.log("Manejo:", manejo, "tasa intere:", tasa_interes_diaria, "intereses:", intereses
-                    , "micro seguro:", micro_seguro, "iva:", iva, "cuota:", "cuota:", Cuota, "Cuota Final:", Cuota_Final);
+
 
                 input_cuota.value = Cuota_Final.toFixed(2);
                 input_desembolso.value = input_montoOtorgar.value;

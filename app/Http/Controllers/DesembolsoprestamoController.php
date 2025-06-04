@@ -98,7 +98,8 @@ class DesembolsoprestamoController extends Controller
 
     public function almacenarPrestamos(Request $request)
     {
-        // Array para almacenar todos los datos a insertar
+    
+
         $datosAInsertar = [];
         $datosSaldoprestamo = [];
         $datosParaPDF = [];
@@ -126,6 +127,7 @@ class DesembolsoprestamoController extends Controller
             $fechaDebeSer = $prestamo['detalleCalculo']['fechaDebeSer'];
             $diasPorPago = $prestamo['detalleCalculo']['parametros']['diasporpago']; // Días por pago
             $idCliente = $prestamo['id']; // ID del cliente
+            $fechaPagoCadaMibro = $prestamo['fechaMiembro']; //Fecha de pago para cada miembro
             $nombreCliente = isset($clientes[$idCliente]) ? $clientes[$idCliente] : 'Desconocido';
             $cuotaFinal = $prestamo['detalleCalculo']['cuotaFinal']; // Cuota final
             $monto = $prestamo['monto']; // Monto
@@ -158,6 +160,7 @@ class DesembolsoprestamoController extends Controller
 
             // Convertir fecha de apertura y fecha de vencimiento a objetos Carbon para facilitar las operaciones
             $fechaActual = \Carbon\Carbon::parse($fechaApertura);
+            $fechaParacadaMiembro = \Carbon\Carbon::parse($fechaPagoCadaMibro);
             $fechaFinal = \Carbon\Carbon::parse($fechaVencimiento);
 
             // Insertar la primera fila con cuota = 0 y iva = 0
@@ -238,14 +241,14 @@ class DesembolsoprestamoController extends Controller
             $primeraFila = true;
             $segundaFila = true;
 
-            while ($fechaActual < $fechaFinal) {
-                $fechaActual->addDays($diasPorPago);
-
-
+            for ($i = 0; $i < $plazo; $i++) {
+                if ($i > 0) {
+                    $fechaParacadaMiembro->addDays($diasPorPago);
+                }
 
                 if ($segundaFila) {
                     $interesesCalculado = $interes;
-                    // El IVA ya está en $iva, tomado del JSON
+                    // $iva ya viene del JSON
                     $segundaFila = false;
                 } else {
                     $interesesCalculado = $montoRestante * $tasa_diaria * $diasPorPago;
@@ -253,28 +256,32 @@ class DesembolsoprestamoController extends Controller
                     $capital = $cuotaFinal - $interesesCalculado - $manejo - $microseguro - $iva;
                 }
 
-                $montoRestante -= $capital;
-
-                // Aquí corregimos si queda negativo
-                if ($montoRestante < 0) {
-                    $montoRestante = 0;
+                // Si es la última iteración, ajustamos el capital para que el saldo llegue a cero exacto
+                if ($i == $plazo - 1) {
+                    $capital = $montoRestante; // absorber todo el restante
+                    $cuota = $capital + $interesesCalculado + $iva + $manejo + $microseguro;
+                    $montoRestante -= $capital; // esto debería llevar el saldo a cero
+                } else {
+                     $montoRestante -= $capital;
                 }
+             
 
                 $datosAInsertar[] = [
-                    'id_cliente' => $idCliente,
-                    'fecha' => $fechaActual->toDateString(),
-                    'cuota' => $cuotaFinal,
-                    'saldo' => $montoRestante,
-                    'tasa_interes' => $tasa,
-                    'dias' => $diasPorPago,
-                    'plazo' => $plazo,
-                    'manejo' => $manejo,
-                    'seguro' => $microseguro,
-                    'capital' => $capital,
-                    'iva' => $iva,
-                    'intereses' => $interesesCalculado,
+                    'id_cliente'     => $idCliente,
+                    'fecha'          => $fechaParacadaMiembro->format('Y-m-d'),
+                    'cuota'          => round($cuota ?? $cuotaFinal, 2),
+                    'saldo'          => round($montoRestante, 2),
+                    'tasa_interes'   => $tasa,
+                    'dias'           => $diasPorPago,
+                    'plazo'          => $plazo,
+                    'manejo'         => round($manejo, 2),
+                    'seguro'         => round($microseguro, 2),
+                    'capital'        => round($capital, 2),
+                    'iva'            => round($iva ?? 0, 2),
+                    'intereses'      => round($interesesCalculado, 2),
                 ];
             }
+            
         }
 
         // Intentar insertar todos los registros de una sola vez
@@ -282,11 +289,7 @@ class DesembolsoprestamoController extends Controller
             $datosAInsertarFiltrados = array_filter($datosAInsertar, function ($fila) {
                 return $fila['cuota'] != 0;
             });
-            foreach ($datosAInsertar as $dato) {
-                DB::table('debeser')
-                    ->where('id_cliente', $dato['id_cliente'])
-                    ->delete();
-            }
+
             DB::table('debeser')->insert($datosAInsertarFiltrados);
 
             foreach ($datosSaldoprestamo as $saldo) {
@@ -505,16 +508,7 @@ class DesembolsoprestamoController extends Controller
             $tasa_iva = 0.13;
             $contador = 1;
 
-            $existePrestamoDebeser = DB::table('debeser')
-                ->where('id_cliente', $id_cliente)
-                ->exists();
-
-            if ($existePrestamoDebeser) {
-                DB::table('debeser')
-                    ->where('id_cliente', $id_cliente)
-                    ->delete();
-            }
-
+     
             $nuevosPagos = [];
 
             while ($fechaPago->lte($fechaFinal)) {

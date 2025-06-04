@@ -56,6 +56,12 @@
                                     entre asesores</a></li>
                         </ul>
                     </li>
+                     {{-- <li class="menu-item menu-item-static"><a href="{{ route('caja') }}" class="menu-link"><img
+                                src="{{ asset('img/icon-caja.svg') }}" alt=""><span>Caja</span></a>
+                    </li>
+                    <li class="menu-item menu-item-static"><a href="{{ route('grupos') }}" class="menu-link"><img
+                                src="{{ asset('img/icon-grupo.svg') }}" alt=""><span>Grupos</span></a>
+                    </li> --}}
                     
                 @break
 
