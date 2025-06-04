@@ -4,8 +4,14 @@
     <!-- Contenido del Modal -->
     <div class="modal-contentgrupos">
         <span class="close-btn1">&times;</span>
-        <h2 id="modal-title">Detalles del Grupo</h2> <!-- Aquí se actualizará el título con el ID -->
-        <table id="tablagrupos" class="table table-striped" style="width:100%">
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2 id="modal-title">Detalles del Grupo</h2> <!-- Aquí se actualizará el título con el ID -->
+        </div>
+        <table id="tablaGrupos" class="table table-striped" style="width:100%">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -86,7 +92,37 @@
         text-decoration: none;
         cursor: pointer;
     }
+     .head-tittle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 90px;
+        margin-bottom: 40px
+    }
+    .head-logo {
+        position: absolute;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        /* ⬅️ Coloca el h3 debajo del img */
+        align-items: center;
+        gap: 5px;
+        margin-top: 25px;
+        
+    }
+    .head-logo img{
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
 
+    }
+      .head-logo h3 {
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+        color: #252525ee;
+    }   
 
     .modal-ge {
         display: flex;

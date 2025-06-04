@@ -1,12 +1,18 @@
 <!-- El Modal -->
-<div id="ModalNuevoUsuario" class="modal">
+<div id="ModalNuevoUsuario" class="modal" >
     <!-- Contenido del Modal -->
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2>Agregar Usuario</h2>
-        <form action="{{route('usuarios.nuevousuario')}}" method="POST">
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2>Agregar Usuario</h2>
+        </div>
+        <form action="{{ route('usuarios.nuevousuario') }}" method="POST">
             @csrf
-            <div class="modal-ge">
+            <div class="modal-ge" style="margin-top: 45px">
                 <div class="input-group">
                     <label for="nombre" class="label1">
                         <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:" required>
@@ -69,14 +75,14 @@
 <script>
     const fechaActual = new Date();
     const fechaMinima = new Date(
-      fechaActual.getFullYear() - 18,
-      fechaActual.getMonth(),
-      fechaActual.getDate()
+        fechaActual.getFullYear() - 18,
+        fechaActual.getMonth(),
+        fechaActual.getDate()
     );
-  
+
     const inputNacimiento = document.getElementById("nacimiento");
     inputNacimiento.max = fechaMinima.toISOString().split("T")[0];
-  </script>
+</script>
 <style>
     :root {
         --navbar: #067016;
@@ -91,12 +97,47 @@
         --font-personal: #8d0808;
         --azul: #385E89;
         --verde-shadow: rgba(43, 255, 0, 0.938);
-        --border-color-input:#159109;
+        --border-color-input: #159109;
     }
 
     h2 {
         justify-self: center
     }
+     .head-tittle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 90px;
+        margin-bottom: 35px
+    }
+
+    .head-logo {
+        position: absolute;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        /* ⬅️ Coloca el h3 debajo del img */
+        align-items: center;
+        gap: 5px;
+        margin-top: 25px;
+
+    }
+
+    .head-logo img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+
+    }
+
+    .head-logo h3 {
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+        color: #252525ee;
+    }
+
 
     .modal-ge {
         display: flex;
@@ -214,11 +255,13 @@
         text-decoration: none;
         cursor: pointer;
     }
-    .modal-ge label:hover{
+
+    .modal-ge label:hover {
         border-color: var(--verde-shadow);
         box-shadow: 0 0 5px var(--verde-shadow);
     }
-    .modal-ge select:hover{
+
+    .modal-ge select:hover {
         border-color: var(--verde-shadow);
         box-shadow: 0 0 5px var(--verde-shadow);
     }

@@ -7,10 +7,9 @@
         <div class="container mt-4">
             <h1>Mantenimiento de Asesores</h1>
             <div class="btn-grupos" style="display: flex; margin-bottom: 10px; margin-top: 10px; margin-left: 10px;">
-                <a href="#" id="openModalBtnnuevoAsesor" class="btn-agregar"
-                    style="margin-right: 15px;"><span>Nuevo
+                <a href="#" id="openModalBtnnuevoAsesor" class="btn-agregar" style="margin-right: 15px;"><span>Nuevo
                         Asesor</span></a>
-               
+
 
             </div>
             @if ($errors->any())
@@ -34,32 +33,38 @@
 
 
             <table id="tablaAsesores" class="table table-striped table1" style="width:100%">
-                
+
                 <thead>
                     <tr>
                         <th>Codigo Asesor</th>
                         <th>Nombres</th>
-                         <th>Sucursal</th>
+                        <th>Sucursal</th>
                         <th>Fecha Ingreso</th>
                         <th>Fecha Actualización</th>
-                        
-                        
+
+
                     </tr>
                 </thead>
                 <tbody>
-                   @foreach ($asesores as $item)
-                       <tr>
-                        <td>{{$item->id}}</td>
-                        <td>{{$item->nombre}}</td>
-                        <td>{{$item->sucursales->nombre}}</td>
-                        <td>{{$item->created_at->format('Y-m-d H:i')}}</td>
-                        <td>{{$item->updated_at->format('Y-m-d H:i')}}</td>
-                        
-                       </tr>
-                   @endforeach
+                    @foreach ($asesores as $item)
+                        <tr>
+                            <td>{{ $item->id }}</td>
+                            <td>{{ $item->nombre }}</td>
+                            <td>{{ $item->sucursales->nombre }}</td>
+                            <td style="text-align: center">
+                                {{ $item->getRawOriginal('created_at') != '0000-00-00 00:00:00' ? $item->created_at->format('d-m-Y H:i') : '-' }}
+                            </td>
+
+                            <td style="text-align: center">
+                                {{ $item->getRawOriginal('updated_at') != '0000-00-00 00:00:00' ? $item->updated_at->format('d-m-Y H:i') : '-' }}
+                            </td>
+
+
+                        </tr>
+                    @endforeach
 
                 </tbody>
-                
+
             </table>
         </div>
     </div>

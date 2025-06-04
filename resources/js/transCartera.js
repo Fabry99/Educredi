@@ -94,31 +94,35 @@ document.addEventListener('DOMContentLoaded', function () {
     selectCentro.addEventListener('change', obtenergrupos);
 
     function obtenergrupos() {
-        id_centro = selectCentro.value;
+        const id_centro = selectCentro.value;
 
-        try {
+        // Elimina TODAS las opciones del select de grupo
+        selectGrupo.innerHTML = '';
 
-            selectGrupo.innerHTML = '<option value="" disabled selected>Seleccionar:</option>';
+        // Agrega opción por defecto
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+        defaultOption.textContent = 'Seleccionar:';
+        selectGrupo.appendChild(defaultOption);
 
+        // Fetch de los grupos
+        fetch('/trasferencia/obtenergrupos/' + id_centro)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(grupo => {
 
-            fetch('/trasferencia/obtenergrupos/' + id_centro)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(grupo => {
-                        const option = document.createElement('option');
-                        option.value = grupo.grupo_id; // o grupo.grupos.id si prefieres
-                        option.textContent = grupo.grupos.nombre;
-                        selectGrupo.appendChild(option);
-                    });
-
-                })
-                .catch(error => {
-                    mostrarAlerta('Error al obtener los grupos:', 'error');
-
+                    const option = document.createElement('option');
+                    option.value = grupo.id;
+                    option.textContent = grupo.nombre;
+                    selectGrupo.appendChild(option);
                 });
-        } catch (error) {
-            mostrarAlerta("Ocurrio un error al Obtener los Datos");
-        }
+            })
+            .catch(error => {
+                console.error('Error al obtener los grupos:', error);
+                mostrarAlerta('Error al obtener los grupos', 'error');
+            });
     }
 
     selectAsesorCartera.addEventListener('change', obtenerDatosTabla);
@@ -148,12 +152,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 const rowsData = [];
 
                 data.datos.forEach(prestamo => {
+                    const fecha = new Date(prestamo.fecha_apertura);
+                    // Obtener día, mes y año
+                    const dia = String(fecha.getDate()).padStart(2, '0');
+                    const mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Meses empiezan en 0
+                    const anio = fecha.getFullYear(); // Si quieres solo dos dígitos usa: anio.toString().slice(-2);
+
+                    const fechaFormateada = `${dia}-${mes}-${anio}`;
+
                     const fila = [
                         `<input type="checkbox" class="select_row" style="transform: scale(1.5);">`,
                         prestamo.id,
                         `$${Number(prestamo.monto).toFixed(2)}`,
                         prestamo.cliente_nombre,
-                        prestamo.fecha_apertura,
+                        fechaFormateada,  // Aquí la fecha formateada
                         `$${Number(prestamo.monto).toFixed(2)}`
                     ];
                     rowsData.push(fila);

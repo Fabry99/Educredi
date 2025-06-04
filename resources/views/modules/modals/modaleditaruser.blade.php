@@ -1,23 +1,30 @@
 <div class="modal" id="modaleditaruser">
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2></h2>
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2></h2>
+        </div>
         <form method="POST" action="{{ route('user.update') }}">
             @csrf
             @method('PUT')
             <input type="hidden" id="user_id" name="id"> <!-- Nuevo campo para el ID -->
-            <div class="modal-ge1">
+            <div class="modal-ge1" style="margin-top: 45px">
                 <div class="input-group1">
                     <label for="nombre" class="label1">
                         Nombres:
-                        <input type="text" id="nombreupdate" name="nombreupdate" placeholder="Nombre:" required>
+                        <input type="text" id="nombreupdate" name="nombreupdate" placeholder="Nombre:" required
+                            style="width: 250px; margin-left: -2px">
                     </label>
                 </div>
-                <div class="input-group1">
+                <div class="input-group1" style="margin-left: 20px">
                     <label for="apellido" class="label1">
                         Apellidos:
                         <input type="text" id="apellidoupdate" name="apellidoupdate" placeholder="Apellidos:"
-                            required>
+                            required style="margin-left: -2px; width: 250px">
                     </label>
                 </div>
             </div>
@@ -26,7 +33,8 @@
                     <label for="correo" class="label1">
                         Correo:
                         <input type="email" id="correoupdate" name="correoupdate" placeholder="Correo:"
-                            title="Ingrese un correo válido como example@dominio.com" required>
+                            title="Ingrese un correo válido como example@dominio.com" required
+                            style="margin-left: -2px; width: 250px">
 
                     </label>
                 </div>
@@ -35,13 +43,14 @@
                         Contraseña:
                         <input type="password" id="passwordupdate" name="passwordupdate"
                             placeholder="Asignar Nueva Contraseña:" minlength=" 8 "
-                            title="La contraseña debe tener al menos 8 caracteres">
+                            title="La contraseña debe tener al menos 8 caracteres"
+                            style="width: 250px; margin-left: -2px">
                     </label>
                 </div>
             </div>
-            <div class="modal-ge1" style="margin-left: 40px">
+            <div class="modal-ge1" style="margin-left: 20px">
                 <label for="">Rol:
-                    <div class="input-group1 select" style="margin-left: 30px; width: 190px;">
+                    <div class="input-group1 select" style="margin-left: 20px; width: 190px;">
                         <select id="rolupdate" name="rolupdate" required>
                             <option value="" disabled selected>Asignar Rol:</option>
                             <option value="administrador">Administrador</option>
@@ -50,8 +59,8 @@
                         </select>
                     </div>
                 </label>
-                <label for="" style="margin-left: 45px">Estado:
-                    <div class="input-group1 select" style="margin-left: 30px; width: 170px;">
+                <label for="" style="margin-left: 100px">Estado:
+                    <div class="input-group1 select" style="margin-left: 20px; width: 170px;">
                         <select id="actividadupdate" name="actividadupdate" required>
                             <option value="" disabled selected>Asignar Actividad</option>
                             <option value="activo">Activo</option>
@@ -60,7 +69,7 @@
                     </div>
                 </label>
             </div>
-            <div class="modal-ge1">
+            <div class="modal-ge1" style="margin-top: 20px">
                 <div class="input-group">
                     <label for="nacimiento" class="label2" style="font-size: 12px">Fecha de Nacimiento:
                         <input type="date" id="nacimientoupdate" name="nacimientoupdate" required>
@@ -78,7 +87,7 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const fechaActual = new Date();
         const fechaMinima = new Date(
             fechaActual.getFullYear() - 18,
@@ -108,6 +117,8 @@
         --background-inputs: #f7f7f7;
         --font-personal: #8d0808;
         --azul: #385E89;
+        --verde-shadow: rgba(43, 255, 0, 0.938);
+
     }
 
     h2 {
@@ -146,7 +157,7 @@
         padding: 10px 0px;
         border-radius: 4px;
         background: var(--background-inputs);
-        margin-left:-20px; 
+        margin-left: -20px;
     }
 
 
@@ -209,6 +220,12 @@
         color: var(--color-font);
         text-decoration: none;
         border: 1px solid black;
+    }
+
+    .btn-aceptar:hover {
+        background: #0b7914;
+        border-color: var(--verde-shadow);
+        box-shadow: 0 0 2px var(--verde-shadow);
     }
 
     .btn-imprimir {

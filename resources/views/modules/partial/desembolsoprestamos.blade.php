@@ -43,21 +43,21 @@
                 </thead>
                 <tbody>
                     @foreach ($clientes as $cliente)
-                    <tr>
-                        <td>{{ $cliente->id }}</td>
-                        <td>{{ $cliente->nombre }} {{ $cliente->apellido }}</td>
-                        <td>{{ $cliente->dui }}</td>
-                        <td>{{ $cliente->saldoprestamo?->MONTO ?? '-' }}</td>
-                        <td>{{ $cliente->saldoprestamo?->FECHAAPERTURA ?? '-' }}</td>
-                        <td>
-                            <button type="button" class="btn-prestamo"
-                                data-id="{{ $cliente->id }}"
-                                data-name="{{ $cliente->nombre }} {{ $cliente->apellido }}">
-                                Préstamo
-                            </button>
-                        </td>
-                    </tr>
-                @endforeach
+                        <tr>
+                            <td>{{ $cliente->id }}</td>
+                            <td>{{ $cliente->nombre }} {{ $cliente->apellido }}</td>
+                            <td>{{ $cliente->dui }}</td>
+                            <td>${{ number_format($cliente->saldoprestamo?->MONTO ?? 0, 2) }}</td>
+                            <td>{{ $cliente->saldoprestamo?->FECHAAPERTURA ? \Carbon\Carbon::parse($cliente->saldoprestamo->FECHAAPERTURA)->format('d-m-Y') : '-' }}
+                            </td>
+                            <td>
+                                <button type="button" class="btn-prestamo" data-id="{{ $cliente->id }}"
+                                    data-name="{{ $cliente->nombre }} {{ $cliente->apellido }}">
+                                    Préstamo
+                                </button>
+                            </td>
+                        </tr>
+                    @endforeach
                 </tbody>
 
 
@@ -66,3 +66,20 @@
     </div>
 
 </div>
+<style>
+    #tabladesembolso th {
+        text-align: center
+    }
+
+    td:nth-child(3),
+    td:nth-child(5),
+    th:nth-child(3),
+    th:nth-child(5) {
+        text-align: center;
+    }
+
+    td:nth-child(4),
+    th:nth-child(4) {
+        text-align: center !important;
+    }
+</style>

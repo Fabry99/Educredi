@@ -38,12 +38,28 @@
         .table td:nth-child(4) {
             text-align: center;
         }
+
+        /* Logo alineado a la izquierda sin afectar el flujo */
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 125px;
+            height: auto;
+        }
     </style>
 </head>
 
 <body>
     <div class="header">
-        <h2>EDUCREDI</h2>
+        @php
+            $logo = base64_encode(file_get_contents(public_path('img/logoeducredi.jpeg')));
+        @endphp
+
+        <!-- Logo en la esquina izquierda -->
+        <img src="data:image/jpeg;base64,{{ $logo }}" alt="Logo" class="logo">
+
+        <h2 style="font-size: 32px; margin-bottom: 10px;">EDUCREDI RURAL <br> S.A DE C.V</h2>
         <h4>Prestamos Nuevos y de Seguimiento</h4>
         <h3 style="margin-bottom: -5px;">DESEMBOLSO DEL EFECTIVO</h3>
         <div class="informacion-header">
@@ -71,7 +87,7 @@
         <tbody>
             @foreach ($prestamos as $prestamo)
                 <tr>
-                    <td>{{$prestamo['id_cliente']}}</td>
+                    <td>{{ $prestamo['id_cliente'] }}</td>
                     <td>{{ $prestamo['nombre_cliente'] }}</td>
                     <td>${{ number_format($prestamo['monto'], 2) }}</td>
                     <td>{{ \Carbon\Carbon::parse($prestamo['fechaapertura'])->format('d/m/Y') }}</td>

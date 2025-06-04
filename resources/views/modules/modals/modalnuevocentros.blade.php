@@ -3,8 +3,14 @@
     <!-- Contenido del Modal -->
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2>Agregar Centros</h2>
-        <form action="{{route('centros.store')}}" method="POST">
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2>Agregar Centros</h2>
+        </div>
+        <form action="{{ route('centros.store') }}" method="POST">
             @csrf
             <div class="modal-ge">
                 <div class="input-group">
@@ -13,12 +19,13 @@
                     <input type="nombre" id="nombre" name="nombre" required>
 
                 </div>
-            
+
             </div>
             <div class="botones">
-                <button type="submit" class="btn-aceptar"><img src="{{asset('img/aceptar.svg')}}" alt=""></button>
+                <button type="submit" class="btn-aceptar"><img src="{{ asset('img/aceptar.svg') }}"
+                        alt=""></button>
             </div>
-            
+
         </form>
     </div>
 </div>
@@ -36,21 +43,22 @@
         --borde: #ccc;
         --background-inputs: #f7f7f7;
         --font-personal: #8d0808;
-        --azul:#385E89;
+        --azul: #385E89;
     }
-    .close-btn1 {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
 
-  .close-btn1:hover,
-  .close-btn1:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
+    .close-btn1 {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close-btn1:hover,
+    .close-btn1:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 
 
     h2 {
@@ -77,15 +85,18 @@
         font-size: 16px;
         padding: 10px;
         margin-left: 10px;
+        margin-top: -30px
     }
+
     .input-group select {
         border: none;
         background: none;
         outline: none;
         width: 100%;
         font-size: 16px;
-        
+
     }
+
     .input-group .label1 {
         display: flex;
         align-items: center;
@@ -101,18 +112,21 @@
         justify-self: center;
     }
 
-  .nombre{
-    display: flex;
-    width: 75%;
-    justify-content: center;
-    align-items: center;
-  }
-    .botones{
+    .nombre {
+        display: flex;
+        width: 75%;
+        justify-content: center;
+        align-items: center;
+        margin-top: -30px;
+    }
+
+    .botones {
         display: flex;
         justify-content: right;
         margin-top: 20px;
     }
-    .btn-aceptar{
+
+    .btn-aceptar {
         background: var(--color-boton);
         padding: 5px 45px;
         border-radius: 4px;
@@ -120,15 +134,17 @@
         text-decoration: none;
         border: 1px solid black;
     }
-   
-     button img{
+
+    button img {
         width: 35px;
-        height: 35px;        
+        height: 35px;
     }
-    .btn-aceptar:hover{
+
+    .btn-aceptar:hover {
         background: #0b7914;
     }
-    .btn-imprimir:hover{
+
+    .btn-imprimir:hover {
         background: #486c96;
     }
 </style>

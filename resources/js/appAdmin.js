@@ -465,33 +465,31 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        //EVENTO QUE PERMITE REPARTIR EL MONTO TOTAL ENTRE LOS MIEMBROS DEL GRUPO
         document.getElementById('montootorgar').addEventListener('input', function () {
             const montoTotal = parseFloat(this.value);
             const inputsMonto = document.querySelectorAll('input[name="monto"]');
-            const cantidadPersonas = inputsMonto.length;
             const totalInput = document.getElementById('total');
 
-            if (!isNaN(montoTotal) && cantidadPersonas > 0) {
-                const montoPorPersona = (montoTotal / cantidadPersonas).toFixed(2);
+            if (!isNaN(montoTotal)) {
+                // En lugar de repartir, poner 0 en todos los inputs monto
                 inputsMonto.forEach(input => {
-                    input.value = montoPorPersona;
+                    input.value = '0.00';
                 });
-
-                // Mostrar el total exacto distribuido (puede tener decimales ajustados)
-                const montoDistribuido = montoPorPersona * cantidadPersonas;
-                totalInput.value = montoDistribuido.toFixed(2);
+                // Puedes actualizar total también en 0
+                totalInput.value = '0.00';
             } else {
-                // Si se borra el monto o es inválido, limpiar la tabla y el total
+                // Si el input está vacío o no es válido, limpiar todo
                 inputsMonto.forEach(input => {
                     input.value = '';
                 });
                 totalInput.value = '';
             }
+
             actualizarTotal();
             actualizarTodasLasCuotas();
-
-
         });
+
 
         function actualizarTotal() {
             const inputsMonto = document.querySelectorAll('input[name="monto"]');
@@ -689,7 +687,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             grupoId: grupoId,
                             centroId: centroId,
                             formapago: detalleCalculo.formapago || formapago,
-                            asesor:asesor,
+                            asesor: asesor,
 
 
 
@@ -841,7 +839,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log("dias", cantDiasSelectind);
                 const datosPrestamo = {
                     id_cliente: clienteId,
-                    nombre:clienteNombre,
+                    nombre: clienteNombre,
                     montoOtorgar: input_montoOtorgar.value,
                     interes: inputInteres_ind.value,
                     linea: selectLinea_ind.value,
@@ -1287,7 +1285,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                                 setTimeout(() => {
                                                     location.reload();
                                                 }, 1000);
-                                                
+
                                             } else {
                                                 mostrarAlerta("Error al eliminar cliente", "error");
                                             }
@@ -1418,7 +1416,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (data.valida) {
                                 $('#modalreversionprestamo').fadeOut();
 
-                                $('#ModalEditarAsesor h2').text("Actualizar Asesor " + nombre_asesor);
+                                $('#ModalEditarAsesor h2').html("Actualizar Asesor<br>" + nombre_asesor);
                                 $('#ModalEditarAsesor #sucursalActua option').each(function () {
                                     if ($(this).text().trim() === sucursalNombre) {
                                         $('#ModalEditarAsesor #sucursalActua').val($(this).val());

@@ -1,7 +1,13 @@
 <div class="modaledit" id="modalmostrarcliente">
     <div class="modal-contentedit">
         <span class="close-btncerrarmostrarcliente">&times;</span>
-        <h2></h2>
+         <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2 id="modal-title"></h2> <!-- Aquí se actualizará el título con el ID -->
+        </div>
         <form method="POST" action="">
             @csrf
             <meta name="csrf-token" content="{{ csrf_token() }}">

@@ -9,13 +9,20 @@
             font-family: sans-serif;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 10px;
+        /* Logo alineado a la izquierda sin afectar el flujo */
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 125px;
+            height: auto;
         }
 
-        .header p {
-            margin-top: 30px;
+        /* Contenedor que centra todo el contenido */
+        .contenido {
+            text-align: center;
+            margin: 0 auto;
+            width: 100%;
         }
 
         .table {
@@ -34,84 +41,54 @@
             background-color: #f2f2f2;
         }
 
-        .table td:nth-child(3),
-        .table td:nth-child(4) {
+        .firma {
+            margin-top: 40px;
             text-align: center;
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h2>EDUCREDI</h2>
-        <h4>Préstamo Individual</h4>
-        <h3 style="margin-bottom: -5px;">DESEMBOLSO DEL EFECTIVO</h3>
+    @php
+        $logo = base64_encode(file_get_contents(public_path('img/logoeducredi.jpeg')));
+    @endphp
 
-        <p>Nombre del Cliente: {{ strtoupper($prestamo['nombre'] ?? 'NO ESPECIFICADO') }}</p>
-        <p>Nombre del Personal que Realiza el Desembolso: _______________________________</p>
+    <!-- Logo en la esquina izquierda -->
+    <img src="data:image/jpeg;base64,{{ $logo }}" alt="Logo" class="logo">
 
-        <p>Fecha del Desembolso: {{ \Carbon\Carbon::parse($prestamo['FECHAAPERTURA'])->format('d/m/Y') }} </p>
+    <!-- Contenido centrado -->
+    <div class="contenido">
+        <div class="header">
+            <h2 style="font-size: 32px; margin-bottom: 10px;">EDUCREDI RURAL <br> S.A DE C.V</h2>
+            <h4 style="margin-bottom: 10px;">Préstamo Individual</h4>
+            <h3 style="margin-bottom: 25px;">DESEMBOLSO DEL EFECTIVO</h3>
+        </div>
+
+
+        <p style="margin-bottom: 25px">Nombre del Cliente: {{ strtoupper($prestamo['nombre'] ?? 'NO ESPECIFICADO') }}</p>
+        <p style="margin-bottom: 25px">Nombre del Personal que Realiza el Desembolso: _______________________________</p>
+        <p style="margin-bottom: 25px">Fecha del Desembolso: {{ \Carbon\Carbon::parse($prestamo['FECHAAPERTURA'])->format('d/m/Y') }} </p>
         <p>Monto neto a desembolsar: ${{ number_format($prestamo['MONTO'], 2) }}</p>
-    </div>
-
-    {{-- <table class="table">
-        <thead>
-            <tr>
-                <th>Detalle</th>
-                <th>Valor</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Interés</td>
-                <td>{{ $prestamo['INTERES'] ?? 'N/A' }}%</td>
-            </tr>
-            <tr>
-                <td>Cuota</td>
-                <td>${{ number_format($prestamo['CUOTA'], 2) }}</td>
-            </tr>
-     
-            <tr>
-                <td>Fecha de Primer Pago</td>
-                <td>{{ \Carbon\Carbon::parse($prestamo['ULTIMA_FECHA_PAGADA'])->format('d/m/Y') }}</td>
-            </tr>
-            <tr>
-                <td>Fecha de Vencimiento</td>
-                <td>{{ \Carbon\Carbon::parse($prestamo['FECHAVENCIMIENTO'])->format('d/m/Y') }}</td>
-            </tr>
-            <tr>
-                <td>Garantía</td>
-                <td>{{ ucfirst($prestamo['GARANTIA'] ?? 'Ninguna') }}</td>
-            </tr>
-        </tbody>
-    </table> --}}
-    <table class="table">
-        <thead>
-            <tr>
-                <th>CODIGO</th>
-                <th>Nombre</th>
-                <th>Monto</th>
-                <th>Fecha Apertura</th>
-                <th>Firma de Recibido</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ $prestamo['id_cliente'] ?? 'N/A' }}</td>
-                <td>{{ $prestamo['nombre'] }}</td>
-                <td>${{ number_format($prestamo['MONTO'], 2) }}</td>
-                <td>{{ \Carbon\Carbon::parse($prestamo['FECHAAPERTURA'])->format('d/m/Y') }}</td>
-                <td></td>
-
-            </tr>
-        </tbody>
-    </table>
-
-
-    <div class="firma">
-        <p>Firma de Recibido:</p>
-        <div class="firma-linea"></div>
-    </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>CODIGO</th>
+                    <th>Nombre</th>
+                    <th>Monto</th>
+                    <th>Fecha Apertura</th>
+                    <th>Firma de Recibido</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ $prestamo['id_cliente'] ?? 'N/A' }}</td>
+                    <td>{{ $prestamo['nombre'] }}</td>
+                    <td>${{ number_format($prestamo['MONTO'], 2) }}</td>
+                    <td>{{ \Carbon\Carbon::parse($prestamo['FECHAAPERTURA'])->format('d/m/Y') }}</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
 </body>
 
 </html>

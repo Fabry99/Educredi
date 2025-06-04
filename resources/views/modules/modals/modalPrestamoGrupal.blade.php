@@ -2,7 +2,13 @@
     <!-- Contenido del Modal -->
     <div class="modal-contentPrestamosGrupal">
         <span class="close-btn1">&times;</span>
-        <h2>Desembolso de Préstamos</h2>
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2>Desembolso de Préstamos</h2>
+        </div>
         <form action="" method="POST">
             @csrf
             <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -29,7 +35,8 @@
                     </div>
                     <div class="input-group1">
                         <p style="white-space:nowrap;">Linea:</p>
-                        <select id="linea" name="linea" style="width:200px; margin-right:50px; margin-left:5px;" required>
+                        <select id="linea" name="linea" style="width:200px; margin-right:50px; margin-left:5px;"
+                            required>
                             <option value="" disabled selected>Seleccionar:</option>
                             @foreach ($linea as $item)
                                 <option value="{{ $item->id }}" data-interes="{{ $item->tasa_interes }}">
@@ -242,8 +249,8 @@
                         border-radius:4px; text-align: right;">
                 </div>
                 <div class="botones">
-                    <button type="submit" class="btn-aceptar" id="btnAceptar"><img src="{{ asset('img/aceptar.svg') }}"
-                            alt=""></button>
+                    <button type="submit" class="btn-aceptar" id="btnAceptar"><img
+                            src="{{ asset('img/aceptar.svg') }}" alt=""></button>
                 </div>
             </div>
         </form>
@@ -304,6 +311,40 @@
         border: 1px solid #888;
         max-width: 1000px;
         border-radius: 10px;
+    }
+
+    .head-tittle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 90px;
+        margin-bottom: 35px
+    }
+
+    .head-logo {
+        position: absolute;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        /* ⬅️ Coloca el h3 debajo del img */
+        align-items: center;
+        gap: 5px;
+        margin-top: 25px;
+        
+    }
+    .head-logo img{
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+
+    }
+
+    .head-logo h3 {
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+        color: #252525ee;
     }
 
     .modal-contentPrestamosGrupal h2 {

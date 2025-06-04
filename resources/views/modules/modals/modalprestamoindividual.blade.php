@@ -2,7 +2,13 @@
     <!-- Contenido del Modal -->
     <div class="modal-contentPrestamosGrupal">
         <span class="close-btn1">&times;</span>
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
         <h2>Desembolso de Préstamo Individual</h2>
+        </div>
         <form action="" method="POST" id="formPrestamoIndividual">
             @csrf
             <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -67,7 +73,7 @@
                     </div>
 
                 </div>
-            
+
                 <div class="modal-gePrestamos"
                     style="border: 1px solid var(--border-color-datosprestamos);
                     background:var(--background-datosprestamos); border-radius:4px; margin:20px 0px;">
@@ -102,13 +108,13 @@
                         <div class="input-group1" style=" margin: 0px 5px; ">
                             <label for="frecuenciameses" class="label1">Frecuencia <br> en Meses:
                                 <input type="number" id="frecuenciamesesind" name="frecuenciameses" placeholder="0"
-                                    style="width: 120px; margin-left:50px" >
+                                    style="width: 120px; margin-left:50px">
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 0px 5px 20px 5px;">
                             <label for="frecuenciadias" class="label1">Frecuencia <br> en Días:
                                 <input type="number" id="frecuenciadiasind" name="frecuenciadias" placeholder="0"
-                                    style="width: 120px; margin-left:65px" >
+                                    style="width: 120px; margin-left:65px">
                             </label>
                         </div>
                         <div class="input-group1" style="margin: 20px 5px;">
@@ -121,8 +127,8 @@
                     <div class="group-datosPrestamos">
                         <div class="input-group1" style="margin: 10px 5px; ">
                             <label for="fechaapertura" class="label1">Fecha Apertura:
-                                <input type="date" id="fechaaperturaind" name="fechaapertura" style="width: 120px;"
-                                    required>
+                                <input type="date" id="fechaaperturaind" name="fechaapertura"
+                                    style="width: 120px;" required>
                             </label>
                         </div>
                         <div class="input-group1" style=" margin: 10px 5px; ">
@@ -154,8 +160,8 @@
                         <div class="input-group1" style="margin: 20px 5px;">
                             <span>Tipo Cuota:</span>
                             <input type="radio" name="Tipo_cuota" id="cuotafijaind" value="1"
-                                    style="width: 16px; height: 16px; margin-left:20px;" checked>
-                                <span style="margin-left:-10px;">Fija</span>
+                                style="width: 16px; height: 16px; margin-left:20px;" checked>
+                            <span style="margin-left:-10px;">Fija</span>
                             <input type="radio" name="Tipo_cuota" id="cuotavariableind" value="2"
                                 style="width: 16px; height: 16px; margin-left:20px;">
                             <span style="margin-left:-10px;">Variable</span>
@@ -219,14 +225,15 @@
                                 </select>
                             </label>
                         </div>
-                        
+
 
                         <div class="input-group1" style="margin: 20px 5px; ">
                             <label for="formapagoind" class="label1">Forma de <br> Pago:
                                 <select id="formapagoind" name="formapagoind" style="width:200px; margin-left:65px;">
                                     <option value="" disabled selected>Seleccionar:</option>
                                     @foreach ($formapago as $item_formapago)
-                                        <option value="{{ $item_formapago->id }}">{{ $item_formapago->nombre_formapago }}</option>
+                                        <option value="{{ $item_formapago->id }}">
+                                            {{ $item_formapago->nombre_formapago }}</option>
                                     @endforeach
                                 </select>
                             </label>
@@ -410,6 +417,4 @@
     hr.separate-line {
         margin: 0px 0px 20px 0px;
     }
-
-
 </style>

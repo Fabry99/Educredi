@@ -1,12 +1,18 @@
-<div class="modaledit" id="modaleditarcliente">
+<div class="modaledit" id="modaleditarcliente" >
     <div class="modal-contentedit">
         <span class="close-btn1">&times;</span>
-        <h2></h2>
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2></h2>
+        </div>
         <form method="POST" action="{{ route('clientes.update') }}">
             @csrf
             @method('PUT')
             <input type="hidden" id="cliente_id" name="id"> <!-- Nuevo campo para el ID -->
-            <div class="modal-ge1">
+            <div class="modal-ge1" style="margin-top: 50px">
                 <div class="input-group1">
                     <p>Nombre:</p>
                     <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:">
@@ -175,7 +181,7 @@
             <div class="modal-ge1">
                 <div class="input-group1">
                     <p style="white-space:nowrap;">Centro:</p>
-                    <select id="id_centroeditar" name="id_centroeditar" >
+                    <select id="id_centroeditar" name="id_centroeditar">
                         <option value="" disabled selected>Seleccione un Centro</option>
                         @foreach ($centros as $centro)
                             <option value="{{ $centro->id }}">{{ $centro->nombre }}</option>
@@ -185,7 +191,7 @@
                 </div>
                 <div class="input-group1">
                     <p style="white-space:nowrap;">Grupo:</p>
-                    <select id="id_grupoeditar" name="id_grupoeditar" >
+                    <select id="id_grupoeditar" name="id_grupoeditar">
                         <option value="" disabled selected>Seleccione un Grupo</option>
                     </select>
                 </div>

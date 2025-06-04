@@ -53,7 +53,8 @@
             <div class="contenedor-conteo">
                 <div class="conteo">
                     <span>Número de Creditos:</span>
-                    <input type="numer" name="creditos" id="creditos" readonly style="text-align: right; padding-right:5px">
+                    <input type="numer" name="creditos" id="creditos" readonly
+                        style="text-align: right; padding-right:5px">
                 </div>
                 <div class="conteo">
                     <span>Monto Total de los Creditos:</span>
@@ -67,7 +68,7 @@
                             <th style="width: 40px;"> <!-- Aseguramos que la columna tenga un ancho específico -->
                                 <input type="checkbox" id="selectAllCheckbox">
                             </th>
-                            <th >id</th>
+                            <th>id</th>
                             <th>Préstamo</th>
                             <th>Nombre del cliente</th>
                             <th>Apertura</th>
@@ -75,7 +76,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        
+
                     </tbody>
                 </table>
             </div>
@@ -83,16 +84,12 @@
                 <div class="option">
                     <span>Asesor a Transferir:</span>
                     <select name="aseso Receptor" id="asesorRecibe">
-                       <option value="" disabled selected>Seleccionar</option>
-                       @foreach ($asesor as $asesorRecibe)
-                           <option value="{{$asesorRecibe->id}}">{{$asesorRecibe->nombre}}</option>
-                       @endforeach
+                        <option value="" disabled selected>Seleccionar</option>
+                        @foreach ($asesor as $asesorRecibe)
+                            <option value="{{ $asesorRecibe->id }}">{{ $asesorRecibe->nombre }}</option>
+                        @endforeach
                     </select>
                 </div>
-                {{-- <div class="botones">
-                    <button type="submit" class="btn-aceptar" id="btnAceptar"><img src="{{ asset('img/aceptar.svg') }}"
-                            alt=""></button>
-                </div> --}}
                 <div class="botones">
                     <button type="submit" class="btn-guardar" id="btnGuardarTransferencia">
                         <img src="{{ asset('img/aceptar.svg') }}" alt="">
@@ -120,6 +117,15 @@
             width: 300px;
             /* Ajusta el valor como necesites */
         }
+        .table1 th:nth-child(2),
+        .table1 td:nth-child(2),
+        .table1 th:nth-child(4),
+        .table1 td:nth-child(4),
+        .table1 th:nth-child(5),
+        .table1 td:nth-child(5) {
+            text-align: center !important;
+        }
+
 
         /* Hacer que el checkbox sea más grande */
         .table1 input[type="checkbox"] {

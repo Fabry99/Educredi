@@ -1,29 +1,37 @@
 <!-- El Modal -->
-<div id="ModalNuevoAsesor" class="modal" >
+<div id="ModalNuevoAsesor" class="modal">
     <!-- Contenido del Modal -->
-    <div class="modal-content" >
+    <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2>Agregar Asesor</h2>
-        <form action="{{route('asesor.insert')}}"  method="POST">
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2>Agregar Asesor</h2>
+        </div>
+        <form action="{{ route('asesor.insert') }}" method="POST">
             @csrf
-            <div class="modal-ge" style=" justify-content: center;">
-                <div class="input-group" style=" paddin: 0px 0px; " >
-                        <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:" required style="width: 250px">
+            <div class="modal-ge" style=" justify-content: center; align-items: center">
+                <div class="input-group" style=" paddin: 0px 0px; margin-top: -1px;">
+                    <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:" required
+                        style="width: 250px">
                 </div>
-                <div class="input-group select" style="margin-left: 20px; width: 250px;
+                <div class="input-group select"
+                    style="margin-left: 20px; width: 250px;
                 margin: 20px; 0px">
-                   <select id="sucursal" name="sucursal" title="Seleccionar Sucursal" required>
-                    <option value="" disabled selected>Asignar Sucursal</option>
-                    @foreach ($sucursales as $sucursal)
-                        <option value="{{ $sucursal->id }}">{{ $sucursal->nombre }}</option>
-                    @endforeach
-                </select>
+                    <select id="sucursal" name="sucursal" title="Seleccionar Sucursal" required>
+                        <option value="" disabled selected>Asignar Sucursal</option>
+                        @foreach ($sucursales as $sucursal)
+                            <option value="{{ $sucursal->id }}">{{ $sucursal->nombre }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
             <div class="botones">
-                <button type="submit" title="Ingresar" class="btn-aceptar" id="btnAceptarAsesor"><img src="{{ asset('img/aceptar.svg') }}"
-                        alt=""></button>
+                <button type="submit" title="Ingresar" class="btn-aceptar" id="btnAceptarAsesor"><img
+                        src="{{ asset('img/aceptar.svg') }}" alt=""></button>
             </div>
         </form>
     </div>
@@ -43,7 +51,7 @@
         --font-personal: #8d0808;
         --azul: #385E89;
         --verde-shadow: rgba(43, 255, 0, 0.938);
-        --border-color-input:#159109;
+        --border-color-input: #159109;
     }
 
     h2 {
@@ -54,6 +62,41 @@
         display: flex;
         width: 100%;
         margin-top: 10px;
+    }
+
+    .head-tittle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 90px;
+        margin-bottom: 35px
+    }
+
+    .head-logo {
+        position: absolute;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        /* ⬅️ Coloca el h3 debajo del img */
+        align-items: center;
+        gap: 5px;
+        margin-top: 25px;
+
+    }
+
+    .head-logo img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+
+    }
+
+    .head-logo h3 {
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+        color: #252525ee;
     }
 
     .modal-ge select {
@@ -89,6 +132,7 @@
         font-size: 16px;
 
     }
+
     .modal-ge .input-group .label1 {
         display: flex;
         align-items: center;
@@ -141,13 +185,14 @@
         text-decoration: none;
         cursor: pointer;
     }
-    .modal-ge input:hover{
+
+    .modal-ge input:hover {
         border-color: var(--verde-shadow);
         box-shadow: 0 0 5px var(--verde-shadow);
     }
-    .modal-ge select:hover{
+
+    .modal-ge select:hover {
         border-color: var(--verde-shadow);
         box-shadow: 0 0 5px var(--verde-shadow);
     }
 </style>
-

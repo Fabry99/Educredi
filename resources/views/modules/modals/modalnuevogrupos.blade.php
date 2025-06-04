@@ -3,24 +3,31 @@
     <!-- Contenido del Modal -->
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2>Agregar Grupos</h2>
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2>Agregar Grupos</h2>
+        </div>
         <form action="{{ route('grupos.savegroup') }}" method="POST">
             @csrf
-            <div class="modal-ge">
+            <div class="modal-ge" style="margin-top:-20px;">
                 <div class="input-group">
-            
-                    <input type="nombre" id="nombre" name="nombre" placeholder="Nombre del Grupo:" required>
+
+                    <input type="nombre" id="nombre" name="nombre" placeholder="Nombre del Grupo:" required
+                        style="height: 50%; margin-top: 1px">
 
                 </div>
                 <div class="input-group">
                     <select class="select-centro" id="id_centros" name="id_centros" required>
                         <option value="" disabled selected>Selecciona un Centro</option>
-                        @foreach($centros as $centro)
+                        @foreach ($centros as $centro)
                             <option value="{{ $centro->id }}">{{ $centro->nombre }}</option>
                         @endforeach
                     </select>
                 </div>
-                
+
             </div>
             <div class="botones">
                 <button type="submit" class="btn-aceptar"><img src="{{ asset('img/aceptar.svg') }}"
@@ -86,6 +93,13 @@
 
     }
 
+    .input-group select:hover {
+
+        border-color: var(--verde-shadow);
+        box-shadow: 0 0 2px var(--verde-shadow);
+
+    }
+
     .input-group .label1 {
         display: flex;
         align-items: center;
@@ -130,9 +144,5 @@
 
     .btn-aceptar:hover {
         background: #0b7914;
-    }
-
-    .btn-imprimir:hover {
-        background: #486c96;
     }
 </style>

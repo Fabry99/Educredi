@@ -3,10 +3,16 @@
     <!-- Contenido del Modal -->
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2>Agregar Cliente</h2>
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2>Agregar Cliente</h2>
+        </div>
         <form action="{{ route('clientes.saveclient') }}" method="POST">
             @csrf
-            <div class="modal-ge">
+            <div class="modal-ge" style="margin-top: 45px;">
                 <div class="input-group">
                     <label for="nombre" class="label1">
                         <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:">
@@ -53,7 +59,8 @@
                 <div class="input-group">
                     <label for="NIT" class="label1">
                         <input type="text" id="NIT" name="NIT" placeholder="NIT: 1234-567891-234-5"
-                         pattern="\d{4}-\d{6}-\d{3}-\d{1}" title="Formato: 4 dígitos - 6 dígitos - 3 dígitos - 1 dígito (Ej: 1234-567891-234-5)">
+                            pattern="\d{4}-\d{6}-\d{3}-\d{1}"
+                            title="Formato: 4 dígitos - 6 dígitos - 3 dígitos - 1 dígito (Ej: 1234-567891-234-5)">
                     </label>
                 </div>
             </div>
@@ -161,13 +168,15 @@
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="nrc" class="label2">
-                        <input type="text" id="nrc" name="nrc" placeholder="NRC:" pattern="\d{22}" title="Ingrese el Código de 22 Dígitos">
+                        <input type="text" id="nrc" name="nrc" placeholder="NRC:" pattern="\d{22}"
+                            title="Ingrese el Código de 22 Dígitos">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="perdependiente" class="label2">
                         <input type="text" id="perdependiente" name="perdependiente"
-                            placeholder="Personas Dependientes:" min="1" max="20" title="Se Debe Agregar la Cantidad de Personas Dependientes">
+                            placeholder="Personas Dependientes:" min="1" max="20"
+                            title="Se Debe Agregar la Cantidad de Personas Dependientes">
                     </label>
                 </div>
                 <div class="input-group">
@@ -213,7 +222,7 @@
         // Limpiar el select de municipios
         var municipioSelect = document.getElementById("id_municipio");
         municipioSelect.innerHTML =
-        '<option value="" disabled selected>Seleccione un Municipio</option>'; // Reset
+            '<option value="" disabled selected>Seleccione un Municipio</option>'; // Reset
 
         // Solo hacer la solicitud si se seleccionó un departamento
         if (departamentoId) {
@@ -228,10 +237,10 @@
                         municipioSelect.appendChild(option);
                     });
                 })
-                .catch(error => {
-                });
+                .catch(error => {});
         }
     });
+
     function formatDate(date) {
         const yyyy = date.getFullYear();
         const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -239,7 +248,7 @@
         return `${yyyy}-${mm}-${dd}`;
     }
 
-    window.addEventListener("DOMContentLoaded", function () {
+    window.addEventListener("DOMContentLoaded", function() {
         const today = new Date();
 
         // Persona debe tener al menos 18 años => Fecha máxima = hoy - 18 años
@@ -285,6 +294,41 @@
     h2 {
         justify-self: center
     }
+    .head-tittle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 90px;
+        margin-bottom: 35px
+    }
+
+    .head-logo {
+        position: absolute;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        /* ⬅️ Coloca el h3 debajo del img */
+        align-items: center;
+        gap: 5px;
+        margin-top: 25px;
+
+    }
+
+    .head-logo img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+
+    }
+
+    .head-logo h3 {
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+        color: #252525ee;
+    }
+
 
     .modal-ge {
         display: flex;
@@ -388,18 +432,18 @@
     .btn-imprimir:hover {
         background: #486c96;
     }
+
     .close-btn1 {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-  .close-btn1:hover,
-  .close-btn1:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
+    .close-btn1:hover,
+    .close-btn1:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
 </style>

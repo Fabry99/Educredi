@@ -21,7 +21,7 @@ class TransferenciacarteraController extends Controller
         $rol = Auth::user()->rol;
         $centro = Centros::all();
         $asesor = Asesores::all();
-        $grupos =Grupos::all();
+        $grupos = Grupos::all();
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador' && $rol !== 'administrador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
@@ -29,21 +29,22 @@ class TransferenciacarteraController extends Controller
         }
 
         // Si el rol es 'contador', cargar la vista
-        return view('modules.dashboard.transferencia', compact('rol','centro','asesor','grupos'));
+        return view('modules.dashboard.transferencia', compact('rol', 'centro', 'asesor', 'grupos'));
     }
 
     public function obtenerGrupos($id_centro)
     {
-
-        $grupos = Centros_Grupos_Clientes::where('centro_id', $id_centro)
-            ->with('grupos')
+        $grupos = Grupos::where('id_centros', $id_centro)
             ->get();
+
+
         return response()->json($grupos);
     }
 
+
     public function obtenerDatosTabla($id_asesor, $id_grupo, $id_centro)
     {
-       
+
 
         $DatosClientes = saldoprestamo::with('clientes') // Asegúrate de que la relación esté definida
             ->where('centro', $id_centro)
@@ -81,15 +82,15 @@ class TransferenciacarteraController extends Controller
             'ids_clientes' => 'required|array|min:1',
             'id_asesorReceptor' => 'required|integer'
         ]);
-    
+
         // Cargar todos los registros afectados
         $prestamos = saldoprestamo::whereIn('id', $request->ids_clientes)->get();
-    
+
         foreach ($prestamos as $prestamo) {
             $prestamo->asesor = $request->id_asesorReceptor;
             $prestamo->save(); // Aquí se dispara el Observer 'updated'
         }
-    
+
         return response()->json(['mensaje' => 'Transferencia completada']);
     }
 }

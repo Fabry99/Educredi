@@ -3,7 +3,13 @@
     <!-- Contenido del Modal -->
     <div class="modal-content">
         <span class="close-btn1">&times;</span>
-        <h2>Validar Eliminación</h2>
+        <div class="head-tittle">
+            <div class="head-logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
+            </div>
+            <h2 style="margin-left: 40px">Validar Eliminación</h2>
+        </div>
         <form action="{{ route('centros.store') }}" method="POST">
             @csrf
             <div class="modal-ge">
@@ -52,6 +58,41 @@
         color: black;
         text-decoration: none;
         cursor: pointer;
+    }
+
+    .head-tittle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        height: 90px;
+        margin-bottom: 35px
+    }
+
+    .head-logo {
+        position: absolute;
+        left: 10px;
+        display: flex;
+        flex-direction: column;
+        /* ⬅️ Coloca el h3 debajo del img */
+        align-items: center;
+        gap: 5px;
+        margin-top: 25px;
+
+    }
+
+    .head-logo img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+
+    }
+
+    .head-logo h3 {
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+        color: #252525ee;
     }
 
 
@@ -135,6 +176,4 @@
     .btn-aceptar:hover {
         background: #0b7914;
     }
-
-  
 </style>

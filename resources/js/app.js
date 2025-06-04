@@ -39,39 +39,6 @@ $('#tablaclientesgrupos').DataTable({
     "lengthMenu": [5, 10, 25, 50, 100],
     "pageLength": 5
 });
-$('#tablagrupos').DataTable({
-    "paging": true,
-    "lengthChange": true,
-    "searching": true,
-    "ordering": true,
-    "info": true,
-    "autoWidth": false,
-    "responsive": true,
-    "colReorder": true,
-    "order": [[0, "asc"]],
-    "language": {
-        "decimal": ",",
-        "thousands": ".",
-        "lengthMenu": "Mostrar _MENU_ registros por página",
-        "zeroRecords": "No se encontraron resultados",
-        "info": "Mostrando página _PAGE_ de _PAGES_",
-        "infoEmpty": "No hay registros disponibles",
-        "infoFiltered": "(filtrado de _MAX_ registros totales)",
-        "search": "Buscar:",
-        "paginate": {
-            "first": "Primera",
-            "previous": "Anterior",
-            "next": "Siguiente",
-            "last": "Última"
-        },
-        "aria": {
-            "sortAscending": ": activar para ordenar la columna de manera ascendente",
-            "sortDescending": ": activar para ordenar la columna de manera descendente"
-        }
-    },
-    "lengthMenu": [5, 10, 25, 50, 100],
-    "pageLength": 5
-});
 
 
 
@@ -167,6 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
+let nombreCentroSeleccionado = '';
+
 $(document).ready(function () {
     const table = $('#tablacentros').DataTable();
 
@@ -185,6 +154,7 @@ $(document).ready(function () {
         const rowData = table.row(this).data(); // Obtiene los datos de la fila seleccionada
         const centroID = rowData[0]; // ID del centro (Columna 0)
         const nombreCentro = rowData[1]; // Nombre del centro (Columna 1)
+        nombreCentroSeleccionado = nombreCentro;
 
         // Actualizar el título del modal
         $('#modalgrupos h2').text('Grupos del Centro - ' + nombreCentro);
@@ -222,11 +192,11 @@ function cargarGruposPorCentro(centroID) {
         success: function (response) {
 
             // Si DataTable ya está inicializado, destrúyelo para reiniciarlo
-            if ($.fn.DataTable.isDataTable('#tablagrupos')) {
-                $('#tablagrupos').DataTable().clear().destroy();
+            if ($.fn.DataTable.isDataTable('#tablaGrupos')) {
+                $('#tablaGrupos').DataTable().clear().destroy();
             }
 
-            $('#tablagrupos tbody').empty();
+            $('#tablaGrupos tbody').empty();
 
             // Iterar sobre cada grupo recibido en la respuesta
             response.grupos.forEach(grupo => {
@@ -253,7 +223,7 @@ function cargarGruposPorCentro(centroID) {
                 }
 
                 fila += '</tr>';
-                $('#tablagrupos tbody').append(fila);
+                $('#tablaGrupos tbody').append(fila);
             });
             $(document).on('click', '.btn-eliminarGrupo', function (event) {
                 event.stopPropagation();
@@ -287,6 +257,41 @@ function cargarGruposPorCentro(centroID) {
                     }
                 });
             });
+            $('#tablaGrupos').DataTable({
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "colReorder": true,
+                "order": [[0, "asc"]],
+                "language": {
+                    "decimal": ",",
+                    "thousands": ".",
+                    "lengthMenu": "Mostrar _MENU_ registros por página",
+                    "zeroRecords": "No se encontraron resultados",
+                    "info": "Mostrando página _PAGE_ de _PAGES_",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first": "Primera",
+                        "previous": "Anterior",
+                        "next": "Siguiente",
+                        "last": "Última"
+                    },
+                    "aria": {
+                        "sortAscending": ": activar para ordenar la columna de manera ascendente",
+                        "sortDescending": ": activar para ordenar la columna de manera descendente"
+                    }
+                },
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "pageLength": 5
+            });
+
+
 
         },
         error: function () {
@@ -295,15 +300,14 @@ function cargarGruposPorCentro(centroID) {
     });
 }
 //Mostrar la tabla de clientes al hacer clic en un grupo
-$('#tablagrupos tbody').on('click', 'tr', function (event) {
+$('#tablaGrupos tbody').on('click', 'tr', function (event) {
     // Evitar que se abra el modal si el clic es en el botón de eliminar
     if ($(event.target).closest('button').is('.btn-eliminarGrupo')) {
         return; // No abrir el modal si se hace clic en el botón "Eliminar"
     }
-
     const grupoId = $(this).data('id'); // Obtiene el id
     const nombreGrupo = $(this).data('nombre'); // Obtiene el nombre
-    $('#modalmostrarcliente h2').text('Grupo: ' + nombreGrupo);
+    $('#modalmostrarcliente h2').text('Clientes del '  + nombreGrupo + ' del Centro: ' + nombreCentroSeleccionado);
 
     // Mostrar el modal
     $('#modalmostrarcliente').fadeIn();
