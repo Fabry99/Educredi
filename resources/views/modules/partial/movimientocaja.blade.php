@@ -2,6 +2,24 @@
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    <div class="notification custom_error">
+                        {{ $error }}
+                    </div>
+                @endforeach
+            @endif
+
+            @if (session('success'))
+                <div class="notification custom_success">
+                    {{ session('success') }}
+                </div>
+            @endif
+            <div id="alert-notification" class="alert"
+                style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
+                <span id="alert-notification-message"></span>
+            </div>
+
             <div class="contenedor-header" style="width: 100%; margin-bottom: 30px">
                 <h1 style="margin-left: 20px">Caja</h1>
                 <div class="input-group">
@@ -63,8 +81,8 @@
                     </div>
                     <div class="information">
                         <span>Num Cuota:</span>
-                        <input type="text" id="input_cuota_total" value="" disabled 
-                        style="text-align: center; font-weight: bold; width: 75px; font-size: 14px">
+                        <input type="text" id="input_cuota_total" value="" disabled
+                            style="text-align: center; font-weight: bold; width: 75px; font-size: 14px">
                     </div>
                 </div>
                 <div class="btn-grupos" style="display: flex; margin:15px; justify-content: center">
@@ -214,36 +232,39 @@
     .btn-aceptar:hover {
         background: #0b7914;
     }
+
     /* Forzamos la columna "Nombre" (segunda columna) a un ancho fijo */
-#tablaCaja th:nth-child(2),
-#tablaCaja td:nth-child(2) {
-    width: 250px !important;
-    min-width: 250px !important;
-    max-width: 250px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    display: table-cell !important;
-}
-#tablaCaja th:nth-child(3),
-#tablaCaja td:nth-child(3) {
-    width: 100px !important;
-    min-width: 100px !important;
-    max-width: 100px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    display: table-cell !important;
-}
-#tablaCaja th:nth-child(5),
-#tablaCaja td:nth-child(5) {
-    width: 110px !important;
-    min-width: 110px !important;
-    max-width: 110px !important;
-    white-space: normal !important;
-    word-break: break-word !important;
-    display: table-cell !important;
-}
-#tablaCaja th{
-    text-align: center;
-}
-  
+    #tablaCaja th:nth-child(2),
+    #tablaCaja td:nth-child(2) {
+        width: 250px !important;
+        min-width: 250px !important;
+        max-width: 250px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        display: table-cell !important;
+    }
+
+    #tablaCaja th:nth-child(3),
+    #tablaCaja td:nth-child(3) {
+        width: 100px !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        display: table-cell !important;
+    }
+
+    #tablaCaja th:nth-child(5),
+    #tablaCaja td:nth-child(5) {
+        width: 110px !important;
+        min-width: 110px !important;
+        max-width: 110px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        display: table-cell !important;
+    }
+
+    #tablaCaja th {
+        text-align: center;
+    }
 </style>

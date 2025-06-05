@@ -74,23 +74,31 @@ document.addEventListener('DOMContentLoaded', function () {
         defaultOption.selected = true;
         defaultOption.textContent = 'Seleccionar:';
         selectGrupo.appendChild(defaultOption);
-
         fetch('/trasferencia/obtenergrupos/' + id_centro)
             .then(response => response.json())
             .then(data => {
-                // Eliminar duplicados si vienen desde el servidor
                 const idsUnicos = new Set();
+
                 data.forEach(grupo => {
-                    if (!idsUnicos.has(grupo.grupo_id)) {
-                        idsUnicos.add(grupo.grupo_id);
+
+                    if (!idsUnicos.has(grupo.id)) {
+                        idsUnicos.add(grupo.id);
+
                         const option = document.createElement('option');
-                        option.value = grupo.grupo_id;
-                        option.textContent = grupo.grupos.nombre;
+                        option.value = grupo.id; // ✅ usa 'id'
+                        option.textContent = grupo.nombre; // ✅ usa 'nombre'
+
                         selectGrupo.appendChild(option);
                     }
                 });
+
+                // Opcional: mostrar alerta si no hay grupos válidos
+                if (idsUnicos.size === 0) {
+                    mostrarAlerta('No se encontraron grupos para este centro.', 'info');
+                }
             })
             .catch(error => {
+                console.error("Error en la petición:", error); // para depurar
                 mostrarAlerta('Error al obtener los grupos:', 'error');
             });
     }
@@ -128,16 +136,16 @@ document.addEventListener('DOMContentLoaded', function () {
             <tr>
                 <td style = 'text-align:end'>${prestamo.cliente_id ? prestamo.cliente_id : '—'}</td>
                 <td>${prestamo.cliente_nombre}</td>
-                <td style = 'text-align:center'>${prestamo.saldo}</td>
+                <td style = 'text-align:center' contenteditable="true">${prestamo.saldo}</td>
                 <td style="text-align: center;">${prestamo.ultima_fecha ? prestamo.ultima_fecha : '—'}</td>
                 <td style="text-align: center;">${prestamo.proxima_fecha ? prestamo.proxima_fecha : '—'}</td>
-                <td style = 'text-align:center'>${prestamo.cuota ? prestamo.cuota : '—'}</td>
-                <td style = 'text-align:center'>${prestamo.intereses ? prestamo.intereses : '—'}</td>
+                <td style = 'text-align:center' contenteditable="true">${prestamo.cuota ? prestamo.cuota : '—'}</td>
+                <td style = 'text-align:center' contenteditable="true">${prestamo.intereses ? prestamo.intereses : '—'}</td>
                 <td></td>
-                <td style = 'text-align:center'>${prestamo.manejo ? prestamo.manejo : '—'}</td>
-                <td style = 'text-align:center'>${prestamo.seguro ? prestamo.seguro : '—'}</td>
-                <td style = 'text-align:center'>${prestamo.iva ? prestamo.iva : '—'}</td>
-                <td style = 'text-align:center'>${prestamo.capital ? prestamo.capital : '—'}</td>
+                <td style = 'text-align:center' contenteditable="true">${prestamo.manejo ? prestamo.manejo : '—'}</td>
+                <td style = 'text-align:center' contenteditable="true">${prestamo.seguro ? prestamo.seguro : '—'}</td>
+                <td style = 'text-align:center' contenteditable="true">${prestamo.iva ? prestamo.iva : '—'}</td>
+                <td style='text-align:center' contenteditable="true">${prestamo.capital ? prestamo.capital : '—'}</td>
                 <td style = 'text-align:center'>${prestamo.dias ? prestamo.dias : '—'}</td>
                 <td style = 'text-align:center'>${prestamo.fecha_apertura ? prestamo.fecha_apertura : '—'}</td>
                 <td style = 'text-align:center'>${prestamo.fecha_vencimiento ? prestamo.fecha_vencimiento : '—'}</td>
@@ -167,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                         .then(response => response.json())
                         .then(data => {
-                                document.getElementById('input_cuota_total').value = `${data.conteo_comparativo} de ${data.conteo_total}`;
+                            document.getElementById('input_cuota_total').value = `${data.conteo_comparativo} de ${data.conteo_total}`;
 
                         })
                         .catch(error => {

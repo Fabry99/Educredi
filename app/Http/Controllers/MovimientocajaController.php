@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Centros;
+use App\Models\debeser;
 use App\Models\Grupos;
 use App\Models\saldoprestamo;
 use DateTime;
@@ -19,7 +20,7 @@ class MovimientocajaController extends Controller
         $centro = Centros::all();
         $grupos = Grupos::all();
 
-        if ($rol !== 'caja' ) {
+        if ($rol !== 'caja') {
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
         return view('modules.dashboard.home', compact('rol', 'centro', 'grupos'));
@@ -50,15 +51,18 @@ class MovimientocajaController extends Controller
         $idsClientes = $DatosClientes->pluck('id_cliente')->unique();
 
         $debeserTodos = DB::table('debeser')
-            ->whereIn('id_cliente', $idsClientes)
-            ->orderBy('id_cliente')
-            ->orderBy('fecha')
-            ->get()
-            ->groupBy('id_cliente');
+            ->where('id_cliente', $idsClientes)
+            ->where('created_at', function ($query) use ($idsClientes) {
+                $query->selectRaw('MAX(created_at)')
+                    ->from('debeser')
+                    ->where('id_cliente', $idsClientes);
+            })
+            ->orderBy('fecha') // Asegúrate de que estén en orden ascendente por fecha
+            ->get();
 
         $respuesta = [
             'datos' => $DatosClientes->map(function ($dato) use ($debeserTodos) {
-                $debeserCliente = $debeserTodos[$dato->id_cliente] ?? collect();
+                $debeserCliente = $debeserTodos->where('id_cliente', $dato->id_cliente)->values();
                 $ultimaFecha = $dato->ULTIMA_FECHA_PAGADA;
 
                 $proximaFila = null;
@@ -130,36 +134,41 @@ class MovimientocajaController extends Controller
             ->value('ULTIMA_FECHA_PAGADA');
 
 
-        // Obtener las fechas ordenadas de 'debeser'
-        $fechas = DB::table('debeser')
+        $registros = DB::table('debeser')
+            ->selectRaw('*, COUNT(*) OVER () AS total_filas')
             ->where('id_cliente', $id_cliente)
-            ->whereNotNull('fecha')
-            ->orderBy('fecha')
-            ->pluck('fecha')
-            ->map(function ($fecha) {
-                return date('Y-m-d', strtotime($fecha));
+            ->where('created_at', function ($query) use ($id_cliente) {
+                $query->selectRaw('MAX(created_at)')
+                    ->from('debeser')
+                    ->where('id_cliente', $id_cliente);
             })
-            ->values()
-            ->toArray();
+            ->orderBy('fecha') // Asegúrate de que estén en orden ascendente por fecha
+            ->get();
 
-        $conteoTotal = count($fechas);
-
+        $conteoTotal = $registros->isNotEmpty() ? $registros[0]->total_filas : 0;
         $conteoComparativo = 0;
 
-        if ($ultimaFechaPagada !== null) {
+        if ($ultimaFechaPagada !== null && $registros->isNotEmpty()) {
             $ultima = new DateTime($ultimaFechaPagada);
 
-            foreach ($fechas as $i => $fechaDebeser) {
-                $fecha = new DateTime($fechaDebeser);
-                $diff = abs($fecha->diff($ultima)->days);
+            foreach ($registros as $i => $registro) {
+                $fechaDebeser = new DateTime($registro->fecha);
+                $margenDias = isset($registro->dias) ? intval($registro->dias) : 0;
 
-                // Considera "igual o cercana" si la diferencia es de 0 a 2 días
-                if ($diff <= 20) {
-                    $conteoComparativo = $i + 1;
-                    break;
+                // Si la última fecha pagada fue ANTES de la fecha del debeser
+                if ($ultima <= $fechaDebeser) {
+                    $diff = $fechaDebeser->diff($ultima)->days;
+
+                    if ($diff <= $margenDias) {
+                        // Posición encontrada con margen válido
+                        $conteoComparativo = $i + 1; // Sumar 1 porque index empieza en 0
+                        break;
+                    }
                 }
             }
         }
+
+
 
 
         return response()->json([

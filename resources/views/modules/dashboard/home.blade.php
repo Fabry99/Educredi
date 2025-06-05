@@ -32,7 +32,7 @@
     @vite('resources/js/app.js')
     @vite('resources/js/notifications.js')
 
-    @if ($rol === 'contador')
+    @if ($rol === 'caja')
         @vite('resources/js/appCaja.js')
     @endif
 @endsection

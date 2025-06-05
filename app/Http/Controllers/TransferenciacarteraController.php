@@ -34,8 +34,11 @@ class TransferenciacarteraController extends Controller
 
     public function obtenerGrupos($id_centro)
     {
+        log::info('datos del centro' . $id_centro);
         $grupos = Grupos::where('id_centros', $id_centro)
             ->get();
+
+        log::info('datos de los grupos ' . $grupos);
 
 
         return response()->json($grupos);
