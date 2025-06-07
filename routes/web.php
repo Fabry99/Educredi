@@ -103,6 +103,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     //Rutas para manejo de caja
     Route::post('/caja/obtenerPrestamos',[MovimientocajaController::class, 'obtenerPrestamos']);
+    Route::post('/caja/obtenerEstadoCuentaDebeser',[MovimientocajaController::class, 'obtenerEstadoCuentaDebeser']);
     // Route::get('/generar-pdf', [pdfController::class, 'generarPdf']);
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
     Route::post('/caja/obtenerconteocuotas',[MovimientocajaController::class, 'obtenerConteoCuotas']);

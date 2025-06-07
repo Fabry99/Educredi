@@ -98,7 +98,7 @@ class DesembolsoprestamoController extends Controller
 
     public function almacenarPrestamos(Request $request)
     {
-    
+
 
         $datosAInsertar = [];
         $datosSaldoprestamo = [];
@@ -161,6 +161,7 @@ class DesembolsoprestamoController extends Controller
             // Convertir fecha de apertura y fecha de vencimiento a objetos Carbon para facilitar las operaciones
             $fechaActual = \Carbon\Carbon::parse($fechaApertura);
             $fechaParacadaMiembro = \Carbon\Carbon::parse($fechaPagoCadaMibro);
+            $fechaPrimerPago = clone $fechaParacadaMiembro;
             $fechaFinal = \Carbon\Carbon::parse($fechaVencimiento);
 
             // Insertar la primera fila con cuota = 0 y iva = 0
@@ -180,28 +181,7 @@ class DesembolsoprestamoController extends Controller
                 // 'microseguro' => $microseguro
             ];
 
-            $datosSaldoprestamo[] = [
-                'id_cliente' => $idCliente,
-                'monto' => $monto,
-                'saldo' => $monto,
-                'cuota' => $cuotaFinal,
-                'fechaapertura' => $fechaApertura,
-                'fechavencimiento' => $fechaVencimiento,
-                'garantia' => $garantia_id,
-                'plazo' => $plazo,
-                'interes' => $tasa,
-                'fecha_primer_pago' => $fechaDebeSer,
-                'colector' => $id_colector,
-                'manejo' => $manejo,
-                'groupsolid' => $grupo_id,
-                'centro' => $centro_id,
-                'sucursal' => $sucursal,
-                'supervisor' => $id_supervisor,
-                'segu_d' => $manejo,
-                'id_aprobadopor' => $id_aprobado,
-                'tip_pago' => $id_formapago,
-                'asesor' => $asesor,
-            ];
+
             $datosParaPDF[] = [
                 'id_cliente' => $prestamo['id'],
                 'nombre_cliente' => $nombreCliente, // Ahora le pasas el nombre
@@ -238,8 +218,9 @@ class DesembolsoprestamoController extends Controller
 
 
             // Iterar para crear registros repetidos según el intervalo de diasPorPago
-            $primeraFila = true;
             $segundaFila = true;
+
+            $nuevaFechaVencimiento = null;
 
             for ($i = 0; $i < $plazo; $i++) {
                 if ($i > 0) {
@@ -261,10 +242,12 @@ class DesembolsoprestamoController extends Controller
                     $capital = $montoRestante; // absorber todo el restante
                     $cuota = $capital + $interesesCalculado + $iva + $manejo + $microseguro;
                     $montoRestante -= $capital; // esto debería llevar el saldo a cero
+
+                    $nuevaFechaVencimiento = clone $fechaParacadaMiembro;
                 } else {
-                     $montoRestante -= $capital;
+                    $montoRestante -= $capital;
                 }
-             
+
 
                 $datosAInsertar[] = [
                     'id_cliente'     => $idCliente,
@@ -281,8 +264,32 @@ class DesembolsoprestamoController extends Controller
                     'intereses'      => round($interesesCalculado, 2),
                 ];
             }
-            
+            $datosSaldoprestamo[] = [
+                'id_cliente' => $idCliente,
+                'monto' => $monto,
+                'saldo' => $monto,
+                'cuota' => $cuotaFinal,
+                'fechaapertura' => $fechaApertura,
+                'fechavencimiento' => $nuevaFechaVencimiento ? $nuevaFechaVencimiento->format('Y-m-d') : null,
+                'ultima_fecha_pagada' => null,
+                'garantia' => $garantia_id,
+                'plazo' => $plazo,
+                'interes' => $tasa,
+                'fecha_primer_pago' => $fechaPrimerPago->format('Y-m-d'),
+                'colector' => $id_colector,
+                'manejo' => $manejo,
+                'groupsolid' => $grupo_id,
+                'centro' => $centro_id,
+                'sucursal' => $sucursal,
+                'supervisor' => $id_supervisor,
+                'segu_d' => $manejo,
+                'id_aprobadopor' => $id_aprobado,
+                'tip_pago' => $id_formapago,
+                'asesor' => $asesor,
+            ];
         }
+        Log::info('datos prestamo', ['datos' => $datosSaldoprestamo]);
+
 
         // Intentar insertar todos los registros de una sola vez
         try {
@@ -508,7 +515,7 @@ class DesembolsoprestamoController extends Controller
             $tasa_iva = 0.13;
             $contador = 1;
 
-     
+
             $nuevosPagos = [];
 
             while ($fechaPago->lte($fechaFinal)) {

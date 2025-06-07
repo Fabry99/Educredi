@@ -1,4 +1,5 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
+@include('modules.modals.modalCajaDebeSer');
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
@@ -39,7 +40,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="valores-calculo">
+                {{-- <div class="valores-calculo">
                     <label>
                         <input type="radio" name="tipo_calculo" value="calculo">Aplicar Valor Cálculo
                     </label>
@@ -51,7 +52,7 @@
                         <input type="checkbox" name="habilitar_manual">
                         Habilitar Cálculo Manual
                     </label>
-                </div>
+                </div> --}}
 
                 <div class="modal-ge select">
                     <div class="information">
@@ -73,6 +74,9 @@
                         <span>Cuenta:</span>
                         <select name="Cuenta" id="id_cuenta" style="width: 180px;">
                             <option value="" disabled selected>Seleccionar</option>
+                            @foreach ($bancos as $banco)
+                                <option value="{{ $banco->id }}">{{ $banco->nombre_banco }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="information">
@@ -90,7 +94,8 @@
                         style="margin-right: 15px;"><span>Confirmar</span></a>
                     <a href="#" id="openModalBtn" class="btn-agregar"
                         style="margin-right: 15px;"><span>Reimprimir</span></a>
-                    <a href="#" id="openModalBtn" class="btn-agregar" style="margin-right: 15px;"><span>Debe
+                    <a href="#" id="openModalBtnDebeser" class="btn-agregar"
+                        style="margin-right: 15px;"><span>Debe
                             ser</span></a>
                     <a href="#" id="openModalBtn" class="btn-agregar" style="margin-right: 15px;"><span>Est.
                             Cuenta</span></a>
@@ -266,5 +271,10 @@
 
     #tablaCaja th {
         text-align: center;
+    }
+
+    #tablaCaja tr.selected {
+        background-color: #d0ebff;
+        /* celeste claro */
     }
 </style>

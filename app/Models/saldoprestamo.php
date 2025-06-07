@@ -130,4 +130,10 @@ class saldoprestamo extends Model
     public function clientes(){
         return $this->belongsTo(Clientes::class, 'id_cliente');
     }
+    public function centros(){
+        return $this->belongsTo(Centros::class, 'centro');
+    }
+     public function asesor(){
+        return $this->belongsTo(Asesores::class, 'ASESOR');
+    }
 }
