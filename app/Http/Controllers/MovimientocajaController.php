@@ -26,8 +26,6 @@ class MovimientocajaController extends Controller
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
         return view('modules.dashboard.home', compact('rol', 'centro', 'grupos', 'bancos'));
-
-        // return view('modules.dashboard.home')->with('rol', $rol);
     }
 
     public function obtenerPrestamos(Request $request)
@@ -35,27 +33,60 @@ class MovimientocajaController extends Controller
         $id_centro = $request->input('id_centro');
         $id_grupo = $request->input('id_grupo');
 
-
-        $DatosClientes = saldoprestamo::with(['clientes', 'centros'])
-            ->where('centro', $id_centro)
-            ->where('groupsolid', $id_grupo)
+        $resultados = DB::table('centros_grupos_clientes as cgc')
+            ->joinSub(function ($query) {
+                $query->from('saldoprestamo as sp1')
+                    ->join(DB::raw("(
+              SELECT id_cliente, MAX(id) AS max_id
+              FROM saldoprestamo
+              GROUP BY id_cliente
+          ) as latest"), 'sp1.id', '=', 'latest.max_id')
+                    ->select(
+                        'sp1.id',
+                        'sp1.SALDO',
+                        'sp1.CUOTA',
+                        'sp1.ULTIMA_FECHA_PAGADA',
+                        'sp1.id_cliente',
+                        'sp1.FECHAAPERTURA',
+                        'sp1.FECHAVENCIMIENTO',
+                        'sp1.centro',
+                        'sp1.interes'
+                    );
+            }, 'sp', 'cgc.cliente_id', '=', 'sp.id_cliente')
+            ->join('clientes as c', 'c.id', '=', 'sp.id_cliente') // ← AQUÍ agregas el JOIN
+            ->join('centros as cen', 'sp.centro', '=', 'cen.id')
+            ->where('cgc.grupo_id', $id_grupo)
+            ->where('cgc.centro_id', $id_centro)
+            ->orderBy('cgc.grupo_id')
             ->select(
-                'id',
-                'SALDO',
-                'CUOTA',
-                'ULTIMA_FECHA_PAGADA',
-                'id_cliente',
-                'FECHAAPERTURA',
-                'FECHAVENCIMIENTO',
-                'centro',
-                'interes',
+                'cgc.grupo_id',
+                'sp.id',
+                'sp.SALDO',
+                'sp.CUOTA',
+                'sp.ULTIMA_FECHA_PAGADA',
+                'sp.id_cliente',
+                'sp.FECHAAPERTURA',
+                'sp.FECHAVENCIMIENTO',
+                'sp.centro',
+                'sp.interes',
+                'c.nombre as cliente_nombre',     // ← Incluyes nombre
+                'c.apellido as cliente_apellido',  // ← Incluyes apellido
+                'cen.nombre as centro_nombre'
             )
             ->get();
+        Log::info('Datos obtenidos', $resultados->toArray()); // <-- Esto es correcto
+        // Construir array de filtros con cliente + fechas
+        $filtros = $resultados->map(function ($item) {
+            return [
+                'id_cliente' => $item->id_cliente,
+                'fecha_apertura' => $item->FECHAAPERTURA,
+                'fecha_vencimiento' => $item->FECHAVENCIMIENTO,
+            ];
+        })->toArray();
 
-        $idsClientes = $DatosClientes->pluck('id_cliente')->unique();
 
-        $debeserTodos =  DB::table('debeser as d1')
-            ->selectRaw('d1.*')
+        $debeserTodos = DB::table('debeser as d1')
+            ->select('d1.*')
             ->join(
                 DB::raw('(SELECT id_cliente, MAX(created_at) as max_created FROM debeser GROUP BY id_cliente) as d2'),
                 function ($join) {
@@ -63,13 +94,28 @@ class MovimientocajaController extends Controller
                         ->on('d1.created_at', '=', 'd2.max_created');
                 }
             )
-            ->whereIn('d1.id_cliente', $idsClientes)
+            ->where(function ($query) use ($filtros) {
+                foreach ($filtros as $filtro) {
+                    $query->orWhere(function ($q) use ($filtro) {
+                        $q->where('d1.id_cliente', $filtro['id_cliente'])
+                            ->where('d1.fecha_apertura', $filtro['fecha_apertura'])
+                            ->where('d1.fecha_vencimiento', $filtro['fecha_vencimiento']);
+                    });
+                }
+            })
             ->orderBy('d1.fecha')
-            ->get();
+            ->get()
+            ->groupBy('id_cliente')
+            ->map(function ($grupo) {
+                return $grupo->toArray();
+            })
+            ->toArray();
+
 
         $respuesta = [
-            'datos' => $DatosClientes->map(function ($dato) use ($debeserTodos) {
-                $debeserCliente = $debeserTodos->where('id_cliente', $dato->id_cliente)->values();
+            'datos' => $resultados->map(function ($dato) use ($debeserTodos) {
+                // Obtener array o colección de registros para el cliente actual
+                $debeserCliente = collect($debeserTodos[$dato->id_cliente] ?? []);
                 $ultimaFecha = $dato->ULTIMA_FECHA_PAGADA;
 
                 $proximaFila = null;
@@ -106,7 +152,7 @@ class MovimientocajaController extends Controller
                     'fecha_apertura' => $dato->FECHAAPERTURA,
                     'fecha_vencimiento' => $dato->FECHAVENCIMIENTO,
                     'cliente_id' => $dato->id_cliente,
-                    'cliente_nombre' => (optional($dato->clientes)->nombre . ' ' . optional($dato->clientes)->apellido) ?? 'Sin nombre',
+                    'cliente_nombre' => trim(($dato->cliente_nombre ?? '') . ' ' . ($dato->cliente_apellido ?? '')) ?: 'Sin nombre',
                     'proxima_fecha' => $proximaFila->fecha ?? null,
                     'manejo' => $proximaFila->manejo ?? null,
                     'seguro' => $proximaFila->seguro ?? null,
@@ -115,16 +161,19 @@ class MovimientocajaController extends Controller
                     'intereses' => $proximaFila->intereses ?? null,
                     'datos_debeser' => $proximaFila,
                     'dias' => $diasTexto,
-                    'centro' => $dato->centros->nombre ?? 'Sin centro',
+                    'centro' => $dato->centro_nombre ?? 'Sin centro',
                     'interes' => $dato->interes,
 
                 ];
 
 
+
                 return $resultado;
             }),
 
+
         ];
+        log::info('Datos obtenidos debeser', $respuesta); // <-- Esto es correcto
 
         return response()->json($respuesta);
     }

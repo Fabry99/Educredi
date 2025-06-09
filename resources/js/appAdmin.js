@@ -714,6 +714,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         document.getElementById('btnAceptar').addEventListener('click', function (event) {
             event.preventDefault(); // Evita el envío del formulario si estás usando un submit
+
+            const btn = this; // botón
             const montoOtorgar = parseFloat(document.getElementById('montootorgar').value);
             const total = parseFloat(document.getElementById('total').value);
             const sucursal = document.getElementById("sucursal").value;
@@ -747,6 +749,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
 
+                btn.disabled = true; // deshabilita botón para evitar dobles clics
+                mostrarAlerta("Procesando préstamo...", "info");
 
                 fetch('/guardarprestamogrupal', {
                     method: 'POST',
@@ -783,10 +787,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         } else {
                             mostrarAlerta('Error al guardar el préstamo.', "error");
+                            btn.disabled = false; // vuelve a habilitar botón
+
                         }
                     })
                     .catch(error => {
                         mostrarAlerta('Error al enviar:', "error");
+                        btn.disabled = false; // vuelve a habilitar botón
                     });
             }
         });
@@ -844,6 +851,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             btn_prestamoindividual.addEventListener('click', function (event) {
                 event.preventDefault();
+
+                btn_prestamoindividual.disabled = true;
+
+                mostrarAlerta("Procesando préstamo...", "info");
+
+
                 const garantiaSeleccionada = document.querySelector('input[name="garantia_ind"]:checked');
                 const garantia = garantiaSeleccionada ? garantiaSeleccionada.value : null;
                 const textoTipoPagoIndi = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
@@ -931,10 +944,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         } else {
                             mostrarAlerta("Error al Realizar el Prestamo", "error");
+                            btn_prestamoindividual.disabled = false; // Rehabilitar botón en caso de error
                         }
 
                     }).catch(error => {
                         mostrarAlerta("Error al guardar el préstamo:", "error");
+                        btn_prestamoindividual.disabled = false; // Rehabilitar botón en caso de error
+
                     });
 
 
@@ -1255,7 +1271,8 @@ document.addEventListener('DOMContentLoaded', function () {
             event.preventDefault();
             if (modalreversionprestamo) {
                 modalreversionprestamo.style.display = "block";
-                btnAceptar.addEventListener('click', function (event) {
+
+                btnAceptar.addEventListener('click', async function (event) {
                     event.preventDefault();
 
                     const SpecialPassword = inputPassword.value.trim();
@@ -1270,51 +1287,62 @@ document.addEventListener('DOMContentLoaded', function () {
                         mostrarAlerta("Por favor ingrese el código de cliente", "error");
                         return;
                     } else {
-                        fetch('/validar/password', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Incluye el token CSRF
-                            },
-                            body: JSON.stringify({ password: SpecialPassword })
-                        }).then(response => response.json())
-                            .then(data => {
-                                if (data.valida) {
-                                    fetch(`/eliminar/desembolsoprestamo`, {
-                                        method: 'DELETE',
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Incluye el token CSRF
-                                        }
-                                        ,
-                                        body: JSON.stringify({
-                                            codigoCliente: codigoCliente,     
-                                            fecha_apertura: fecha_aperturaenviar,
-                                            fecha_vencimiento: fecha_vencimientoenviar
-                                        })
-                                    }).then(response => response.json())
-                                        .then(deleteData => {
-                                            if (deleteData.success) {
-                                                mostrarAlerta("Cliente eliminado con éxito", "success");
-                                                setTimeout(() => {
-                                                    location.reload();
-                                                }, 1000);
+                        // 🔒 Desactivar botón y mostrar alerta de procesamiento
+                        btnAceptar.disabled = true;
+                        btnAceptar.style.display = 'none';
+                        mostrarAlerta("Procesando eliminación...", "info");
 
-                                            } else {
-                                                mostrarAlerta("Error al eliminar cliente", "error");
-                                            }
-                                        }).catch(error => {
-                                            mostrarAlerta("Error en la eliminación del cliente", "error");
-                                        });
-                                } else {
-                                    mostrarAlerta(data.mensaje || "Contraseña incorrecta", "error");
-                                }
-                            }).catch(error => {
-                                mostrarAlerta("Error en el Servidor: ");
+                        try {
+                            const response = await fetch('/validar/password', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify({ password: SpecialPassword })
                             });
+
+                            const data = await response.json();
+
+                            if (data.valida) {
+                                const deleteResponse = await fetch(`/eliminar/desembolsoprestamo`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                    },
+                                    body: JSON.stringify({
+                                        codigoCliente,
+                                        fecha_apertura: fecha_aperturaenviar,
+                                        fecha_vencimiento: fecha_vencimientoenviar
+                                    })
+                                });
+
+                                const deleteData = await deleteResponse.json();
+
+                                if (deleteData.success) {
+                                    mostrarAlerta("Cliente eliminado con éxito", "success");
+                                    setTimeout(() => {
+                                        location.reload();
+                                    }, 1000);
+                                } else {
+                                    mostrarAlerta("Error al eliminar cliente", "error");
+                                }
+                            } else {
+                                mostrarAlerta(data.mensaje || "Contraseña incorrecta", "error");
+                            }
+                        } catch (error) {
+                            mostrarAlerta("Error en el servidor o en la solicitud", "error");
+                        } finally {
+                            // 🔓 Reactivar el botón al final del proceso
+                            btnAceptar.disabled = false;
+                            btnAceptar.style.display = 'block';
+                        }
                     }
-                });
+                }, { once: true }); // Prevenir múltiples ejecuciones
             }
+
+
         });
 
         //Funcion para mostrar el saldo de prestamo al escribir el codigo del cliente
@@ -1336,7 +1364,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         })
                         .then(data => {
-                            console.log(data);
                             inputMonto.value = data.monto !== null ? data.monto : '';
                             fecha_apertura.value = data.fecha_apertura !== null ? data.fecha_apertura : '';
                             fecha_vencimiento.value = data.fecha_vencimiento !== null ? data.fecha_vencimiento : '';
@@ -1521,13 +1548,15 @@ function mostrarAlerta(mensaje, tipo) {
 
     // Limpiar cualquier contenido o clase previa
     mensajeAlerta.textContent = mensaje;
-    alerta.classList.remove('error_notification', 'success_notification'); // Limpiar clases anteriores
+    alerta.classList.remove('error_notification', 'success_notification', 'info_notification'); // Limpiar clases anteriores
 
     // Asignar la clase correcta según el tipo
     if (tipo === "error") {
         alerta.classList.add('error_notification'); // Clase de error (rojo)
     } else if (tipo === "success") {
         alerta.classList.add('success_notification'); // Clase de éxito (verde)
+    } else if (tipo === "info") {
+        alerta.classList.add('info_notification'); // Clase informativa (azul oscuro)
     }
 
     // Mostrar la alerta y aplicar animación
@@ -1544,5 +1573,6 @@ function mostrarAlerta(mensaje, tipo) {
         }, 500);  // Tiempo para que la animación termine
     }, 4000);  // La alerta se oculta después de 4 segundos
 }
+
 
 

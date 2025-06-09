@@ -323,50 +323,58 @@ class DesembolsoprestamoController extends Controller
 
             ];
         }
-        Log::info('datos prestamo', ['datos' => $datosAInsertar]);
 
 
         // Intentar insertar todos los registros de una sola vez
         try {
+            DB::transaction(function () use (
+                $datosAInsertar,
+                $datosSaldoprestamo,
+                $datosHistorialPrestamos,
+                $datosParaPDF
+            ) {
+                // Filtrar datos con cuota distinta de 0
+                $datosAInsertarFiltrados = array_filter($datosAInsertar, function ($fila) {
+                    return $fila['cuota'] != 0;
+                });
 
-            $datosAInsertarFiltrados = array_filter($datosAInsertar, function ($fila) {
-                return $fila['cuota'] != 0;
-            });
+                DB::table('debeser')->insert($datosAInsertarFiltrados);
 
-            DB::table('debeser')->insert($datosAInsertarFiltrados);
-
-            foreach ($datosSaldoprestamo as $saldo) {
-                // Intentamos hacer update
-                $affected = DB::table('saldoprestamo')
-                    ->where('id_cliente', $saldo['id_cliente'])
-                    ->update($saldo);
-
-                $accion = '';
-
-                if ($affected) {
-                    $accion = 'update';
-                } else {
-                    // Si no se actualizó, se inserta
+                foreach ($datosSaldoprestamo as $saldo) {
                     DB::table('saldoprestamo')->insert($saldo);
-                    $accion = 'insert';
+
+                    $saldoBitacora = [
+                        'CLIENTE' => $saldo['id_cliente'] ?? null,
+                        'MONTO' => isset($saldo['monto']) ? round($saldo['monto'], 2) : null,
+                        'CUOTA' => isset($saldo['cuota']) ? round($saldo['cuota'], 2) : null,
+                        'PLAZO' => $saldo['plazo'] ?? null,
+                        'FECHA APERTURA' => isset($saldo['fechaapertura']) ? Carbon::parse($saldo['fechaapertura'])->format('d-m-Y') : null,
+                        'FECHA VENCIMIENTO' => isset($saldo['fechavencimiento']) ? Carbon::parse($saldo['fechavencimiento'])->format('d-m-Y') : null,
+                        'ASESOR' => $saldo['asesor'] ?? null,
+                        'CENTRO' => $saldo['centro'] ?? null,
+                        'GRUPO' => $saldo['gruposolid'] ?? null,
+                        'SUCURSAL' => $saldo['sucursal'] ?? null,
+                        'SUPERVISOR' => $saldo['supervisor'] ?? null,
+                    ];
+
+                    Bitacora::create([
+                        'usuario' => Auth::user()->name,
+                        'tabla_afectada' => 'saldoprestamo',
+                        'accion' => 'INSERT',
+                        'datos' => json_encode($saldoBitacora),
+                        'fecha' => Carbon::now(),
+                        'id_asesor' => Auth::user()->id,
+                    ]);
                 }
 
-                // Registrar en la bitácora
-                Bitacora::create([
-                    'usuario' => Auth::user()->name, // Asegúrate de tener esta variable
-                    'tabla_afectada' => 'saldoprestamo',
-                    'accion' => strtoupper($accion),
-                    'datos' => json_encode($saldo),
-                    'fecha' => Carbon::now(), // usa Carbon para fecha y hora actual
-                    'id_asesor' => Auth::user()->id, // Asegúrate de tener esta variable
-                ]);
-            }
-            //Insertar en tabla Historialprestamos
-            if (!empty($datosHistorialPrestamos)) {
-                DB::table('historial_prestamos')->insert($datosHistorialPrestamos);
-            }
+                if (!empty($datosHistorialPrestamos)) {
+                    DB::table('historial_prestamos')->insert($datosHistorialPrestamos);
+                }
 
-            // Generar el PDF
+                // Aquí también podrías guardar info del PDF si es necesario dentro de la transacción
+            });
+
+            // Si todo fue exitoso, se genera el PDF
             $pdf = PDF::loadView('PDF.desembolsoPrestamoGrupal', ['prestamos' => $datosParaPDF])
                 ->setPaper('a4', 'portrait')
                 ->setOptions(['defaultFont' => 'sans-serif']);
@@ -376,13 +384,14 @@ class DesembolsoprestamoController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Datos insertados correctamente en la tabla debeSer',
+                'message' => 'Datos insertados correctamente',
                 'pdf' => $pdfBase64
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Hubo un problema al insertar los datos',
+                'error' => $e->getMessage(), // útil para depuración, eliminar en producción si quieres
             ], 500);
         }
     }
@@ -437,41 +446,30 @@ class DesembolsoprestamoController extends Controller
         DB::beginTransaction();
 
         try {
-
             $fechaApertura = $request->input('fecha_apertura');
             $fechaVencimiento = $request->input('fecha_vencimiento');
             $codigoCliente = $request->input('codigoCliente');
-            Log::info('Datos recibidos en eliminarDesembolso', [
-                'fecha_apertura' => $fechaApertura,
-                'fecha_vencimiento' => $fechaVencimiento,
-                'codigoCliente' => $codigoCliente
-            ]);
+
+
             // Buscar el último desembolso
+            $cliente = Saldoprestamo::where('id_cliente', $codigoCliente)
+                ->where('FECHAAPERTURA', $fechaApertura)
+                ->where('FECHAVENCIMIENTO', $fechaVencimiento)
+                ->latest('id')
+                ->first();
 
-            //cambiare esta linea de codigo para que en la vista caja mostrar los desembolso de la tabla historial de prestamos y debeser
-            //para no afectar el conteo de las rotaciones de los desembolsos
-            
-            // $cliente = Saldoprestamo::where('id_cliente', $codigoCliente)
-            //     ->where('FECHAAPERTURA', $fechaApertura)
-            //     ->where('FECHAVENCIMIENTO', $fechaVencimiento)
-            //     ->latest('id')
-            //     ->first();
+            if (!$cliente) {
+                DB::rollBack(); // Asegura revertir transacción en caso de fallo temprano
+                return response()->json([
+                    'success' => false,
+                    'mensaje' => 'No se encontró el desembolso para este cliente'
+                ], 404);
+            }
 
-            // if (!$cliente) {
-            //     return response()->json([
-            //         'success' => false,
-            //         'mensaje' => 'No se encontró el desembolso para este cliente'
-            //     ], 404);
-            // }
+            // Eliminar el registro de Saldoprestamo
+            $cliente->delete();
 
-            // // En vez de eliminar, actualizamos las columnas monto y saldo a null
-            // $cliente->update([
-            //     'MONTO' => null,
-            //     'SALDO' => null,
-            // ]);
-
-
-            // Eliminar el último registro de debeser
+            // Eliminar el último registro de la tabla debeser
             DB::table('debeser')
                 ->where('id_cliente', $codigoCliente)
                 ->where('fecha_apertura', $fechaApertura)
@@ -485,6 +483,7 @@ class DesembolsoprestamoController extends Controller
                 })
                 ->delete();
 
+            // Eliminar el último registro del historial
             $registro = HistorialPrestamos::where('id_cliente', $codigoCliente)
                 ->where('fecha_apertura', $fechaApertura)
                 ->where('fecha_vencimiento', $fechaVencimiento)
@@ -495,12 +494,11 @@ class DesembolsoprestamoController extends Controller
                 $registro->delete();
             }
 
-
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Eliminación exitosa'
+                'mensaje' => 'El desembolso ha sido eliminado correctamente'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -546,6 +544,8 @@ class DesembolsoprestamoController extends Controller
                 'DIAS' => $request->input('frecuenciaDias'),
                 'ID_BANCO' => $request->input('banco'),
                 'ASESOR' => $request->input('id_asesor'),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ];
             $datosHistorialPrestamos = [
                 'id_cliente' => $id_cliente,
@@ -562,29 +562,37 @@ class DesembolsoprestamoController extends Controller
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
-            // Usando Eloquent para crear o actualizar el préstamo
-            SaldoPrestamo::updateOrCreate(
-                ['id_cliente' => $id_cliente],
-                $datos
-            );
-            //Insertar en tabla Historialprestamos
-            if (!empty($datosHistorialPrestamos)) {
-                DB::table('historial_prestamos')->insert($datosHistorialPrestamos);
-            }
-            // Crear o actualizar relación en Centros_Grupos_Clientes
-            Centros_Grupos_Clientes::updateOrCreate(
-                [
-                    'cliente_id' => $id_cliente,
-                    'centro_id' => 1,
-                    'grupo_id' => 1,
-                ],
-                [
-                    'cliente_id' => $id_cliente,
-                    'centro_id' => 1,
-                    'grupo_id' => 1,
-                    // Puedes agregar más campos si son requeridos
-                ]
-            );
+
+
+            $monto = round(floatval($request->input('montoOtorgar')), 2);
+            $cuota = round(floatval($request->input('cuota')), 2);
+            $fechaApertura = $request->input('fechaApertura')
+                ? Carbon::parse($request->input('fechaApertura'))->format('d-m-Y')
+                : null;
+
+            $fechaVencimiento = $request->input('fechaVencimiento')
+                ? Carbon::parse($request->input('fechaVencimiento'))->format('d-m-Y')
+                : null;
+
+            // Solo ciertos campos para bitácora
+            $datosBitacora = [
+                'CLIENTE' => $id_cliente,
+                'MONTO' => $monto,
+                'CUOTA' => $cuota,
+                'PLAZO' => $request->input('plazo'),
+                'FECHA APERTURA' => $fechaApertura,
+                'FECHA VENCIMIENTO' => $fechaVencimiento,
+                'INTERES' => $request->input('interes'),
+                'COLECTOR' => $request->input('colector'),
+                'MANEJO' => $request->input('manejo'),
+                'GRUPO' => 1,
+                'CENTRO' => 1,
+                'SUCURSAL' => $request->input('sucursal'),
+                'SUPERVISOR' => $request->input('supervisor'),
+                'ASESOR' => $request->input('id_asesor'),
+
+            ];
+
 
             $segundaFila = true;
             $fechaApertura = Carbon::parse($request->input('fechaApertura'));
@@ -652,6 +660,8 @@ class DesembolsoprestamoController extends Controller
                     'capital' => $capital,
                     'iva' => $iva,
                     'intereses' => $interesesCalculado,
+                    'fecha_apertura' => $fechaApertura->toDateString(),
+                    'fecha_vencimiento' => $fechaFinal->toDateString(),
 
                 ];
 
@@ -695,6 +705,38 @@ class DesembolsoprestamoController extends Controller
                 'ID_BANCO' => $request->input('banco'),
             ];
 
+
+            DB::table('saldoprestamo')->insert($datos);
+
+
+            // Registrar en bitácora
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'saldoprestamo',
+                'accion' => 'INSERT',
+                'datos' => json_encode($datosBitacora),
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+            ]);
+            //Insertar en tabla Historialprestamos
+            if (!empty($datosHistorialPrestamos)) {
+                DB::table('historial_prestamos')->insert($datosHistorialPrestamos);
+            }
+            // Crear o actualizar relación en Centros_Grupos_Clientes
+            Centros_Grupos_Clientes::updateOrCreate(
+                [
+                    'cliente_id' => $id_cliente,
+                    'centro_id' => 1,
+                    'grupo_id' => 1,
+                ],
+                [
+                    'cliente_id' => $id_cliente,
+                    'centro_id' => 1,
+                    'grupo_id' => 1,
+                    // Puedes agregar más campos si son requeridos
+                ]
+            );
+
             DB::table('debeser')->insert($nuevosPagos);
             DB::commit();
 
@@ -711,12 +753,8 @@ class DesembolsoprestamoController extends Controller
                 'pdf' => $pdfBase64
             ]);
         } catch (\Exception $e) {
-            // DB::rollBack();
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Hubo un error al guardar los datos.',
-            ], 500);
+            DB::rollback();
+            return response()->json(['error' => 'Error al guardar el préstamo.', 'details' => $e->getMessage()], 500);
         }
     }
 }

@@ -208,3 +208,9 @@ body {
     color: white;
     box-shadow: 0 0 5px var(--shadow-alert);
 }
+
+.info_notification {
+    background-color: #07305b;
+    color: white;
+    box-shadow: 0 0 5px var(--shadow-alert);
+}
