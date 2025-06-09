@@ -24,6 +24,8 @@ class debeser extends Model
         'iva',
         'intereses',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'fecha_apertura',
+        'fecha_vencimiento',
     ];
 }

@@ -90,7 +90,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     Route::get('/consulta/reversion/{codigo}', [DesembolsoprestamoController::class, 'obtenerSaldoPrestamo']);
     Route::POST('/validar/password', [DesembolsoprestamoController::class, 'validarPassword']);
-    Route::delete('/eliminar/desembolsoprestamo/{codigoCliente}', [DesembolsoprestamoController::class, 'eliminarDesembolso']);
+    Route::delete('/eliminar/desembolsoprestamo', [DesembolsoprestamoController::class, 'eliminarDesembolso']);
 
     //Rutas Para Mantenimiento de Asesores
     Route::post('/asesores/insert/', [AsesoresController::class, 'InsertarAsesor'])->name('asesor.insert');

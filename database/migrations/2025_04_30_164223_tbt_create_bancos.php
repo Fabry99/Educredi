@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('bancos', function(Blueprint $table){
             $table->id();
             $table->string('nombre_banco', 250);
+            $table->string('cuenta_banco',50)->nullable();
+            $table->string('ctabanco',50)->nullable();
             $table->timestamps();
         });
     }

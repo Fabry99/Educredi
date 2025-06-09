@@ -1,6 +1,6 @@
 @extends('layouts/main')
 
-@section('titulo_pagina', 'Grupos')
+@section('titulo_pagina', 'Reversión de prestamos')
 
 @section('css')
     @vite('resources/css/sidebar.css')

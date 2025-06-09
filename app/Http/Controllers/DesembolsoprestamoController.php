@@ -11,6 +11,7 @@ use App\Models\Clientes;
 use App\Models\Colector;
 use App\Models\debeser;
 use App\Models\Formapago;
+use App\Models\HistorialPrestamos;
 use App\Models\Linea;
 use App\Models\saldoprestamo;
 use App\Models\SpecialPassword;
@@ -221,6 +222,8 @@ class DesembolsoprestamoController extends Controller
             $segundaFila = true;
 
             $nuevaFechaVencimiento = null;
+            $fechasVencimientoClientes = [];
+
 
             for ($i = 0; $i < $plazo; $i++) {
                 if ($i > 0) {
@@ -244,6 +247,9 @@ class DesembolsoprestamoController extends Controller
                     $montoRestante -= $capital; // esto debería llevar el saldo a cero
 
                     $nuevaFechaVencimiento = clone $fechaParacadaMiembro;
+
+                    // Asignar la fecha de vencimiento al cliente en tabla debeser
+                    $fechasVencimientoClientes[$idCliente] = $nuevaFechaVencimiento->format('Y-m-d');
                 } else {
                     $montoRestante -= $capital;
                 }
@@ -262,8 +268,19 @@ class DesembolsoprestamoController extends Controller
                     'capital'        => round($capital, 2),
                     'iva'            => round($iva ?? 0, 2),
                     'intereses'      => round($interesesCalculado, 2),
+                    'fecha_apertura' => $fechaApertura,
+                    'fecha_vencimiento' => $nuevaFechaVencimiento ? $nuevaFechaVencimiento->format('Y-m-d') : null,
                 ];
+                // Asignar la fecha de vencimiento correcta a cada fila
+
             }
+            foreach ($datosAInsertar as &$fila) {
+                $clienteID = $fila['id_cliente'];
+                if (isset($fechasVencimientoClientes[$clienteID])) {
+                    $fila['fecha_vencimiento'] = $fechasVencimientoClientes[$clienteID];
+                }
+            }
+            unset($fila);
             $datosSaldoprestamo[] = [
                 'id_cliente' => $idCliente,
                 'monto' => $monto,
@@ -286,13 +303,32 @@ class DesembolsoprestamoController extends Controller
                 'id_aprobadopor' => $id_aprobado,
                 'tip_pago' => $id_formapago,
                 'asesor' => $asesor,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
+            $datosHistorialPrestamos[] = [
+                'id_cliente' => $idCliente,
+                'monto' => $monto,
+                'cuota' => $cuotaFinal,
+                'plazo' => $plazo,
+                'interes' => $tasa,
+                'manejo' => $manejo,
+                'fecha_apertura' => $fechaApertura,
+                'fecha_vencimiento' => $nuevaFechaVencimiento ? $nuevaFechaVencimiento->format('Y-m-d') : null,
+                'asesor' => $asesor,
+                'centro' => $centro_id,
+                'grupo' => $grupo_id,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+
             ];
         }
-        Log::info('datos prestamo', ['datos' => $datosSaldoprestamo]);
+        Log::info('datos prestamo', ['datos' => $datosAInsertar]);
 
 
         // Intentar insertar todos los registros de una sola vez
         try {
+
             $datosAInsertarFiltrados = array_filter($datosAInsertar, function ($fila) {
                 return $fila['cuota'] != 0;
             });
@@ -325,6 +361,10 @@ class DesembolsoprestamoController extends Controller
                     'id_asesor' => Auth::user()->id, // Asegúrate de tener esta variable
                 ]);
             }
+            //Insertar en tabla Historialprestamos
+            if (!empty($datosHistorialPrestamos)) {
+                DB::table('historial_prestamos')->insert($datosHistorialPrestamos);
+            }
 
             // Generar el PDF
             $pdf = PDF::loadView('PDF.desembolsoPrestamoGrupal', ['prestamos' => $datosParaPDF])
@@ -350,19 +390,24 @@ class DesembolsoprestamoController extends Controller
 
     public function obtenerSaldoPrestamo($codigo)
     {
-
         $prestamo = saldoprestamo::where('id_cliente', $codigo)
-            ->orderByDesc('id') // o ->latest('id')
+            ->orderByDesc('id')
             ->first();
 
         if ($prestamo) {
-            return response()->json([
+            $respuesta = [
                 'monto' => $prestamo->MONTO,
-            ]);
+                'fecha_apertura' => $prestamo->FECHAAPERTURA,
+                'fecha_vencimiento' => $prestamo->FECHAVENCIMIENTO,
+            ];
+
+            // Esta línea no se ejecuta si dd() está presente
+            return response()->json($respuesta);
         }
 
         return response()->json(['monto' => null], 404);
     }
+
     public function validarPassword(Request $request)
     {
 
@@ -387,35 +432,69 @@ class DesembolsoprestamoController extends Controller
 
 
 
-    public function eliminarDesembolso($codigoCliente)
+    public function eliminarDesembolso(Request $request)
     {
         DB::beginTransaction();
 
         try {
+
+            $fechaApertura = $request->input('fecha_apertura');
+            $fechaVencimiento = $request->input('fecha_vencimiento');
+            $codigoCliente = $request->input('codigoCliente');
+            Log::info('Datos recibidos en eliminarDesembolso', [
+                'fecha_apertura' => $fechaApertura,
+                'fecha_vencimiento' => $fechaVencimiento,
+                'codigoCliente' => $codigoCliente
+            ]);
             // Buscar el último desembolso
-            $cliente = Saldoprestamo::where('id_cliente', $codigoCliente)
-                ->latest('id')
-                ->first();
 
-            if (!$cliente) {
-                return response()->json([
-                    'success' => false,
-                    'mensaje' => 'No se encontró el desembolso para este cliente'
-                ], 404);
-            }
+            //cambiare esta linea de codigo para que en la vista caja mostrar los desembolso de la tabla historial de prestamos y debeser
+            //para no afectar el conteo de las rotaciones de los desembolsos
+            
+            // $cliente = Saldoprestamo::where('id_cliente', $codigoCliente)
+            //     ->where('FECHAAPERTURA', $fechaApertura)
+            //     ->where('FECHAVENCIMIENTO', $fechaVencimiento)
+            //     ->latest('id')
+            //     ->first();
 
-            // Eliminar el registro de saldoprestamo
-            $cliente->delete();
+            // if (!$cliente) {
+            //     return response()->json([
+            //         'success' => false,
+            //         'mensaje' => 'No se encontró el desembolso para este cliente'
+            //     ], 404);
+            // }
+
+            // // En vez de eliminar, actualizamos las columnas monto y saldo a null
+            // $cliente->update([
+            //     'MONTO' => null,
+            //     'SALDO' => null,
+            // ]);
+
 
             // Eliminar el último registro de debeser
             DB::table('debeser')
                 ->where('id_cliente', $codigoCliente)
-                ->where('created_at', function ($query) use ($codigoCliente) {
+                ->where('fecha_apertura', $fechaApertura)
+                ->where('fecha_vencimiento', $fechaVencimiento)
+                ->where('created_at', function ($query) use ($codigoCliente, $fechaApertura, $fechaVencimiento) {
                     $query->select(DB::raw('MAX(created_at)'))
                         ->from('debeser')
-                        ->where('id_cliente', $codigoCliente);
+                        ->where('id_cliente', $codigoCliente)
+                        ->where('fecha_apertura', $fechaApertura)
+                        ->where('fecha_vencimiento', $fechaVencimiento);
                 })
                 ->delete();
+
+            $registro = HistorialPrestamos::where('id_cliente', $codigoCliente)
+                ->where('fecha_apertura', $fechaApertura)
+                ->where('fecha_vencimiento', $fechaVencimiento)
+                ->latest('id')
+                ->first();
+
+            if ($registro) {
+                $registro->delete();
+            }
+
 
             DB::commit();
 
@@ -454,7 +533,7 @@ class DesembolsoprestamoController extends Controller
                 'PLAZO' => $request->input('plazo'),
                 'INTERES' => $request->input('interes'),
                 'COLECTOR' => $request->input('colector'),
-                'MANEJO' => $request->input('colector'),
+                'MANEJO' => $request->input('manejo'),
                 'groupsolid' => 1,
                 'centro' => 1,
                 'sucursal' => $request->input('sucursal'),
@@ -468,11 +547,30 @@ class DesembolsoprestamoController extends Controller
                 'ID_BANCO' => $request->input('banco'),
                 'ASESOR' => $request->input('id_asesor'),
             ];
+            $datosHistorialPrestamos = [
+                'id_cliente' => $id_cliente,
+                'monto' => $request->input('montoOtorgar'),
+                'cuota' => $request->input('cuota'),
+                'plazo' => $request->input('plazo'),
+                'interes' => $request->input('interes'),
+                'manejo' => $request->input('manejo'),
+                'fecha_apertura' => $request->input('fechaApertura'),
+                'fecha_vencimiento' => $request->input('fechaVencimiento'),
+                'asesor' => $request->input('id_asesor'),
+                'centro' => 1, // Asignar el centro por defecto
+                'grupo' => 1, // Asignar el grupo por defecto
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
             // Usando Eloquent para crear o actualizar el préstamo
             SaldoPrestamo::updateOrCreate(
                 ['id_cliente' => $id_cliente],
                 $datos
             );
+            //Insertar en tabla Historialprestamos
+            if (!empty($datosHistorialPrestamos)) {
+                DB::table('historial_prestamos')->insert($datosHistorialPrestamos);
+            }
             // Crear o actualizar relación en Centros_Grupos_Clientes
             Centros_Grupos_Clientes::updateOrCreate(
                 [

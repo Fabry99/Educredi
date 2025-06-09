@@ -113,6 +113,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!id_centro || !id_grupo) {
             return;
         }
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return text;
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
 
         fetch('/caja/obtenerPrestamos', {
             method: 'POST',
@@ -138,25 +147,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
                     const fila = $(`
-            <tr>
-                <td style='text-align:end'>${prestamo.cliente_id || '—'}</td>
-                <td>${prestamo.cliente_nombre}</td>
-                <td style='text-align:center' contenteditable="true">${prestamo.saldo}</td>
-                <td style='text-align: center;'>${prestamo.ultima_fecha || '—'}</td>
-                <td style='text-align: center;'>${prestamo.proxima_fecha || '—'}</td>
-                <td style='text-align:center' contenteditable="true">${prestamo.cuota || '—'}</td>
-                <td style='text-align:center' contenteditable="true">${prestamo.intereses || '—'}</td>
-                <td></td>
-                <td style='text-align:center' contenteditable="true">${prestamo.manejo || '—'}</td>
-                <td style='text-align:center' contenteditable="true">${prestamo.seguro || '—'}</td>
-                <td style='text-align:center' contenteditable="true">${prestamo.iva || '—'}</td>
-                <td style='text-align:center' contenteditable="true">${prestamo.capital || '—'}</td>
-                <td style='text-align:center'>${prestamo.dias || '—'}</td>
-                <td style='text-align:center'>${prestamo.fecha_apertura || '—'}</td>
-                <td style='text-align:center'>${prestamo.fecha_vencimiento || '—'}</td>
-            </tr>
-        `);
+<tr>
+    <td style='text-align:end'>${prestamo.cliente_id || '—'}</td>
+    <td>${prestamo.cliente_nombre}</td>
+    <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.saldo || '—')}">${prestamo.saldo || '—'}</td>
+    <td style='text-align: center;'>${prestamo.ultima_fecha || '—'}</td>
+    <td style='text-align: center;'>${prestamo.proxima_fecha || '—'}</td>
+    <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.cuota || '—')}">${prestamo.cuota || '—'}</td>
+    <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.intereses || '—')}">${prestamo.intereses || '—'}</td>
+    <td></td>
+    <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.manejo || '—')}">${prestamo.manejo || '—'}</td>
+    <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.seguro || '—')}">${prestamo.seguro || '—'}</td>
+    <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.iva || '—')}">${prestamo.iva || '—'}</td>
+    <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.capital || '—')}">${prestamo.capital || '—'}</td>
+    <td style='text-align:center'>${prestamo.dias || '—'}</td>
+    <td style='text-align:center'>${prestamo.fecha_apertura || '—'}</td>
+    <td style='text-align:center'>${prestamo.fecha_vencimiento || '—'}</td>
+</tr>
+`);
 
+
+                    fila.find('[contenteditable="true"]').on('blur', function () {
+                        const currentValue = $(this).text().trim();
+                        const originalValue = $(this).attr('data-original');
+                        if (currentValue === '') {
+                            $(this).text(originalValue);
+                        }
+                    });
                     // Evento click para seleccionar fila y obtener cliente_id
                     fila.on('click', function () {
                         tabla.find("tr").removeClass("selected");
@@ -275,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
     })
-     // Cerrar el modal al hacer clic en el botón de cerrar
+    // Cerrar el modal al hacer clic en el botón de cerrar
     $('.close-btn1').on('click', function () {
         $('#modalCajaDebeSer').fadeOut();
     });

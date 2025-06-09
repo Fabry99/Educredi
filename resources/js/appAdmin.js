@@ -1244,6 +1244,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnreversionprestamo = document.getElementById('btn-abrirmodalreversion');
     const id_cliente = document.getElementById('codigo');
     const inputMonto = document.getElementById('monto');
+    const fecha_apertura = document.getElementById('fecha_apertura');
+    const fecha_vencimiento = document.getElementById('fecha_vencimiento');
     const btnAceptar = document.getElementById('btnAceptar');
     const inputPassword = document.getElementById('password');
 
@@ -1258,6 +1260,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const SpecialPassword = inputPassword.value.trim();
                     const codigoCliente = id_cliente.value.trim();
+                    const fecha_aperturaenviar = fecha_apertura.value.trim();
+                    const fecha_vencimientoenviar = fecha_vencimiento.value.trim();
 
                     if (SpecialPassword === '') {
                         mostrarAlerta("Por Favor Ingrese una Contraseña Correcta", "error");
@@ -1276,12 +1280,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         }).then(response => response.json())
                             .then(data => {
                                 if (data.valida) {
-                                    fetch(`/eliminar/desembolsoprestamo/${codigoCliente}`, {
+                                    fetch(`/eliminar/desembolsoprestamo`, {
                                         method: 'DELETE',
                                         headers: {
                                             'Content-Type': 'application/json',
                                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Incluye el token CSRF
                                         }
+                                        ,
+                                        body: JSON.stringify({
+                                            codigoCliente: codigoCliente,     
+                                            fecha_apertura: fecha_aperturaenviar,
+                                            fecha_vencimiento: fecha_vencimientoenviar
+                                        })
                                     }).then(response => response.json())
                                         .then(deleteData => {
                                             if (deleteData.success) {
@@ -1307,6 +1317,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        //Funcion para mostrar el saldo de prestamo al escribir el codigo del cliente
         let debounceTimeout; // Variable para guardar el temporizador
 
         id_cliente.addEventListener('input', function () {
@@ -1325,7 +1336,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         })
                         .then(data => {
+                            console.log(data);
                             inputMonto.value = data.monto !== null ? data.monto : '';
+                            fecha_apertura.value = data.fecha_apertura !== null ? data.fecha_apertura : '';
+                            fecha_vencimiento.value = data.fecha_vencimiento !== null ? data.fecha_vencimiento : '';
                         })
                         .catch(error => {
                             mostrarAlerta(error.message || "Error en la búsqueda", "error");

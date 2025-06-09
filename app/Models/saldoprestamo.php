@@ -69,6 +69,7 @@ class saldoprestamo extends Model
         'ULT_APO',
         'ULT_SIM',
         'COLECTOR',
+        'MANEJO',
         'AVIOGANA',
         'NAVDIA',
         'APODIA',

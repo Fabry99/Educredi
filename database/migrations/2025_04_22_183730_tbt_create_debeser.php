@@ -26,6 +26,9 @@ return new class extends Migration
             $table->decimal('aportac',10,2);
             $table->decimal('capital',10,2);
             $table->decimal('iva',12,2);
+            $table->date('fecha_apertura');
+            $table->date('fecha_vencimiento');
+            $table->timestamps();
         });
     }
 
