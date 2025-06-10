@@ -105,14 +105,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     selectGrupo.addEventListener('change', obtenerDatosTabla);
 
+    let selectedRows = new Set();
 
     function obtenerDatosTabla() {
         const id_centro = selectCentro.value;
         const id_grupo = selectGrupo.value;
 
-        if (!id_centro || !id_grupo) {
-            return;
-        }
+        if (!id_centro || !id_grupo) return;
+
         function escapeHtml(text) {
             if (typeof text !== 'string') return text;
             return text
@@ -129,23 +129,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({
-                id_centro: id_centro,
-                id_grupo: id_grupo
-            })
+            body: JSON.stringify({ id_centro, id_grupo })
         })
             .then(response => response.json())
             .then(data => {
                 if (data.datos.length > 0) {
                     window.nombreCentroActual = data.datos[0].centro;
                 }
+
                 const tabla = $('#tablaCaja');
                 const tablaBody = tabla.find("tbody");
                 tablaBody.empty();
 
+
                 data.datos.forEach(prestamo => {
-
-
                     const fila = $(`
 <tr>
     <td style='text-align:end'>${prestamo.cliente_id || '—'}</td>
@@ -164,9 +161,9 @@ document.addEventListener('DOMContentLoaded', function () {
     <td style='text-align:center'>${prestamo.fecha_apertura || '—'}</td>
     <td style='text-align:center'>${prestamo.fecha_vencimiento || '—'}</td>
 </tr>
-`);
+            `);
 
-
+                    // Restaurar valor original si el campo queda vacío
                     fila.find('[contenteditable="true"]').on('blur', function () {
                         const currentValue = $(this).text().trim();
                         const originalValue = $(this).attr('data-original');
@@ -174,33 +171,55 @@ document.addEventListener('DOMContentLoaded', function () {
                             $(this).text(originalValue);
                         }
                     });
-                    // Evento click para seleccionar fila y obtener cliente_id
-                    fila.on('click', function () {
-                        tabla.find("tr").removeClass("selected");
-                        $(this).addClass("selected");
 
-                        const celdas = $(this).find('td');
-
-                        const cliente_id = celdas.eq(0).text().trim();    // primer dato
-                        const segundoDato = celdas.eq(1).text().trim();   // segundo dato
-                        const penultimo = celdas.eq(celdas.length - 2).text().trim();
-                        const ultimo = celdas.eq(celdas.length - 1).text().trim();
-
-
-                        window.clienteSeleccionado = {
-                            id: cliente_id,
-                            nombrecliente: segundoDato,   // guardo el segundo dato
-                            Apertura: penultimo,
-                            Vencimiento: ultimo
-                        };
-                    });
                     tablaBody.append(fila);
                 });
 
-                // Evento de clic por fila para obtener el conteo de cuotas
-                tablaBody.find('tr').on('click', function () {
-                    const id_cliente = $(this).find('td:first').text().trim();
 
+
+                // Agrega el evento de selección múltiple + lógica adicional
+                tablaBody.off('click').on('click', 'tr', function (event) {
+                    const fila = $(this);
+                    const celdas = fila.find('td');
+                    const id_cliente = celdas.eq(0).text().trim();
+
+                    if (event.ctrlKey || event.metaKey) {
+                        if (fila.hasClass('selected')) {
+                            fila.removeClass('selected');
+                            selectedRows.delete(id_cliente);
+                        } else {
+                            fila.addClass('selected');
+                            selectedRows.add(id_cliente);
+                        }
+
+                        const datosFila = {};
+                        celdas.each(function (index) {
+                            datosFila[`columna_${index}`] = $(this).text().trim();
+                        });
+
+
+                    } else {
+                        tablaBody.find('tr').removeClass('selected');
+                        selectedRows.clear();
+
+                        fila.addClass('selected');
+                        selectedRows.add(id_cliente);
+
+                    }
+
+                    // Guardar datos del cliente seleccionado (último click)
+                    const segundoDato = celdas.eq(1).text().trim();
+                    const penultimo = celdas.eq(celdas.length - 2).text().trim();
+                    const ultimo = celdas.eq(celdas.length - 1).text().trim();
+
+                    window.clienteSeleccionado = {
+                        id: id_cliente,
+                        nombrecliente: segundoDato,
+                        Apertura: penultimo,
+                        Vencimiento: ultimo
+                    };
+
+                    // Obtener conteo de cuotas si el cliente es válido
                     if (!id_cliente || id_cliente === '—') {
                         mostrarAlerta('No se ha seleccionado un cliente válido.', 'error');
                         return;
@@ -213,17 +232,20 @@ document.addEventListener('DOMContentLoaded', function () {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         },
                         body: JSON.stringify({
-                            id_cliente: id_cliente,
+                            id_cliente,
+                            Apertura: penultimo,
+                            Vencimiento: ultimo
                         })
                     })
                         .then(response => response.json())
                         .then(data => {
                             document.getElementById('input_cuota_total').value = `${data.conteo_comparativo} de ${data.conteo_total}`;
-
                         })
                         .catch(error => {
                             console.error('Error al obtener el conteo de cuotas:', error);
                         });
+
+
                 });
 
             })
@@ -231,6 +253,124 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Error al obtener los datos:', error);
             });
     }
+    $(document).on('click', function (event) {
+        if (!$(event.target).closest('#tablaCaja').length) {
+            $('#tablaCaja tbody tr').removeClass('selected');
+            selectedRows.clear();
+        }
+    });
+    // Asignar eventos una vez que se genera la tabla
+    $('#tablaCaja').on('blur', 'td[contenteditable="true"]', function () {
+        const celda = $(this);
+        const fila = celda.closest('tr');
+        const index = celda.index(); // Qué columna fue editada
+
+        const currentValue = celda.text().trim();
+        const originalValue = celda.attr('data-original');
+
+        // 🔒 Si el usuario borró el valor y se restauró el original, no recalculamos
+        if (currentValue === '') {
+            celda.text(originalValue);
+            return;
+        }
+
+        const cuotaCelda = fila.find('td').eq(5);
+        const capitalCelda = fila.find('td').eq(11);
+        const saldoCelda = fila.find('td').eq(2);
+        const cuotaOriginal = parseFloat(cuotaCelda.attr('data-original')) || 0;
+        const saldoOriginal = parseFloat(saldoCelda.attr('data-original')) || parseFloat(saldoCelda.text()) || 0;
+
+        if (index === 5) {
+            const cuotaActual = parseFloat(cuotaCelda.text()) || 0;
+
+            if (cuotaActual !== cuotaOriginal) {
+                const intereses = parseFloat(fila.find('td').eq(6).text()) || 0;
+                const manejo = parseFloat(fila.find('td').eq(8).text()) || 0;
+                const seguro = parseFloat(fila.find('td').eq(9).text()) || 0;
+                const iva = parseFloat(fila.find('td').eq(10).text()) || 0;
+
+                const capital = cuotaActual - intereses - manejo - seguro - iva;
+                const nuevoSaldo = saldoOriginal - capital;
+
+                capitalCelda.text(capital.toFixed(2));
+                saldoCelda.text(nuevoSaldo.toFixed(2));
+            }
+        } else if (index === 11) {
+            const capitalActual = parseFloat(capitalCelda.text()) || 0;
+            const nuevoSaldo = saldoOriginal - capitalActual;
+            saldoCelda.text(nuevoSaldo.toFixed(2));
+        }
+    });
+
+
+    $('#btnGuardar').on('click', function () {
+        const btn = $(this);
+
+        if (btn.prop('disabled')) return;
+
+        btn.prop('disabled', true); // Desactivar botón
+
+        const filasSeleccionadas = $('#tablaCaja tbody tr.selected');
+        if (filasSeleccionadas.length === 0) {
+            mostrarAlerta('No hay filas seleccionadas para guardar.', 'info');
+            btn.prop('disabled', false);
+            return;
+        }
+
+        const datosFilas = [];
+
+        filasSeleccionadas.each(function () {
+            const celdas = $(this).find('td');
+            const filaDatos = {
+                cliente_id: celdas.eq(0).text().trim(),
+                cliente_nombre: celdas.eq(1).text().trim(),
+                saldo: celdas.eq(2).text().trim(),
+                ultima_fecha: celdas.eq(3).text().trim(),
+                proxima_fecha: celdas.eq(4).text().trim(),
+                cuota: celdas.eq(5).text().trim(),
+                intereses: celdas.eq(6).text().trim(),
+                manejo: celdas.eq(8).text().trim(),
+                seguro: celdas.eq(9).text().trim(),
+                iva: celdas.eq(10).text().trim(),
+                capital: celdas.eq(11).text().trim(),
+                dias: celdas.eq(12).text().trim(),
+                fecha_apertura: celdas.eq(13).text().trim(),
+                fecha_vencimiento: celdas.eq(14).text().trim(),
+            };
+            datosFilas.push(filaDatos);
+        });
+
+        if (datosFilas.length === 0) {
+            mostrarAlerta('No hay datos para guardar.', 'info');
+            btn.prop('disabled', false);
+            return;
+        }
+
+        // Mostrar mensaje de "Procesando..."
+        mostrarAlerta('Procesando pago...', 'info');
+
+        // Simular envío (reemplaza esto con tu llamada real al backend)
+        // fetch('/caja/guardarDatos', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        //     },
+        //     body: JSON.stringify({ datos: datosFilas })
+        // })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         mostrarAlerta('Pago procesado correctamente.', 'success');
+        //         btn.prop('disabled', false);
+        //     })
+        //     .catch(error => {
+        //         console.error('Error al guardar:', error);
+        //         mostrarAlerta('Error al procesar el pago.', 'error');
+        //         btn.prop('disabled', false);
+        //     });
+    });
+
+
     //Eveto para mostrar el estado de cuenta Debe Ser
     const btnMostrarDebeSer = document.getElementById('openModalBtnDebeser');
     btnMostrarDebeSer.addEventListener('click', function () {
@@ -311,32 +451,37 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
 function mostrarAlerta(mensaje, tipo) {
     const alerta = document.getElementById('alert-notification');
     const mensajeAlerta = document.getElementById('alert-notification-message');
 
-    // Limpiar cualquier contenido o clase previa
+    // Limpiar contenido y clases anteriores
     mensajeAlerta.textContent = mensaje;
-    alerta.classList.remove('error_notification', 'success_notification'); // Limpiar clases anteriores
+    alerta.classList.remove('error_notification', 'success_notification', 'info_notification');
 
-    // Asignar la clase correcta según el tipo
+    // Asignar clase según tipo
     if (tipo === "error") {
-        alerta.classList.add('error_notification'); // Clase de error (rojo)
+        alerta.classList.add('error_notification');
     } else if (tipo === "success") {
-        alerta.classList.add('success_notification'); // Clase de éxito (verde)
+        alerta.classList.add('success_notification');
+    } else if (tipo === "info") {
+        alerta.classList.add('info_notification');
     }
 
-    // Mostrar la alerta y aplicar animación
+    // Mostrar la alerta
     alerta.style.display = 'block';
     setTimeout(() => {
-        alerta.classList.add('show'); // Aplica la animación de mostrar
+        alerta.classList.add('show');
     }, 10);
 
-    // Ocultar la alerta después de 4 segundos
-    setTimeout(function () {
-        alerta.classList.remove('show'); // Eliminar la animación de mostrar
-        setTimeout(function () {
-            alerta.style.display = 'none'; // Ocultar la alerta completamente
-        }, 500);  // Tiempo para que la animación termine
-    }, 4000);  // La alerta se oculta después de 4 segundos
+    // Solo ocultar automáticamente si el mensaje no es "Procesando pago..."
+    if (tipo !== "info") {
+        setTimeout(() => {
+            alerta.classList.remove('show');
+            setTimeout(() => {
+                alerta.style.display = 'none';
+            }, 500);
+        }, 4000);
+    }
 }

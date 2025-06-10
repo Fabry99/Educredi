@@ -33,50 +33,56 @@ class MovimientocajaController extends Controller
         $id_centro = $request->input('id_centro');
         $id_grupo = $request->input('id_grupo');
 
-        $resultados = DB::table('centros_grupos_clientes as cgc')
-            ->joinSub(function ($query) {
-                $query->from('saldoprestamo as sp1')
-                    ->join(DB::raw("(
-              SELECT id_cliente, MAX(id) AS max_id
-              FROM saldoprestamo
-              GROUP BY id_cliente
-          ) as latest"), 'sp1.id', '=', 'latest.max_id')
-                    ->select(
-                        'sp1.id',
-                        'sp1.SALDO',
-                        'sp1.CUOTA',
-                        'sp1.ULTIMA_FECHA_PAGADA',
-                        'sp1.id_cliente',
-                        'sp1.FECHAAPERTURA',
-                        'sp1.FECHAVENCIMIENTO',
-                        'sp1.centro',
-                        'sp1.interes'
-                    );
-            }, 'sp', 'cgc.cliente_id', '=', 'sp.id_cliente')
-            ->join('clientes as c', 'c.id', '=', 'sp.id_cliente') // ← AQUÍ agregas el JOIN
-            ->join('centros as cen', 'sp.centro', '=', 'cen.id')
-            ->where('cgc.grupo_id', $id_grupo)
-            ->where('cgc.centro_id', $id_centro)
-            ->orderBy('cgc.grupo_id')
-            ->select(
-                'cgc.grupo_id',
-                'sp.id',
-                'sp.SALDO',
-                'sp.CUOTA',
-                'sp.ULTIMA_FECHA_PAGADA',
-                'sp.id_cliente',
-                'sp.FECHAAPERTURA',
-                'sp.FECHAVENCIMIENTO',
-                'sp.centro',
-                'sp.interes',
-                'c.nombre as cliente_nombre',     // ← Incluyes nombre
-                'c.apellido as cliente_apellido',  // ← Incluyes apellido
-                'cen.nombre as centro_nombre'
-            )
-            ->get();
-        Log::info('Datos obtenidos', $resultados->toArray()); // <-- Esto es correcto
+        $resultados = DB::select("
+    WITH cgc_filtered AS (
+        SELECT cliente_id
+        FROM centros_grupos_clientes
+        WHERE centro_id = ? AND grupo_id = ?
+    ),
+    cgc_count AS (
+        SELECT COUNT(*) AS total FROM cgc_filtered
+    ),
+    saldos_numerados AS (
+        SELECT sp.id, sp.id_cliente, sp.SALDO, sp.CUOTA, sp.ULTIMA_FECHA_PAGADA,
+               sp.FECHAAPERTURA, sp.FECHAVENCIMIENTO, sp.centro, sp.INTERES, sp.groupsolid,
+               ROW_NUMBER() OVER (PARTITION BY sp.id_cliente ORDER BY sp.id DESC) AS rn
+        FROM saldoprestamo AS sp
+        WHERE sp.centro = ? AND sp.groupsolid = ? 
+          AND sp.id_cliente IN (SELECT cliente_id FROM cgc_filtered)
+    )
+    SELECT 
+      sn.id,
+      sn.id_cliente,
+      c.nombre AS cliente_nombre,
+      c.apellido AS cliente_apellido,
+      sn.SALDO,
+      sn.CUOTA,
+      sn.ULTIMA_FECHA_PAGADA,
+      sn.FECHAAPERTURA,
+      sn.FECHAVENCIMIENTO,
+      sn.centro,
+      cen.nombre AS centro_nombre,
+      sn.INTERES,
+      sn.groupsolid,
+      cc.total AS total_registros
+    FROM saldos_numerados sn
+    JOIN cgc_count cc ON 1=1
+    JOIN clientes c ON c.id = sn.id_cliente
+    JOIN centros cen ON cen.id = sn.centro
+    WHERE sn.rn = 1
+    ORDER BY sn.id DESC
+", [
+            $id_centro,
+            $id_grupo,
+            $id_centro,
+            $id_grupo
+        ]);
+
+
+        $resultados = collect($resultados);
+
         // Construir array de filtros con cliente + fechas
-        $filtros = $resultados->map(function ($item) {
+        $filtros = collect($resultados)->map(function ($item) {
             return [
                 'id_cliente' => $item->id_cliente,
                 'fecha_apertura' => $item->FECHAAPERTURA,
@@ -84,13 +90,18 @@ class MovimientocajaController extends Controller
             ];
         })->toArray();
 
-
         $debeserTodos = DB::table('debeser as d1')
             ->select('d1.*')
             ->join(
-                DB::raw('(SELECT id_cliente, MAX(created_at) as max_created FROM debeser GROUP BY id_cliente) as d2'),
+                DB::raw('(
+            SELECT id_cliente, fecha_apertura, fecha_vencimiento, MAX(created_at) as max_created
+            FROM debeser
+            GROUP BY id_cliente, fecha_apertura, fecha_vencimiento
+        ) as d2'),
                 function ($join) {
                     $join->on('d1.id_cliente', '=', 'd2.id_cliente')
+                        ->on('d1.fecha_apertura', '=', 'd2.fecha_apertura')
+                        ->on('d1.fecha_vencimiento', '=', 'd2.fecha_vencimiento')
                         ->on('d1.created_at', '=', 'd2.max_created');
                 }
             )
@@ -162,7 +173,6 @@ class MovimientocajaController extends Controller
                     'datos_debeser' => $proximaFila,
                     'dias' => $diasTexto,
                     'centro' => $dato->centro_nombre ?? 'Sin centro',
-                    'interes' => $dato->interes,
 
                 ];
 
@@ -173,7 +183,7 @@ class MovimientocajaController extends Controller
 
 
         ];
-        log::info('Datos obtenidos debeser', $respuesta); // <-- Esto es correcto
+
 
         return response()->json($respuesta);
     }
@@ -181,7 +191,8 @@ class MovimientocajaController extends Controller
     {
 
         $id_cliente = $request->input('id_cliente');
-
+        $fechaApertura = $request->input('Apertura');
+        $fechaVencimiento = $request->input('Vencimiento');
         if (!$id_cliente) {
             return response()->json(['error' => 'ID de cliente no proporcionado'], 400);
         }
@@ -192,15 +203,22 @@ class MovimientocajaController extends Controller
             ->value('ULTIMA_FECHA_PAGADA');
 
 
-        $registros = DB::table('debeser')
-            ->selectRaw('*, COUNT(*) OVER () AS total_filas')
+        $subquery = DB::table('debeser')
+            ->selectRaw('COUNT(*) AS total_filas, MAX(created_at) AS max_created_at, id_cliente, fecha_apertura, fecha_vencimiento')
             ->where('id_cliente', $id_cliente)
-            ->where('created_at', function ($query) use ($id_cliente) {
-                $query->selectRaw('MAX(created_at)')
-                    ->from('debeser')
-                    ->where('id_cliente', $id_cliente);
+            ->where('fecha_apertura', $fechaApertura)
+            ->where('fecha_vencimiento', $fechaVencimiento)
+            ->groupBy('id_cliente', 'fecha_apertura', 'fecha_vencimiento');
+
+        $registros = DB::table('debeser as d')
+            ->joinSub($subquery, 't', function ($join) {
+                $join->on('d.id_cliente', '=', 't.id_cliente')
+                    ->on('d.fecha_apertura', '=', 't.fecha_apertura')
+                    ->on('d.fecha_vencimiento', '=', 't.fecha_vencimiento')
+                    ->on('d.created_at', '=', 't.max_created_at');
             })
-            ->orderBy('fecha') // Asegúrate de que estén en orden ascendente por fecha
+            ->orderBy('d.fecha', 'asc')
+            ->select('d.*', 't.total_filas')
             ->get();
 
         $conteoTotal = $registros->isNotEmpty() ? $registros[0]->total_filas : 0;
@@ -242,22 +260,24 @@ class MovimientocajaController extends Controller
         $fechaVencimiento = $request->input('FechaVencimiento');
 
 
-
         $registros = DB::table('debeser')
-            ->selectRaw('fecha, cuota, capital, intereses, iva, saldo,tasa_interes, COUNT(*) OVER () AS total_filas')
+            ->select('fecha', 'cuota', 'capital', 'intereses', 'iva', 'saldo', 'tasa_interes')
+            ->addSelect(DB::raw('COUNT(*) OVER () AS total_filas'))
             ->where('id_cliente', $id_cliente)
-            ->whereBetween('fecha', [$fechaApertura, $fechaVencimiento])
+            ->where('fecha_apertura', $fechaApertura)
+            ->where('fecha_vencimiento', $fechaVencimiento)
             ->where('created_at', function ($query) use ($id_cliente, $fechaApertura, $fechaVencimiento) {
                 $query->selectRaw('MAX(created_at)')
                     ->from('debeser')
                     ->where('id_cliente', $id_cliente)
-                    ->whereBetween('fecha', [$fechaApertura, $fechaVencimiento]);
+                    ->where('fecha_apertura', $fechaApertura)
+                    ->where('fecha_vencimiento', $fechaVencimiento);
             })
             ->get();
+
         $registrosSaldoPrestamo = saldoprestamo::with('asesor')
             ->where('id_cliente', $id_cliente)
             ->first();
-        log::info('datos del js', $registrosSaldoPrestamo->toArray());
         return response()->json([
             'debeser' => $registros,
 

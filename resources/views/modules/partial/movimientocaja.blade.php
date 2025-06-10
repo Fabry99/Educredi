@@ -90,7 +90,7 @@
                     </div>
                 </div>
                 <div class="btn-grupos" style="display: flex; margin:15px; justify-content: center">
-                    <a href="#" id="openModalBtn" class="btn-agregar"
+                    <a href="#" id="btnGuardar" class="btn-agregar"
                         style="margin-right: 15px;"><span>Confirmar</span></a>
                     <a href="#" id="openModalBtn" class="btn-agregar"
                         style="margin-right: 15px;"><span>Reimprimir</span></a>

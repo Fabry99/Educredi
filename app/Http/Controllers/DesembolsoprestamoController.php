@@ -20,6 +20,7 @@ use App\Models\Supervisores;
 use App\Models\Tipopago;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
+use DateInterval;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -227,30 +228,34 @@ class DesembolsoprestamoController extends Controller
 
             for ($i = 0; $i < $plazo; $i++) {
                 if ($i > 0) {
-                    $fechaParacadaMiembro->addDays($diasPorPago);
+                    // Avanza la fecha de pago según intervalo
+                    $fechaParacadaMiembro->add(new DateInterval("P{$diasPorPago}D"));
                 }
 
                 if ($segundaFila) {
+                    // Primera cuota especial
                     $interesesCalculado = $interes;
-                    // $iva ya viene del JSON
+                    $iva = $interesesCalculado * $tasa_iva;
+                    $capital = $cuotaFinal - $interesesCalculado - $manejo - $microseguro - $iva;
                     $segundaFila = false;
                 } else {
+                    // Cuotas siguientes
                     $interesesCalculado = $montoRestante * $tasa_diaria * $diasPorPago;
                     $iva = $interesesCalculado * $tasa_iva;
                     $capital = $cuotaFinal - $interesesCalculado - $manejo - $microseguro - $iva;
                 }
 
-                // Si es la última iteración, ajustamos el capital para que el saldo llegue a cero exacto
                 if ($i == $plazo - 1) {
-                    $capital = $montoRestante; // absorber todo el restante
+                    // Ajuste última cuota para que saldo llegue a 0
+                    $capital = $montoRestante;
                     $cuota = $capital + $interesesCalculado + $iva + $manejo + $microseguro;
-                    $montoRestante -= $capital; // esto debería llevar el saldo a cero
-
+                    $montoRestante -= $capital;
                     $nuevaFechaVencimiento = clone $fechaParacadaMiembro;
 
-                    // Asignar la fecha de vencimiento al cliente en tabla debeser
+                    // Guardar fecha de vencimiento para este cliente
                     $fechasVencimientoClientes[$idCliente] = $nuevaFechaVencimiento->format('Y-m-d');
                 } else {
+                    $cuota = $cuotaFinal;
                     $montoRestante -= $capital;
                 }
 
