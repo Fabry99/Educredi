@@ -50,11 +50,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const fechalocal = `${year}-${month}-${day}`;
 
-    // const today = new Date().toISOString().split('T')[0];
-
     document.getElementById('fecha').value = fechalocal;
     document.getElementById('fcontable').value = fechalocal;
     document.getElementById('fabono').value = fechalocal;
+
+    // const today = new Date().toISOString().split('T')[0];
+
+    const comprobante = document.getElementById('comprobante');
+    fetch('/caja/obtenercomprobante', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la solicitud: ' + response.status);
+            }
+            return response.json(); // o response.text(), según lo que devuelva tu backend
+        })
+        .then(data => {
+            comprobante.value = data.comprobante
+        })
+        .catch(error => {
+            console.error('Ocurrió un error:', error);
+        });
+
+
+
 
     const selectCentro = document.getElementById('id_centro');
     const selectGrupo = document.getElementById('id_grupo');
@@ -107,6 +130,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let selectedRows = new Set();
 
+    function formatearFechaDMY(fecha) {
+        if (!fecha) return '—';
+        const partes = fecha.split('-');
+        if (partes.length !== 3) return '—';
+        return `${partes[2]}-${partes[1]}-${partes[0]}`;
+    }
+
+
+
     function obtenerDatosTabla() {
         const id_centro = selectCentro.value;
         const id_grupo = selectGrupo.value;
@@ -148,8 +180,8 @@ document.addEventListener('DOMContentLoaded', function () {
     <td style='text-align:end'>${prestamo.cliente_id || '—'}</td>
     <td>${prestamo.cliente_nombre}</td>
     <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.saldo || '—')}">${prestamo.saldo || '—'}</td>
-    <td style='text-align: center;'>${prestamo.ultima_fecha || '—'}</td>
-    <td style='text-align: center;'>${prestamo.proxima_fecha || '—'}</td>
+    <td style='text-align: center;'>${formatearFechaDMY(prestamo.ultima_fecha)}</td>
+    <td style='text-align: center;'>${formatearFechaDMY(prestamo.proxima_fecha)}</td>
     <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.cuota || '—')}">${prestamo.cuota || '—'}</td>
     <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.intereses || '—')}">${prestamo.intereses || '—'}</td>
     <td></td>
@@ -158,8 +190,8 @@ document.addEventListener('DOMContentLoaded', function () {
     <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.iva || '—')}">${prestamo.iva || '—'}</td>
     <td style='text-align:center' contenteditable="true" data-original="${escapeHtml(prestamo.capital || '—')}">${prestamo.capital || '—'}</td>
     <td style='text-align:center'>${prestamo.dias || '—'}</td>
-    <td style='text-align:center'>${prestamo.fecha_apertura || '—'}</td>
-    <td style='text-align:center'>${prestamo.fecha_vencimiento || '—'}</td>
+    <td style='text-align:center'>${formatearFechaDMY(prestamo.fecha_apertura)}</td>
+    <td style='text-align:center'>${formatearFechaDMY(prestamo.fecha_vencimiento)}</td>
 </tr>
             `);
 
@@ -212,11 +244,24 @@ document.addEventListener('DOMContentLoaded', function () {
                     const penultimo = celdas.eq(celdas.length - 2).text().trim();
                     const ultimo = celdas.eq(celdas.length - 1).text().trim();
 
+                    const centroSelect = document.getElementById('id_centro');
+                    const grupoSelect = document.getElementById('id_grupo');
+
+                    const centroId = centroSelect.value;
+
+                    const grupoId = grupoSelect.value;
+
+
+
+                    // Puedes agregarlos también a la variable clienteSeleccionado si los necesitas
                     window.clienteSeleccionado = {
                         id: id_cliente,
                         nombrecliente: segundoDato,
                         Apertura: penultimo,
-                        Vencimiento: ultimo
+                        Vencimiento: ultimo,
+                        centroId,
+                        grupoId
+
                     };
 
                     // Obtener conteo de cuotas si el cliente es válido
@@ -234,16 +279,20 @@ document.addEventListener('DOMContentLoaded', function () {
                         body: JSON.stringify({
                             id_cliente,
                             Apertura: penultimo,
-                            Vencimiento: ultimo
+                            Vencimiento: ultimo,
+                            centroId,
+                            grupoId
                         })
                     })
                         .then(response => response.json())
                         .then(data => {
                             document.getElementById('input_cuota_total').value = `${data.conteo_comparativo} de ${data.conteo_total}`;
+                            document.getElementById('cuota_total').value = `${data.total_cuotas}`;
                         })
                         .catch(error => {
                             console.error('Error al obtener el conteo de cuotas:', error);
                         });
+
 
 
                 });
@@ -257,49 +306,75 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!$(event.target).closest('#tablaCaja').length) {
             $('#tablaCaja tbody tr').removeClass('selected');
             selectedRows.clear();
+            $('#input_cuota_total').val('');
+            $('#cuota_total').val('');
         }
     });
     // Asignar eventos una vez que se genera la tabla
+    $('#tablaCaja').on('focus', 'td[contenteditable="true"]', function () {
+        // Guardamos valor original al entrar a editar
+        const celda = $(this);
+        celda.attr('data-original', celda.text().trim());
+        celda.data('edited', false); // flag que indica si el usuario escribió algo
+    });
+
+    $('#tablaCaja').on('input', 'td[contenteditable="true"]', function () {
+        // Cuando el usuario escribe algo, ponemos flag true
+        const celda = $(this);
+        celda.data('edited', true);
+    });
+
     $('#tablaCaja').on('blur', 'td[contenteditable="true"]', function () {
         const celda = $(this);
         const fila = celda.closest('tr');
-        const index = celda.index(); // Qué columna fue editada
+        const index = celda.index();
 
         const currentValue = celda.text().trim();
         const originalValue = celda.attr('data-original');
+        const edited = celda.data('edited'); // true si el usuario escribió algo
 
-        // 🔒 Si el usuario borró el valor y se restauró el original, no recalculamos
+        // Si está vacío, regresamos el valor original
         if (currentValue === '') {
             celda.text(originalValue);
             return;
         }
 
+        // Sólo recalculamos si el usuario realmente escribió (no solo entró y salió)
+        if (!edited) {
+            return; // No hacer nada porque no hubo edición
+        }
+
         const cuotaCelda = fila.find('td').eq(5);
         const capitalCelda = fila.find('td').eq(11);
         const saldoCelda = fila.find('td').eq(2);
-        const cuotaOriginal = parseFloat(cuotaCelda.attr('data-original')) || 0;
-        const saldoOriginal = parseFloat(saldoCelda.attr('data-original')) || parseFloat(saldoCelda.text()) || 0;
 
-        if (index === 5) {
-            const cuotaActual = parseFloat(cuotaCelda.text()) || 0;
+        const saldoBase = parseFloat(saldoCelda.attr('data-saldo-base')) || parseFloat(saldoCelda.text()) || 0;
+        const cuotaActual = parseFloat(cuotaCelda.text()) || 0;
 
-            if (cuotaActual !== cuotaOriginal) {
-                const intereses = parseFloat(fila.find('td').eq(6).text()) || 0;
-                const manejo = parseFloat(fila.find('td').eq(8).text()) || 0;
-                const seguro = parseFloat(fila.find('td').eq(9).text()) || 0;
-                const iva = parseFloat(fila.find('td').eq(10).text()) || 0;
+        function recalcular() {
+            const intereses = parseFloat(fila.find('td').eq(6).text()) || 0;
+            const manejo = parseFloat(fila.find('td').eq(8).text()) || 0;
+            const seguro = parseFloat(fila.find('td').eq(9).text()) || 0;
+            const iva = parseFloat(fila.find('td').eq(10).text()) || 0;
 
-                const capital = cuotaActual - intereses - manejo - seguro - iva;
-                const nuevoSaldo = saldoOriginal - capital;
+            const capital = cuotaActual - intereses - manejo - seguro - iva;
+            const nuevoSaldo = saldoBase - capital;
 
-                capitalCelda.text(capital.toFixed(2));
-                saldoCelda.text(nuevoSaldo.toFixed(2));
-            }
-        } else if (index === 11) {
-            const capitalActual = parseFloat(capitalCelda.text()) || 0;
-            const nuevoSaldo = saldoOriginal - capitalActual;
+            capitalCelda.text(capital.toFixed(2));
             saldoCelda.text(nuevoSaldo.toFixed(2));
         }
+
+        if ([5, 6, 8, 9, 10].includes(index)) {
+            recalcular();
+        } else if (index === 11) {
+            const capitalActual = parseFloat(capitalCelda.text()) || 0;
+            const nuevoSaldo = saldoBase - capitalActual;
+            saldoCelda.text(nuevoSaldo.toFixed(2));
+        }
+
+        // Actualizar valor original y flag
+        celda.attr('data-original', currentValue);
+        celda.data('edited', false);
     });
 
 
@@ -312,7 +387,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const filasSeleccionadas = $('#tablaCaja tbody tr.selected');
         if (filasSeleccionadas.length === 0) {
-            mostrarAlerta('No hay filas seleccionadas para guardar.', 'info');
+            mostrarAlerta('No hay filas seleccionadas para guardar.', 'error');
+            btn.prop('disabled', false);
+            return;
+        }
+
+        const fcontable = $('#fcontable').val();
+        const fabono = $('#fabono').val();
+        const comprobante = $('#comprobante').val();
+        const cuenta_id = $('#id_cuenta').val(); // Valor del banco seleccionado
+        const id_centro = $('#id_centro').val(); // obtiene el valor (id) seleccionado en el select
+        const id_grupo = $('#id_grupo').val();  // acá corriges para tomar el select correcto
+
+        if (!cuenta_id || cuenta_id === '0') {
+            mostrarAlerta('Por favor, seleccione una cuenta antes de guardar.', 'error');
             btn.prop('disabled', false);
             return;
         }
@@ -336,6 +424,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 dias: celdas.eq(12).text().trim(),
                 fecha_apertura: celdas.eq(13).text().trim(),
                 fecha_vencimiento: celdas.eq(14).text().trim(),
+                fecha_contable: fcontable,
+                fecha_abono: fabono,
+                comprobante: comprobante,
+                id_cuenta: cuenta_id,
+                id_centro: id_centro,
+                id_grupo: id_grupo,
+
             };
             datosFilas.push(filaDatos);
         });
@@ -348,26 +443,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Mostrar mensaje de "Procesando..."
         mostrarAlerta('Procesando pago...', 'info');
-
         // Simular envío (reemplaza esto con tu llamada real al backend)
-        // fetch('/caja/guardarDatos', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        //     },
-        //     body: JSON.stringify({ datos: datosFilas })
-        // })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         mostrarAlerta('Pago procesado correctamente.', 'success');
-        //         btn.prop('disabled', false);
-        //     })
-        //     .catch(error => {
-        //         console.error('Error al guardar:', error);
-        //         mostrarAlerta('Error al procesar el pago.', 'error');
-        //         btn.prop('disabled', false);
-        //     });
+        fetch('/caja/AlmacenarCuota', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({ datos: datosFilas })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("La respuesta no es JSON");
+                }
+
+                return response.json();
+            })
+            .then(data => {
+                ocultarAlertaInfo();
+                btn.prop('disabled', false);
+                if (data.status === 'success') {
+                    mostrarAlerta('Pago procesado correctamente.', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    mostrarAlerta(data.message || 'Ocurrió un error inesperado.', 'error');
+                }
+            })
+            .catch(error => {
+                ocultarAlertaInfo();
+                console.error('Error al guardar:', error);
+                mostrarAlerta('Error al procesar el pago.', 'error');
+                btn.prop('disabled', false);
+            });
     });
 
 
@@ -483,5 +595,13 @@ function mostrarAlerta(mensaje, tipo) {
                 alerta.style.display = 'none';
             }, 500);
         }, 4000);
+    }
+}
+function ocultarAlertaInfo() {
+    const alerta = document.getElementById('alert-notification');
+
+    if (alerta.classList.contains('info_notification')) {
+        alerta.classList.remove('show');  // Quita la clase show (sin animación)
+        alerta.style.display = 'none';    // Oculta inmediatamente
     }
 }

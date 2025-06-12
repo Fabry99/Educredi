@@ -68,6 +68,7 @@ class DesembolsoprestamoController extends Controller
 
         if ($clientesgrupos->isNotEmpty()) {
             return response()->json($clientesgrupos);
+            dd();
         }
 
         return response()->json(['error' => 'No se encontraron datos'], 404);
@@ -119,8 +120,12 @@ class DesembolsoprestamoController extends Controller
                 return [$item->id => $item->nombre . ' ' . $item->apellido];
             });
 
+        $gruposCentros = [];
+
         // Preparar los datos a insertar
         foreach ($request->prestamos as $prestamo) {
+
+
 
 
             // Obtener los datos necesarios del préstamo
@@ -150,6 +155,11 @@ class DesembolsoprestamoController extends Controller
             $grupo = DB::table('grupos')->where('id', $grupo_id)->first(); // Asegúrate de que 'grupos' sea la tabla correcta
             $centro = DB::table('centros')->where('id', $centro_id)->first(); // Asegúrate de que 'centros' sea la tabla correcta
 
+            $clave = $centro_id . '_' . $grupo_id;
+            $gruposCentros[$clave] = [
+                'centro_id' => $centro_id,
+                'grupo_id' => $grupo_id,
+            ];
 
             // Si no se encuentra el grupo o el centro, asignar un valor por defecto
             $nombreGrupo = $grupo ? $grupo->nombre : 'Grupo desconocido';
@@ -344,10 +354,11 @@ class DesembolsoprestamoController extends Controller
                 });
 
                 DB::table('debeser')->insert($datosAInsertarFiltrados);
-
+                $idsClientesActualizar = [];
                 foreach ($datosSaldoprestamo as $saldo) {
                     DB::table('saldoprestamo')->insert($saldo);
 
+                    $idsClientesActualizar[] = $saldo['id_cliente'];
                     $saldoBitacora = [
                         'CLIENTE' => $saldo['id_cliente'] ?? null,
                         'MONTO' => isset($saldo['monto']) ? round($saldo['monto'], 2) : null,
@@ -357,14 +368,14 @@ class DesembolsoprestamoController extends Controller
                         'FECHA VENCIMIENTO' => isset($saldo['fechavencimiento']) ? Carbon::parse($saldo['fechavencimiento'])->format('d-m-Y') : null,
                         'ASESOR' => $saldo['asesor'] ?? null,
                         'CENTRO' => $saldo['centro'] ?? null,
-                        'GRUPO' => $saldo['gruposolid'] ?? null,
+                        'GRUPO' => $saldo['groupsolid'] ?? null,
                         'SUCURSAL' => $saldo['sucursal'] ?? null,
                         'SUPERVISOR' => $saldo['supervisor'] ?? null,
                     ];
 
                     Bitacora::create([
                         'usuario' => Auth::user()->name,
-                        'tabla_afectada' => 'saldoprestamo',
+                        'tabla_afectada' => 'PRESTAMOS',
                         'accion' => 'INSERT',
                         'datos' => json_encode($saldoBitacora),
                         'fecha' => Carbon::now(),
@@ -375,9 +386,33 @@ class DesembolsoprestamoController extends Controller
                 if (!empty($datosHistorialPrestamos)) {
                     DB::table('historial_prestamos')->insert($datosHistorialPrestamos);
                 }
+                $idsClientesActualizar = array_unique($idsClientesActualizar);
+
+                // Actualizar los clientes según condición
+                DB::table('clientes')
+                    ->whereIn('id', $idsClientesActualizar)
+                    ->where(function ($query) {
+                        $query->whereNull('conteo_rotacion')
+                            ->orWhere('conteo_rotacion', 0);
+                    })
+                    ->update(['conteo_rotacion' => 1]);
 
                 // Aquí también podrías guardar info del PDF si es necesario dentro de la transacción
             });
+            foreach ($gruposCentros as $item) {
+                $conteo = DB::table('grupos')
+                    ->where('id', $item['grupo_id'])
+                    ->where('id_centros', $item['centro_id'])
+                    ->value('conteo_rotacion');
+
+                if (is_null($conteo) || $conteo == 0) {
+                    DB::table('grupos')
+                        ->where('id', $item['grupo_id'])
+                        ->where('id_centros', $item['centro_id'])
+                        ->update(['conteo_rotacion' => 1]);
+                }
+            }
+
 
             // Si todo fue exitoso, se genera el PDF
             $pdf = PDF::loadView('PDF.desembolsoPrestamoGrupal', ['prestamos' => $datosParaPDF])
@@ -629,6 +664,7 @@ class DesembolsoprestamoController extends Controller
 
             $nuevosPagos = [];
 
+
             while ($fechaPago->lte($fechaFinal)) {
 
                 if (in_array($frecuenciaSeleccionada, $frecuenciasLargas)) {
@@ -717,7 +753,7 @@ class DesembolsoprestamoController extends Controller
             // Registrar en bitácora
             Bitacora::create([
                 'usuario' => Auth::user()->name,
-                'tabla_afectada' => 'saldoprestamo',
+                'tabla_afectada' => 'PRESTAMOS',
                 'accion' => 'INSERT',
                 'datos' => json_encode($datosBitacora),
                 'fecha' => Carbon::now(),
@@ -741,6 +777,17 @@ class DesembolsoprestamoController extends Controller
                     // Puedes agregar más campos si son requeridos
                 ]
             );
+
+            // Actualizar los clientes según condición
+            $clienteid = (array) $id_cliente; // Fuerza a array
+
+            DB::table('clientes')
+                ->whereIn('id', $clienteid)
+                ->where(function ($query) {
+                    $query->whereNull('conteo_rotacion')
+                        ->orWhere('conteo_rotacion', 0);
+                })
+                ->update(['conteo_rotacion' => 1]);
 
             DB::table('debeser')->insert($nuevosPagos);
             DB::commit();

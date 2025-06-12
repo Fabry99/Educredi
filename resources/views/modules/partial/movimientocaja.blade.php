@@ -23,7 +23,7 @@
 
             <div class="contenedor-header" style="width: 100%; margin-bottom: 30px">
                 <h1 style="margin-left: 20px">Caja</h1>
-                <div class="input-group">
+                <div class="input-group2">
                     <label for="fecha" class="label1"><span style="margin-right: 5px">Fecha:</span>
                         <input type="date" id="fecha" name="fecha" placeholder="Fecha:">
                     </label>
@@ -36,25 +36,13 @@
                     <div style="display: flex; align-items:center;">
                         <span style="margin-right: 5px">Comprobante:</span>
                         <label for="comprobante" class="label1">
-                            <input type="" id="comprobante" name="comprobante" placeholder="Comprobante:">
+                            <input type="" id="comprobante" name="comprobante" placeholder="Comprobante:"
+                                readonly style="width: 80px; ">
                         </label>
                     </div>
                 </div>
-                {{-- <div class="valores-calculo">
-                    <label>
-                        <input type="radio" name="tipo_calculo" value="calculo">Aplicar Valor Cálculo
-                    </label>
-                    <label style="margin-left: 10px;">
-                        <input type="radio" name="tipo_calculo" value="fijo" checked>
-                        Aplicar Valor Fijo
-                    </label>
-                    <label>
-                        <input type="checkbox" name="habilitar_manual">
-                        Habilitar Cálculo Manual
-                    </label>
-                </div> --}}
 
-                <div class="modal-ge select">
+                <div class="modal-ge2 select">
                     <div class="information">
                         <span>SFDM:</span>
                         <select name="Centro" id="id_centro" style="width: 180px;">
@@ -81,7 +69,8 @@
                     </div>
                     <div class="information">
                         <span>Cuota Total:</span>
-                        <input type="text" value="" disabled>
+                        <input type="text" id="cuota_total" value="" disabled
+                            style="text-align: center; font-weight: bold; width: 75px; font-size: 14px">
                     </div>
                     <div class="information">
                         <span>Num Cuota:</span>
@@ -99,8 +88,8 @@
                             ser</span></a>
                     <a href="#" id="openModalBtn" class="btn-agregar" style="margin-right: 15px;"><span>Est.
                             Cuenta</span></a>
-                    <a href="#" id="openModalBtn" class="btn-agregar"
-                        style="margin-right: 15px;"><span>Actualizar</span></a>
+                    {{-- <a href="#" id="openModalBtn" class="btn-agregar"
+                        style="margin-right: 15px;"><span>Actualizar</span></a> --}}
                 </div>
             </div>
             <table id="tablaCaja" class="table table-striped table1" style="width:100%">
@@ -153,31 +142,31 @@
         justify-self: center
     }
 
-    .modal-ge {
+    .modal-ge2 {
         display: flex;
         width: 100%;
         margin-top: 10px;
     }
 
-    .modal-ge select {
+    .modal-ge2 select {
         width: 100%;
         padding: 10px 15px;
         border-radius: 4px;
         background: var(--background-inputs);
     }
 
-    .input-group.select {
+    .input-group2.select {
         border: 1px solid var(--borde);
         border-radius: 4px;
         background: var(--background-inputs);
     }
 
-    .input-group {
+    .input-group2 {
         margin-left: 20px;
         display: flex;
     }
 
-    .input-group input {
+    .input-group2 input {
         border: none;
         background: none;
         outline: none;
@@ -186,7 +175,7 @@
 
     }
 
-    .input-group select {
+    .input-group2 select {
         border: none;
         background: none;
         outline: none;
@@ -195,7 +184,7 @@
 
     }
 
-    .input-group .label1 {
+    .input-group2 .label1 {
         display: flex;
         align-items: center;
         background: var(--background-inputs);
@@ -276,5 +265,16 @@
     #tablaCaja tr.selected {
         background-color: #d0ebff;
         /* celeste claro */
+    }
+
+    input#comprobante:hover,
+    input#fecha:hover,
+    input#fcontable:hover,
+    input#fabono:hover {
+        /* Elimina cualquier cambio de estilo en hover */
+        background-color: initial !important;
+        border-color: initial !important;
+        box-shadow: none !important;
+        cursor: default !important;
     }
 </style>

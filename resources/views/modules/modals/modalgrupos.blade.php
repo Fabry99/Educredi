@@ -6,7 +6,7 @@
         <span class="close-btn1">&times;</span>
         <div class="head-tittle">
             <div class="head-logo">
-                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo" width="80" height="80">
                 <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
             </div>
             <h2 id="modal-title">Detalles del Grupo</h2> <!-- Aquí se actualizará el título con el ID -->

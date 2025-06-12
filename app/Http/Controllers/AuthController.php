@@ -45,7 +45,6 @@ class AuthController extends Controller
             return view('modules/auth/login');
         } catch (\Exception $e) {
             // Maneja cualquier error que ocurra durante la autenticación
-            Log::error('Error al verificar o redirigir al usuario: ' . $e->getMessage());
 
             // Redirige al login con un mensaje de error si algo sale mal
             return redirect()->route('login')->withErrors(['error' => 'Ocurrió un error inesperado.']);
@@ -102,7 +101,6 @@ class AuthController extends Controller
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error('Error en el proceso de autenticación: ' . $e->getMessage());
 
             return back()->withErrors([
                 'error' => 'Ocurrió un error inesperado. Por favor, intente nuevamente más tarde.'

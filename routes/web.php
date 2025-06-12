@@ -22,7 +22,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest', 'prevent.back.history')->group(function () {
     Route::get('/', [AuthController::class, 'login'])->name('login');
     Route::post('/loggear', [AuthController::class, 'loggear'])->name('loggear');
-    
 });
 
 
@@ -41,7 +40,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     // Rutas caja
     Route::get('/caja', [MovimientocajaController::class, 'caja'])->name('caja');
-    Route::get('/mov_caja',[AuthController::class, 'mov_caja'])->name('mov_caja');
+    Route::get('/mov_caja', [AuthController::class, 'mov_caja'])->name('mov_caja');
     // Rutas Contador
     Route::get('/clientes', [AuthController::class, 'contador'])->name('contador');
     Route::get('/grupos', [AuthController::class, 'grupos'])->name('grupos');
@@ -85,8 +84,8 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     //Rutas para desembolso de prestamos
     Route::get('/prestamos/obtener-centros-grupos-clientes/{id}', [DesembolsoprestamoController::class, 'obtenerCentrosGruposClientes']);
     Route::get('/prestamos/obtenergrupos-clientes/{centro_id}/{grupo_id}', [DesembolsoprestamoController::class, 'obtenergruposclientes']);
-    Route::post('/guardarprestamogrupal', [DesembolsoprestamoController::class,'almacenarPrestamos']);
-    Route::post('/guardarprestamoindividual', [DesembolsoprestamoController::class,'almacenarPrestamoIndividual']);
+    Route::post('/guardarprestamogrupal', [DesembolsoprestamoController::class, 'almacenarPrestamos']);
+    Route::post('/guardarprestamoindividual', [DesembolsoprestamoController::class, 'almacenarPrestamoIndividual']);
 
     Route::get('/consulta/reversion/{codigo}', [DesembolsoprestamoController::class, 'obtenerSaldoPrestamo']);
     Route::POST('/validar/password', [DesembolsoprestamoController::class, 'validarPassword']);
@@ -94,21 +93,21 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     //Rutas Para Mantenimiento de Asesores
     Route::post('/asesores/insert/', [AsesoresController::class, 'InsertarAsesor'])->name('asesor.insert');
-    Route::put('/update/asesor/{id}', [AsesoresController::class, 'updateAsesor']); 
+    Route::put('/update/asesor/{id}', [AsesoresController::class, 'updateAsesor']);
 
     //Rutas Para Transferencia de cartera
-    Route::get('/trasferencia/obtenergrupos/{id_centro}',[TransferenciacarteraController::class, 'obtenerGrupos']); 
-    Route::get('/transferencia/obtenerPrestamos/{id_asesor}/{id_grupo}/{id_centro}',[TransferenciacarteraController::class,'obtenerDatosTabla']);
+    Route::get('/trasferencia/obtenergrupos/{id_centro}', [TransferenciacarteraController::class, 'obtenerGrupos']);
+    Route::get('/transferencia/obtenerPrestamos/{id_asesor}/{id_grupo}/{id_centro}', [TransferenciacarteraController::class, 'obtenerDatosTabla']);
     Route::post('/transferencia/transferircartera', [TransferenciacarteraController::class, 'transferirCartera']);
 
     //Rutas para manejo de caja
-    Route::post('/caja/obtenerPrestamos',[MovimientocajaController::class, 'obtenerPrestamos']);
-    Route::post('/caja/obtenerEstadoCuentaDebeser',[MovimientocajaController::class, 'obtenerEstadoCuentaDebeser']);
+    Route::post('/caja/obtenerPrestamos', [MovimientocajaController::class, 'obtenerPrestamos']);
+    Route::post('/caja/obtenerEstadoCuentaDebeser', [MovimientocajaController::class, 'obtenerEstadoCuentaDebeser']);
+    Route::get('/caja/obtenercomprobante', [MovimientocajaController::class, 'ObtenerComprobante']);
+    Route::post('/caja/AlmacenarCuota', [MovimientocajaController::class, 'AlmacenarCuota']);
     // Route::get('/generar-pdf', [pdfController::class, 'generarPdf']);
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
-    Route::post('/caja/obtenerconteocuotas',[MovimientocajaController::class, 'obtenerConteoCuotas']);
-        
-
+    Route::post('/caja/obtenerconteocuotas', [MovimientocajaController::class, 'obtenerConteoCuotas']);
 });
 
 

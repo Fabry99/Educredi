@@ -8,7 +8,8 @@ class Grupos extends Model
 {
     protected $table = 'grupos';
 
-    protected $fillable = ['id', 'nombre', 'id_centros', 'id_asesor', 'created_at', 'updated_at'];
+    protected $fillable =
+    ['id', 'nombre', 'id_centros', 'id_asesor', 'created_at', 'updated_at', 'conteo_rotacion'];
 
 
     // En el modelo Grupo (Grupos.php)
@@ -21,5 +22,4 @@ class Grupos extends Model
     {
         return $this->hasMany(Centros_Grupos_Clientes::class, 'grupo_id');
     }
- 
 }

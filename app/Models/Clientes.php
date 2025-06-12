@@ -38,6 +38,7 @@ class Clientes extends Model
         'created_at',
         'updated_at',
         'nrc',
+        'conteo_rotacion'
     ];
     public function municipio()
     {

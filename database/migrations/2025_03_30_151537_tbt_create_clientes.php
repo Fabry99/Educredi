@@ -41,6 +41,7 @@ return new class extends Migration
             $table->enum('puede_firmar', ['si', 'no']);
             $table->foreignId('id_centro');
             $table->foreignId('id_grupo');
+            $table->integer('conteo_rotacion')->default(0); 
             $table->timestamps();
         });
     }

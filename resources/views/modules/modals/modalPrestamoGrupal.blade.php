@@ -4,7 +4,7 @@
         <span class="close-btn1">&times;</span>
         <div class="head-tittle">
             <div class="head-logo">
-                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="Logo" width="80" height="80">
                 <h3>EDUCREDI RURAL <br> S.A DE C.V</h3>
             </div>
             <h2>Desembolso de Préstamos</h2>
@@ -59,23 +59,25 @@
                     <div class="input-group1" style="margin-left: 20px">
                         <p style="white-space:nowrap;">Supervisor:</p>
                         <select id="supervisor" name="supervisor"
-                            style="width:200px; margin-right:50px; margin-left:5px;">
+                            style="width:200px; margin-right:25px; margin-left:5px;">
                             <option value="" disabled selected>Seleccionar:</option>
                             @foreach ($supervisor as $supervisor)
                                 <option value="{{ $supervisor->id }}">{{ $supervisor->nombre }}</option>
                             @endforeach
                         </select>
+
+                        <div class="input-group1" style="margin-left: 20px">
+                            <p style="white-space:nowrap;">Asesor:</p>
+                            <select id="asesor" name="asesor"
+                                style="width:200px; margin-right:50px; margin-left:5px;">
+                                <option value="" disabled selected>Seleccionar:</option>
+                                @foreach ($asesores as $asesor)
+                                    <option value="{{ $asesor->id }}">{{ $asesor->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="input-group1" style="margin-left: 20px">
-                        <p style="white-space:nowrap;">Asesor:</p>
-                        <select id="asesor" name="asesor" style="width:200px; margin-right:50px; margin-left:5px;">
-                            <option value="" disabled selected>Seleccionar:</option>
-                            @foreach ($asesores as $asesor)
-                                <option value="{{ $asesor->id }}">{{ $asesor->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
                 <div class="modal-gePrestamos" style="margin-top:20px;">
                     <div class="input-group1">
@@ -89,6 +91,22 @@
                         <select id="grupo" name="grupo" style="width:200px; margin-left:5px;" required>
                             <option value="" disabled selected>Grupo:</option>
                         </select>
+                    </div>
+
+
+                </div>
+                <div class="modal-gePrestamos" style="margin-top:25px; ">
+                    <div class="input-group1" style="align-items: center">
+                        <p style="white-space:nowrap;">Rotación de Cliente N°:</p>
+                        <input type="text" id="rotacioncliente" disabled
+                            style="width:40px; height:15px; text-align: center; 
+                            color: #1818189e; font-weight: bolder;">
+                    </div>
+                    <div class="input-group1" style="align-items: center">
+                        <p style="white-space:nowrap;">Rotación del Grupo N°:</p>
+                        <input type="text" id="rotaciongrupo" disabled
+                            style="width:40px; height:15px; text-align: center; 
+                            color: #1818189e; font-weight: bolder;">
                     </div>
 
 
@@ -331,9 +349,10 @@
         align-items: center;
         gap: 5px;
         margin-top: 25px;
-        
+
     }
-    .head-logo img{
+
+    .head-logo img {
         width: 80px;
         height: 80px;
         border-radius: 50%;

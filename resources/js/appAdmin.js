@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let centroSeleccionado = null;
         let seguro = 0;
         let capital = 0;
+        let RotacionCliente = 0;
 
 
         const selectCentro = document.getElementById('centro');
@@ -285,9 +286,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.btn-prestamo').forEach(button => {
             button.addEventListener('click', function (e) {
                 e.preventDefault();
+                const fila = this.closest('tr');
+
                 clienteId = this.getAttribute('data-id');
                 clienteNombre = this.getAttribute('data-name');
+                const conteoRotacion = fila.querySelector('td[hidden]').textContent.trim();
 
+                RotacionCliente = conteoRotacion;
                 modal.style.display = 'block';
                 modal.classList.add('flex-center');
             });
@@ -301,12 +306,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             document.getElementById('id').value = clienteId;
             document.getElementById('nombre').value = clienteNombre;
+            document.getElementById('rotacioncliente').value = RotacionCliente;
 
             $.ajax({
                 url: '/prestamos/obtener-centros-grupos-clientes/' + clienteId,
                 type: 'GET',
                 success: function (response) {
                     datacliente = response;
+
                     renderCentros(response);
                     configurarEventosSelects(); // 👈 Aquí activamos los listeners
                 },
@@ -315,6 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         });
+
 
         function renderCentros(data) {
             selectCentro.innerHTML = '<option value="" disabled selected>Centro:</option>';
@@ -342,6 +350,8 @@ document.addEventListener('DOMContentLoaded', function () {
             selectGrupo.addEventListener('change', manejarCambioGrupo);
         }
 
+
+
         function manejarCambioCentro() {
             centroSeleccionado = parseInt(this.value);
             selectGrupo.innerHTML = '<option value="" disabled selected>Grupo:</option>';
@@ -359,6 +369,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         }
+        function mostrarRotacionGrupal() {
+            const grupoIdSeleccionado = parseInt(selectGrupo.value);
+
+            const itemGrupo = datacliente.find(item => item.grupos.id === grupoIdSeleccionado);
+
+            if (itemGrupo) {
+                if (itemGrupo.grupos.nombre.toLowerCase() === 'individual') {
+                    document.getElementById('rotaciongrupo').value = '0';
+                } else if (itemGrupo.grupos.conteo_rotacion !== undefined) {
+                    document.getElementById('rotaciongrupo').value = itemGrupo.grupos.conteo_rotacion;
+                } else {
+                    document.getElementById('rotaciongrupo').value = '';
+                }
+            } else {
+                document.getElementById('rotaciongrupo').value = '';
+            }
+        }
+
+
 
 
         function calcularCuota(monto, tasa, row = null) {
@@ -532,7 +561,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         function manejarCambioGrupo() {
             const grupoSeleccionado = this.value;
+            mostrarRotacionGrupal();
             const ruta = `/prestamos/obtenergrupos-clientes/${centroSeleccionado}/${grupoSeleccionado}`;
+
+
 
             $.ajax({
                 url: ruta,

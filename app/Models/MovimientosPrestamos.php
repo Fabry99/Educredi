@@ -20,7 +20,7 @@ class MovimientosPrestamos extends Model
         'int_acum',
         'int_mora',
         'tipo_interes',
-        'capital_atrasado',
+        'capital',
         'saldo_anterior',
         'mes_act',
         'seguro',
@@ -60,5 +60,6 @@ class MovimientosPrestamos extends Model
         'fecha_vencimiento',
         'created_at',
         'updated_at',
+        'dias'
     ];
 }

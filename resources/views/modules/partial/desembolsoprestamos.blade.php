@@ -37,6 +37,7 @@
                         <th>Prestamo</th>
                         <th>Fecha Prestamo</th>
                         <th></th>
+                        <th hidden></th>
 
 
                     </tr>
@@ -56,6 +57,7 @@
                                     Préstamo
                                 </button>
                             </td>
+                            <td hidden>{{ $cliente->conteo_rotacion }}</td>
                         </tr>
                     @endforeach
                 </tbody>
