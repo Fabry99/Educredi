@@ -22,6 +22,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest', 'prevent.back.history')->group(function () {
     Route::get('/', [AuthController::class, 'login'])->name('login');
     Route::post('/loggear', [AuthController::class, 'loggear'])->name('loggear');
+
+    // Route::get('/vista-pdf', function () {
+    //     // $prestamos = []; // Simula o pasa tus datos reales
+    //     return view('PDF.comprobantePago');
+    // });
 });
 
 

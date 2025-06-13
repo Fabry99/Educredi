@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     const selectCentro = document.getElementById('id_centro');
+
     const selectGrupo = document.getElementById('id_grupo');
     let id_centro = null;
 
@@ -108,8 +109,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         idsUnicos.add(grupo.id);
 
                         const option = document.createElement('option');
-                        option.value = grupo.id; // ✅ usa 'id'
-                        option.textContent = grupo.nombre; // ✅ usa 'nombre'
+                        option.value = grupo.id;
+                        option.textContent = grupo.nombre;
+                        option.dataset.nombre = grupo.nombre;
 
                         selectGrupo.appendChild(option);
                     }
@@ -129,6 +131,8 @@ document.addEventListener('DOMContentLoaded', function () {
     selectGrupo.addEventListener('change', obtenerDatosTabla);
 
     let selectedRows = new Set();
+    let nombre_centro = null;
+    let nombre_grupo = '';
 
     function formatearFechaDMY(fecha) {
         if (!fecha) return '—';
@@ -167,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.datos.length > 0) {
                     window.nombreCentroActual = data.datos[0].centro;
+                    window.saldosAnteriores = {};
                 }
 
                 const tabla = $('#tablaCaja');
@@ -175,6 +180,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
                 data.datos.forEach(prestamo => {
+                    window.saldosAnteriores[prestamo.cliente_id] = parseFloat(prestamo.saldo) || 0;
+
                     const fila = $(`
 <tr>
     <td style='text-align:end'>${prestamo.cliente_id || '—'}</td>
@@ -251,6 +258,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const grupoId = grupoSelect.value;
 
+                    nombre_centro = selectCentro.options[selectCentro.selectedIndex]?.dataset?.nombre || '';
+                    nombre_grupo = selectGrupo.options[selectGrupo.selectedIndex]?.dataset?.nombre || '';
 
 
                     // Puedes agregarlos también a la variable clienteSeleccionado si los necesitas
@@ -260,9 +269,11 @@ document.addEventListener('DOMContentLoaded', function () {
                         Apertura: penultimo,
                         Vencimiento: ultimo,
                         centroId,
-                        grupoId
+                        grupoId,
 
                     };
+                    window.clienteSeleccionado.saldoAnterior = window.saldosAnteriores[id_cliente] || 0;
+
 
                     // Obtener conteo de cuotas si el cliente es válido
                     if (!id_cliente || id_cliente === '—') {
@@ -409,8 +420,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         filasSeleccionadas.each(function () {
             const celdas = $(this).find('td');
+            const cliente_id = celdas.eq(0).text().trim();
+
             const filaDatos = {
-                cliente_id: celdas.eq(0).text().trim(),
+                cliente_id: cliente_id,
                 cliente_nombre: celdas.eq(1).text().trim(),
                 saldo: celdas.eq(2).text().trim(),
                 ultima_fecha: celdas.eq(3).text().trim(),
@@ -430,6 +443,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 id_cuenta: cuenta_id,
                 id_centro: id_centro,
                 id_grupo: id_grupo,
+                saldo_anterior: window.saldosAnteriores[cliente_id] || 0,
+                nombre_centro: nombre_centro,
+                nombre_grupo: nombre_grupo,
+
 
             };
             datosFilas.push(filaDatos);
@@ -469,7 +486,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 btn.prop('disabled', false);
                 if (data.status === 'success') {
                     mostrarAlerta('Pago procesado correctamente.', 'success');
+                    if (data.pdf) {
+                        const pdfWindow = window.open(""); // Abrir nueva ventana
+                        pdfWindow.document.write(`
+                                <html>
+                                    <head>
+                                        <title>Comprobante de Pago</title>
+                                    </head>
+                                    <body style="margin:0">
+                                        <embed width="100%" height="100%" src="data:application/pdf;base64,${data.pdf}" type="application/pdf">
+                                    </body>
+                                </html>
+                            `);
+                    }
                     setTimeout(() => location.reload(), 1000);
+
                 } else {
                     mostrarAlerta(data.message || 'Ocurrió un error inesperado.', 'error');
                 }

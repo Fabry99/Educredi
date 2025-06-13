@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
+
 
 class MovimientocajaController extends Controller
 {
@@ -326,20 +328,23 @@ class MovimientocajaController extends Controller
         ]);
     }
 
+
     public function AlmacenarCuota(Request $request)
     {
-
         DB::beginTransaction();
+
         try {
             $datos = $request->input('datos');
 
             if (!$datos || !is_array($datos)) {
                 return response()->json(['error' => 'Datos inválidos o vacíos'], 400);
             }
+
             $grupoId = null;
             $centroId = null;
             $fechaApertura = null;
             $fechaVencimiento = null;
+            $datosParaPDF = [];
 
             foreach ($datos as $index => $fila) {
 
@@ -350,7 +355,7 @@ class MovimientocajaController extends Controller
 
                 $grupoId = $fila['id_grupo'];
                 $centroId = $fila['id_centro'];
-                // Insert en movimientos_presta
+
                 DB::table('movimientos_presta')->insert([
                     'id_cliente' => $fila['cliente_id'],
                     'fecha' => $fechaAbono,
@@ -373,8 +378,6 @@ class MovimientocajaController extends Controller
                     'updated_at' => now(),
                 ]);
 
-
-                // Bitácora SOLO para movimientos_presta
                 Bitacora::create([
                     'usuario' => Auth::user()->name,
                     'tabla_afectada' => 'HISTORIAL DE PAGOS',
@@ -397,7 +400,6 @@ class MovimientocajaController extends Controller
                     'id_asesor' => Auth::user()->id,
                 ]);
 
-                // Actualización de saldoprestamo (sin bitácora)
                 DB::table('saldoprestamo')
                     ->where('id_cliente', $fila['cliente_id'])
                     ->where('centro', $fila['id_centro'])
@@ -410,20 +412,29 @@ class MovimientocajaController extends Controller
                         'updated_at' => now()
                     ]);
 
-                
-                // Obtener todos los clientes para ese grupo y centro
-
+                $datosParaPDF[] = [
+                    'nombrecliente' => $fila['cliente_nombre'],
+                    'saldo_anterior' => $fila['saldo_anterior'],
+                    'valor_cuota' => $fila['cuota'],
+                    'capital' => $fila['capital'],
+                    'intereses' => $fila['intereses'],
+                    'manejo' => $fila['manejo'],
+                    'micro_seg' => $fila['seguro'],
+                    'iva' => $fila['iva'],
+                    'saldo_actual' => $fila['saldo'],
+                    'comprobante' => $fila['comprobante'],
+                    'nombre_centro'=> $fila['nombre_centro'],
+                    'nombre_grupo' => $fila['nombre_grupo']
+                ];
             }
-            // 1. Obtener los IDs de clientes filtrados
+
             $clientesFiltrados = DB::table('centros_grupos_clientes')
                 ->where('centro_id', $centroId)
                 ->where('grupo_id', $grupoId)
                 ->pluck('cliente_id');
 
-            // 2. Obtener el conteo total
             $totalClientes = $clientesFiltrados->count();
 
-            // 3. Consulta para obtener los últimos registros por cliente
             $ultimosSaldos = DB::table('saldoprestamo as sp')
                 ->where('sp.centro', $centroId)
                 ->where('sp.groupsolid', $grupoId)
@@ -437,31 +448,38 @@ class MovimientocajaController extends Controller
                         ->groupBy('id_cliente');
                 });
 
-            // 4. Obtener los resultados
-            $resultados = $ultimosSaldos->orderByDesc('id_cliente')
-                ->take($totalClientes)
-                ->get();
+            $resultados = $ultimosSaldos->orderByDesc('id_cliente')->take($totalClientes)->get();
 
-            // 5. Verificar si todos los saldos son 0
             $todosSaldosCero = $resultados->every(function ($item) {
-                return $item->SALDO == 0; // Asegúrate de que 'saldo' es el nombre correcto de la columna
+                return $item->SALDO == 0;
             });
 
-            // 6. Actualizar conteo_rotacion si todos los saldos son 0
             if ($todosSaldosCero && $totalClientes > 0) {
                 DB::table('grupos')
                     ->where('id_centros', $centroId)
                     ->where('id', $grupoId)
-                    ->increment('conteo_rotacion'); // Incrementa en 1 el valor actual
+                    ->increment('conteo_rotacion');
             }
+
+            $pdf = PDF::loadView('PDF.comprobantePago', ['pago' => $datosParaPDF])
+                ->setPaper('a4', 'portrait')
+                ->setOptions(['defaultFont' => 'sans-serif']);
+
+            $pdfContent = $pdf->output();
+            $pdfBase64 = base64_encode($pdfContent);
+
             DB::commit();
+
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Cuotas almacenadas correctamente'
+                'message' => 'Cuotas almacenadas correctamente',
+                'pdf' => $pdfBase64
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error al almacenar las cuotas: ' . $e->getMessage()

@@ -48,7 +48,7 @@
                         <select name="Centro" id="id_centro" style="width: 180px;">
                             <option value="" disabled selected>Seleccionar:</option>
                             @foreach ($centro as $item)
-                                <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                                <option value="{{ $item->id }}" data-nombre="{{ $item->nombre }}">{{ $item->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
