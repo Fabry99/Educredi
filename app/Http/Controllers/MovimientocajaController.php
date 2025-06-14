@@ -423,7 +423,7 @@ class MovimientocajaController extends Controller
                     'iva' => $fila['iva'],
                     'saldo_actual' => $fila['saldo'],
                     'comprobante' => $fila['comprobante'],
-                    'nombre_centro'=> $fila['nombre_centro'],
+                    'nombre_centro' => $fila['nombre_centro'],
                     'nombre_grupo' => $fila['nombre_grupo']
                 ];
             }
@@ -485,5 +485,88 @@ class MovimientocajaController extends Controller
                 'message' => 'Error al almacenar las cuotas: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function obtenerEstadoCuenta(Request $request)
+    {
+        $id_centro = $request->input("id_centro");
+        $id_grupo = $request->input("id_grupo");
+        $movimientos = DB::table('movimientos_presta')
+            ->select('*', DB::raw("CONCAT(fecha_apertura, ' / ', fecha_vencimiento) AS grupo_fecha"))
+            ->where('id_centro', $id_centro)
+            ->where('id_grupo', $id_grupo)
+            ->orderBy('fecha_apertura')
+            ->orderBy('fecha_vencimiento')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $movimientosAgrupados = $movimientos->groupBy('grupo_fecha')->map(function ($items, $grupo_fecha) {
+            return [
+                'grupo_fecha' => $grupo_fecha,
+                'registros' => $items->values()
+            ];
+        })->values();
+
+        $saldoprestamos = DB::table('saldoprestamo')
+            ->join('clientes', 'saldoprestamo.id_cliente', '=', 'clientes.id')
+            ->join('centros', 'saldoprestamo.centro', '=', 'centros.id')
+            ->join('grupos', 'saldoprestamo.groupsolid', '=', 'grupos.id') 
+            ->select(
+                'centros.nombre as centro_nombre',
+                'grupos.nombre as grupo_nombre',
+                'saldoprestamo.id',
+                'saldoprestamo.id_cliente',
+                'clientes.nombre',
+                'clientes.apellido',
+                'saldoprestamo.MONTO',
+                'saldoprestamo.FECHAAPERTURA',
+                'saldoprestamo.FECHAVENCIMIENTO'
+            )
+            ->where('saldoprestamo.centro', $id_centro)
+            ->where('saldoprestamo.groupsolid', $id_grupo)
+            ->get();
+       
+        // Primero cuentas cuántos pagos ya se hicieron
+        $results = $saldoprestamos->map(function ($prestamo) {
+            // Obtener total de pagos para cada préstamo
+            $total_pagos = DB::table('movimientos_presta')
+                ->where('id_cliente', $prestamo->id_cliente)
+                ->where('fecha_apertura', $prestamo->FECHAAPERTURA)
+                ->where('fecha_vencimiento', $prestamo->FECHAVENCIMIENTO)
+                ->count();
+
+            // Obtener próxima cuota de la tabla debeser
+            $proximaCuota = DB::table('debeser')
+                ->where('id_cliente', $prestamo->id_cliente)
+                ->where('fecha_apertura', $prestamo->FECHAAPERTURA)
+                ->where('fecha_vencimiento', $prestamo->FECHAVENCIMIENTO)
+                ->orderBy('fecha')
+                ->skip($total_pagos) // Saltar las cuotas ya pagadas
+                ->first();
+
+
+            // Retornar datos agregados al objeto préstamo
+            return (object) [
+                'prestamo' => $prestamo,
+                'total_pagos' => $total_pagos,
+                'proxima_cuota' => $proximaCuota
+            ];
+        });
+
+        $resultadosAgrupados = $results->groupBy(function ($item) {
+            return $item->prestamo->FECHAAPERTURA . ' / ' . $item->prestamo->FECHAVENCIMIENTO;
+        })->map(function ($grupo, $grupo_fecha) {
+            return [
+                'grupo_fecha' => $grupo_fecha,
+                'prestamos' => $grupo->values()
+            ];
+        })->values();
+
+        return response()->json([
+            'movimientos_presta' => $movimientosAgrupados,
+            'datoscuotas' => $resultadosAgrupados,
+        ]);
+
+       
     }
 }

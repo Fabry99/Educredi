@@ -1,5 +1,6 @@
 <link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
 @include('modules.modals.modalCajaDebeSer');
+@include('modules.modals.modalCajaEstadoCuenta');
 <div class="container">
     <div class="main-content">
         <div class="container mt-4">
@@ -86,7 +87,7 @@
                     <a href="#" id="openModalBtnDebeser" class="btn-agregar"
                         style="margin-right: 15px;"><span>Debe
                             ser</span></a>
-                    <a href="#" id="openModalBtn" class="btn-agregar" style="margin-right: 15px;"><span>Est.
+                    <a href="#" id="openModalBtnEstadoCuenta" class="btn-agregar" style="margin-right: 15px;"><span>Est.
                             Cuenta</span></a>
                     {{-- <a href="#" id="openModalBtn" class="btn-agregar"
                         style="margin-right: 15px;"><span>Actualizar</span></a> --}}

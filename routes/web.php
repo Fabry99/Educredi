@@ -112,7 +112,10 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::post('/caja/AlmacenarCuota', [MovimientocajaController::class, 'AlmacenarCuota']);
     // Route::get('/generar-pdf', [pdfController::class, 'generarPdf']);
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
+    Route::post('/pdf/estadoCuenta', [pdfController::class, 'estadoCuenta']);
+
     Route::post('/caja/obtenerconteocuotas', [MovimientocajaController::class, 'obtenerConteoCuotas']);
+    Route::post('/caja/obtenerEstadoCuenta', [MovimientocajaController::class, 'obtenerEstadoCuenta']);
 });
 
 
