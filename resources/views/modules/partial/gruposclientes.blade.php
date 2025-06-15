@@ -14,13 +14,14 @@
         <div class="container mt-4">
             <h1>Mantenimiento de Grupos</h1>
             @if (Auth::check() && (Auth::user()->rol === 'administrador' || Auth::user()->rol === 'contador'))
-            <div class="btn-grupos" style="display: flex; margin-bottom: 10px; margin-top: 10px; margin-left: 10px;">
-                <a href="#" id="openModalBtnnuevocentro" class="btn-agregar"
-                    style="margin-right: 15px;"><span>Nuevo
-                        Centro</span></a>
-                <a href="#" id="openModalBtnnuevogrupo" class="btn-eliminar"><span>Nuevo
-                        Grupo</span></a>
-            </div>
+                <div class="btn-grupos"
+                    style="display: flex; margin-bottom: 10px; margin-top: 10px; margin-left: 10px;">
+                    <a href="#" id="openModalBtnnuevocentro" class="btn-agregar"
+                        style="margin-right: 15px;"><span>Nuevo
+                            Centro</span></a>
+                    <a href="#" id="openModalBtnnuevogrupo" class="btn-eliminar"><span>Nuevo
+                            Grupo</span></a>
+                </div>
             @endif
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
@@ -40,6 +41,10 @@
                 <span id="custom-alert-message">Hola</span>
             </div>
 
+            <div id="alert-notification" class="alert"
+                style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
+                <span id="alert-notification-message"></span>
+            </div>
 
             <table id="tablacentros" class="table table-striped " style="width:100%">
 
@@ -88,11 +93,10 @@
                                             <button type="submit" class="btn-eliminar-centro btn-eliminar"><img
                                                     src="{{ asset('img/icon-eliminar.svg') }}" alt=""></button>
                                         </form>
-                                   
+                                    @endif
+                                </td>
                             @endif
-                            </td>
-                    @endif
-                    </tr>
+                        </tr>
                     @endforeach
                 </tbody>
 

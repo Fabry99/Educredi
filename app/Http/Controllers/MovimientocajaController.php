@@ -331,6 +331,7 @@ class MovimientocajaController extends Controller
 
     public function AlmacenarCuota(Request $request)
     {
+   
         DB::beginTransaction();
 
         try {
@@ -378,24 +379,26 @@ class MovimientocajaController extends Controller
                     'updated_at' => now(),
                 ]);
 
+                // Construir texto plano para bitácora con formato legible
+                $textoBitacora = "";
+                $textoBitacora .= "Nombre: {$fila['cliente_nombre']}\n";
+                $textoBitacora .= "Comprobante: {$fila['comprobante']}\n";
+                $textoBitacora .= "Valor cuota: {$fila['cuota']}\n";
+                $textoBitacora .= "Saldo: {$fila['saldo']}\n";
+                $textoBitacora .= "Capital: {$fila['capital']}\n";
+                $textoBitacora .= "Fecha: " . Carbon::parse($fechaAbono)->format('d-m-y') . "\n";
+                $textoBitacora .= "Fecha apertura: " . Carbon::parse($fechaApertura)->format('d-m-y') . "\n";
+                $textoBitacora .= "Fecha vencimiento: " . Carbon::parse($fechaVencimiento)->format('d-m-y') . "\n";
+                $textoBitacora .= "Fecha contable: " . Carbon::parse($fechaContable)->format('d-m-y') . "\n";
+                $textoBitacora .= "Centro: {$fila['nombre_centro']}\n";
+                $textoBitacora .= "Grupo: {$fila['nombre_grupo']}\n";
+                $textoBitacora .= "-------------------------\n";
+
                 Bitacora::create([
                     'usuario' => Auth::user()->name,
                     'tabla_afectada' => 'HISTORIAL DE PAGOS',
-                    'accion' => 'INGRESAR',
-                    'datos' => json_encode([
-                        'CLIENTE' => $fila['cliente_id'],
-                        'FECHA' => $fechaAbono,
-                        'COMPROBANTE' => $fila['comprobante'],
-                        'SALDO' => $fila['saldo'],
-                        'VALOR CUOTA' => $fila['cuota'],
-                        'CAPITAL' => $fila['capital'],
-                        'FECHA APERTURA' => $fechaApertura,
-                        'FECHA VENCIMIENTO' => $fechaVencimiento,
-                        'FECHA CONTABLE' => $fechaContable,
-                        'FECHA ABONO' => $fechaAbono,
-                        'CENTRO' => $fila['id_centro'],
-                        'GRUPO' => $fila['id_grupo'],
-                    ]),
+                    'accion' => 'PAGO DE CUOTA',
+                    'datos' => $textoBitacora,
                     'fecha' => Carbon::now(),
                     'id_asesor' => Auth::user()->id,
                 ]);
@@ -510,7 +513,7 @@ class MovimientocajaController extends Controller
         $saldoprestamos = DB::table('saldoprestamo')
             ->join('clientes', 'saldoprestamo.id_cliente', '=', 'clientes.id')
             ->join('centros', 'saldoprestamo.centro', '=', 'centros.id')
-            ->join('grupos', 'saldoprestamo.groupsolid', '=', 'grupos.id') 
+            ->join('grupos', 'saldoprestamo.groupsolid', '=', 'grupos.id')
             ->select(
                 'centros.nombre as centro_nombre',
                 'grupos.nombre as grupo_nombre',
@@ -525,7 +528,7 @@ class MovimientocajaController extends Controller
             ->where('saldoprestamo.centro', $id_centro)
             ->where('saldoprestamo.groupsolid', $id_grupo)
             ->get();
-       
+
         // Primero cuentas cuántos pagos ya se hicieron
         $results = $saldoprestamos->map(function ($prestamo) {
             // Obtener total de pagos para cada préstamo
@@ -566,7 +569,5 @@ class MovimientocajaController extends Controller
             'movimientos_presta' => $movimientosAgrupados,
             'datoscuotas' => $resultadosAgrupados,
         ]);
-
-       
     }
 }

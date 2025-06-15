@@ -103,6 +103,7 @@ class DesembolsoprestamoController extends Controller
     {
 
 
+
         $datosAInsertar = [];
         $datosSaldoprestamo = [];
         $datosParaPDF = [];
@@ -151,6 +152,9 @@ class DesembolsoprestamoController extends Controller
             $grupo_id = $prestamo['detalleCalculo']['grupoId'];
             $centro_id = $prestamo['detalleCalculo']['centroId'];
             $asesor = $prestamo['asesor'];
+            $nombre_asesor = $prestamo['nombre_asesor'];
+            $nombre_supervisor = $prestamo['nombre_supervisor'];
+            $nombre_sucursal = $prestamo['nombre_sucursal'];
 
             $grupo = DB::table('grupos')->where('id', $grupo_id)->first(); // Asegúrate de que 'grupos' sea la tabla correcta
             $centro = DB::table('centros')->where('id', $centro_id)->first(); // Asegúrate de que 'centros' sea la tabla correcta
@@ -320,6 +324,12 @@ class DesembolsoprestamoController extends Controller
                 'asesor' => $asesor,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'nombre_cliente' => $nombreCliente,
+                'nombre_centro' => $nombreCentro,
+                'nombre_grupo' => $nombreGrupo,
+                'nombre_sucursal' => $nombre_sucursal,
+                'nombre_asesor' => $nombre_asesor,
+                'nombre_supervisor' => $nombre_supervisor,
             ];
             $datosHistorialPrestamos[] = [
                 'id_cliente' => $idCliente,
@@ -356,28 +366,40 @@ class DesembolsoprestamoController extends Controller
                 DB::table('debeser')->insert($datosAInsertarFiltrados);
                 $idsClientesActualizar = [];
                 foreach ($datosSaldoprestamo as $saldo) {
-                    DB::table('saldoprestamo')->insert($saldo);
+
+                    $camposPermitidos = array_diff_key($saldo, array_flip([
+                        'nombre_cliente',
+                        'nombre_centro',
+                        'nombre_grupo',
+                        'nombre_asesor',
+                        'nombre_supervisor',
+                        'nombre_sucursal'
+                    ]));
+
+                    DB::table('saldoprestamo')->insert($camposPermitidos);
 
                     $idsClientesActualizar[] = $saldo['id_cliente'];
-                    $saldoBitacora = [
-                        'CLIENTE' => $saldo['id_cliente'] ?? null,
-                        'MONTO' => isset($saldo['monto']) ? round($saldo['monto'], 2) : null,
-                        'CUOTA' => isset($saldo['cuota']) ? round($saldo['cuota'], 2) : null,
-                        'PLAZO' => $saldo['plazo'] ?? null,
-                        'FECHA APERTURA' => isset($saldo['fechaapertura']) ? Carbon::parse($saldo['fechaapertura'])->format('d-m-Y') : null,
-                        'FECHA VENCIMIENTO' => isset($saldo['fechavencimiento']) ? Carbon::parse($saldo['fechavencimiento'])->format('d-m-Y') : null,
-                        'ASESOR' => $saldo['asesor'] ?? null,
-                        'CENTRO' => $saldo['centro'] ?? null,
-                        'GRUPO' => $saldo['groupsolid'] ?? null,
-                        'SUCURSAL' => $saldo['sucursal'] ?? null,
-                        'SUPERVISOR' => $saldo['supervisor'] ?? null,
-                    ];
+
+                    $textoBitacora = "";
+                    $textoBitacora .= "CLIENTE: " . ($saldo['nombre_cliente']) . "\n";
+                    $textoBitacora .= "MONTO: " . (isset($saldo['monto']) ? round($saldo['monto'], 2) : 'N/A') . "\n";
+                    $textoBitacora .= "CUOTA: " . (isset($saldo['cuota']) ? round($saldo['cuota'], 2) : 'N/A') . "\n";
+                    $textoBitacora .= "PLAZO: " . ($saldo['plazo'] ?? 'N/A') . "\n";
+                    $textoBitacora .= "FECHA APERTURA: " . (isset($saldo['fechaapertura']) ? Carbon::parse($saldo['fechaapertura'])->format('d-m-Y') : 'N/A') . "\n";
+                    $textoBitacora .= "FECHA VENCIMIENTO: " . (isset($saldo['fechavencimiento']) ? Carbon::parse($saldo['fechavencimiento'])->format('d-m-Y') : 'N/A') . "\n";
+                    $textoBitacora .= "ASESOR: " . ($saldo['nombre_asesor'] ?? 'N/A') . "\n";
+                    $textoBitacora .= "CENTRO: " . ($saldo['nombre_centro'] ?? 'N/A') . "\n";
+                    $textoBitacora .= "GRUPO: " . ($saldo['nombre_grupo'] ?? 'N/A') . "\n";
+                    $textoBitacora .= "SUCURSAL: " . ($saldo['nombre_sucursal'] ?? 'N/A') . "\n";
+                    $textoBitacora .= "SUPERVISOR: " . ($saldo['nombre_supervisor'] ?? 'N/A') . "\n";
+                    $textoBitacora .= "-------------------------\n";
+
 
                     Bitacora::create([
                         'usuario' => Auth::user()->name,
                         'tabla_afectada' => 'PRESTAMOS',
-                        'accion' => 'INSERT',
-                        'datos' => json_encode($saldoBitacora),
+                        'accion' => 'INSERTAR',
+                        'datos' => $textoBitacora,
                         'fecha' => Carbon::now(),
                         'id_asesor' => Auth::user()->id,
                     ]);
@@ -459,7 +481,6 @@ class DesembolsoprestamoController extends Controller
 
     public function validarPassword(Request $request)
     {
-
         // Validación del input
         $request->validate([
             'password' => 'required|string',
@@ -483,13 +504,31 @@ class DesembolsoprestamoController extends Controller
 
     public function eliminarDesembolso(Request $request)
     {
+        
         DB::beginTransaction();
 
         try {
             $fechaApertura = $request->input('fecha_apertura');
             $fechaVencimiento = $request->input('fecha_vencimiento');
             $codigoCliente = $request->input('codigoCliente');
+            $motivo =$request->input('motivo');
 
+            // Obtener datos del cliente para bitácora
+            $clienteDatos = DB::table('clientes')
+                ->select('nombre', 'apellido') // Cambia según columnas reales
+                ->where('id', $codigoCliente)
+                ->first();
+
+            if (!$clienteDatos) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'mensaje' => 'No se encontró el cliente'
+                ], 404);
+            }
+
+            // Formar nombre completo
+            $nombreCompleto = trim($clienteDatos->nombre . ' ' . $clienteDatos->apellido);
 
             // Buscar el último desembolso
             $cliente = Saldoprestamo::where('id_cliente', $codigoCliente)
@@ -499,12 +538,32 @@ class DesembolsoprestamoController extends Controller
                 ->first();
 
             if (!$cliente) {
-                DB::rollBack(); // Asegura revertir transacción en caso de fallo temprano
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
                     'mensaje' => 'No se encontró el desembolso para este cliente'
                 ], 404);
             }
+
+            // Aquí ya tienes el nombre completo y el registro del desembolso, puedes armar tu texto para bitácora
+            $textoBitacora = "";
+            $textoBitacora .= "Nombre: {$nombreCompleto}\n";
+            $textoBitacora .= "Monto: " . number_format($cliente->MONTO, 2) . "\n";  // <-- aquí el monto con 2 decimales
+            $textoBitacora .= "Fecha apertura: " . date('d-m-Y', strtotime($fechaApertura)) . "\n";
+            $textoBitacora .= "Fecha vencimiento: " . date('d-m-Y', strtotime($fechaVencimiento)) . "\n";
+            $textoBitacora .= "-------------------------\n";
+
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'Historial Prestamos',
+                'accion' => 'REVERSIÓN PRESTAMO',
+                'datos' => $textoBitacora,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => $motivo
+                // 'comentarios' => $motivo
+            ]);
+            // Aquí agregarías el código para insertar en bitácora con $textoBitacora
 
             // Eliminar el registro de Saldoprestamo
             $cliente->delete();
@@ -549,6 +608,7 @@ class DesembolsoprestamoController extends Controller
             ], 500);
         }
     }
+
 
 
 
@@ -614,22 +674,24 @@ class DesembolsoprestamoController extends Controller
                 ? Carbon::parse($request->input('fechaVencimiento'))->format('d-m-Y')
                 : null;
 
-            // Solo ciertos campos para bitácora
+            // // Solo ciertos campos para bitácora
+            $sucursalNombre = $request->input('nombre_sucursal') ?? 'No especificado';
+            $supervisorNombre = $request->input('nombre_supervisor') ?? 'No especificado';
+            $asesorNombre = $request->input('nombre_asesor') ?? 'No especificado';
             $datosBitacora = [
-                'CLIENTE' => $id_cliente,
+                'CLIENTE' => $request->input('nombre'),
                 'MONTO' => $monto,
                 'CUOTA' => $cuota,
                 'PLAZO' => $request->input('plazo'),
                 'FECHA APERTURA' => $fechaApertura,
                 'FECHA VENCIMIENTO' => $fechaVencimiento,
                 'INTERES' => $request->input('interes'),
-                'COLECTOR' => $request->input('colector'),
                 'MANEJO' => $request->input('manejo'),
-                'GRUPO' => 1,
-                'CENTRO' => 1,
-                'SUCURSAL' => $request->input('sucursal'),
-                'SUPERVISOR' => $request->input('supervisor'),
-                'ASESOR' => $request->input('id_asesor'),
+                'GRUPO' => 'INDIVIDUAL',
+                'CENTRO' => 'INDIVIDUAL',
+                'SUCURSAL' => $sucursalNombre,
+                'SUPERVISOR' => $supervisorNombre,
+                'ASESOR' => $asesorNombre,
 
             ];
 
@@ -749,13 +811,29 @@ class DesembolsoprestamoController extends Controller
 
             DB::table('saldoprestamo')->insert($datos);
 
+            $fechaAperturaFormat = Carbon::parse($datosBitacora['FECHA APERTURA'])->format('d-m-Y');
+            $fechaVencimientoFormat = Carbon::parse($datosBitacora['FECHA VENCIMIENTO'])->format('d-m-Y');
+
+            $datosBitacoraTextoPlano =
+                "CLIENTE: {$datosBitacora['CLIENTE']}\n" .
+                "MONTO: {$datosBitacora['MONTO']}\n" .
+                "CUOTA: {$datosBitacora['CUOTA']}\n" .
+                "PLAZO: {$datosBitacora['PLAZO']}\n" .
+                "FECHA APERTURA: {$fechaAperturaFormat}\n" .
+                "FECHA VENCIMIENTO: {$fechaVencimientoFormat}\n" .
+                "ASESOR: {$datosBitacora['ASESOR']}\n" .
+                "CENTRO: {$datosBitacora['CENTRO']}\n" .
+                "GRUPO: {$datosBitacora['GRUPO']}\n" .
+                "SUCURSAL: {$datosBitacora['SUCURSAL']}\n" .
+                "SUPERVISOR: {$datosBitacora['SUPERVISOR']}\n" .
+                "-------------------------";
 
             // Registrar en bitácora
             Bitacora::create([
                 'usuario' => Auth::user()->name,
                 'tabla_afectada' => 'PRESTAMOS',
-                'accion' => 'INSERT',
-                'datos' => json_encode($datosBitacora),
+                'accion' => 'INSERTAR',
+                'datos' => $datosBitacoraTextoPlano,
                 'fecha' => Carbon::now(),
                 'id_asesor' => Auth::user()->id,
             ]);

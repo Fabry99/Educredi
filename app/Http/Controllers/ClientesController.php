@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bitacora;
+use App\Models\Centros;
 use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
+use App\Models\Grupos;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ClientesController extends Controller
 {
@@ -39,13 +44,10 @@ class ClientesController extends Controller
             'ocupacion' => 'nullable|string|max:250',
             'firma' => 'required|in:si,no',
             'nrc' => 'nullable|string|max:22'
-
-
-
         ]);
+
         try {
-            // Insertar el centro
-            Clientes::create([
+            $cliente = Clientes::create([
                 'nombre' => $request->nombre,
                 'apellido' => $request->apellido,
                 'direccion' => $request->direccion,
@@ -73,17 +75,37 @@ class ClientesController extends Controller
                 'ocupacion' => $request->ocupacion,
                 'puede_firmar' => $request->firma,
                 'nrc' => $request->nrc,
-
-
             ]);
 
-            // Mensaje de éxito
+            // Obtener texto para la bitácora
+            $textoBitacora = "Nuevo cliente registrado:\n";
+            $textoBitacora .= "- Nombre: {$request->nombre} {$request->apellido}\n";
+            $textoBitacora .= "- Dirección: {$request->direccion}\n";
+            $textoBitacora .= "- Género: {$request->genero}\n";
+            $textoBitacora .= "- Fecha nacimiento: {$request->fecha_nacimiento}\n";
+            $textoBitacora .= "- DUI: {$request->dui}\n";
+            $textoBitacora .= "- NIT: {$request->NIT}\n";
+            $textoBitacora .= "- Tel. Casa: {$request->telcasa}, Tel. Oficina: {$request->teloficina}\n";
+            $textoBitacora .= "- Actividad Económica: {$request->actividadeconomica}\n";
+            $textoBitacora .= "- Nacionalidad: {$request->nacionalidad}\n";
+
+            // Bitácora
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'CLIENTES',
+                'accion' => 'CREACIÓN DE CLIENTE',
+                'datos' => $textoBitacora,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => null
+            ]);
+
             return redirect()->back()->with('success', 'Cliente Agregado Correctamente.');
         } catch (\Exception $e) {
-            // En caso de algún error, pasar mensaje de error
             return redirect()->back()->with('error', 'Hubo un Problema al Agregar el Cliente.');
         }
     }
+
     public function obtenerCliente($id)
     {
         // Buscar el cliente junto con su grupo y centro
@@ -102,30 +124,146 @@ class ClientesController extends Controller
     {
         $id = $request->id;
 
-        // Validar campos básicos del cliente
         $request->validate([
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
         ]);
 
-        // Actualizar datos del cliente (exceptuando los campos de relación)
         $cliente = Clientes::findOrFail($id);
-        $cliente->update($request->except(['id_centroeditar', 'id_grupoeditar']));
 
-        // Verifica que ambos campos estén presentes y no sean nulos
+        // Clonamos el estado anterior para comparar
+        $clienteAnterior = $cliente->replicate();
+
+        // Actualizamos datos (excluyendo campos no relacionados y tokens)
+        $cliente->update($request->except(['id_centroeditar', 'id_grupoeditar', '_token', '_method', 'id']));
+
+        // Funciones para obtener nombre de departamento, municipio, centro y grupo
+        function obtenerNombreDepartamento($id_departamento)
+        {
+            $dep = \App\Models\Departamentos::find($id_departamento);
+            return $dep ? $dep->nombre : $id_departamento;
+        }
+
+        function obtenerNombreMunicipio($id_municipio)
+        {
+            $mun = \App\Models\Municipios::find($id_municipio);
+            return $mun ? $mun->nombre : $id_municipio;
+        }
+
+        function obtenerNombreCentro($id_centro)
+        {
+            $cen = \App\Models\Centros::find($id_centro);
+            return $cen ? $cen->nombre : $id_centro;
+        }
+
+        function obtenerNombreGrupo($id_grupo)
+        {
+            $gru = \App\Models\Grupos::find($id_grupo);
+            return $gru ? $gru->nombre : $id_grupo;
+        }
+
+        // Mapeo de campos con nombres amigables
+        $campos = [
+            'nombre' => 'Nombre',
+            'apellido' => 'Apellido',
+            'direccion' => 'Dirección',
+            'genero' => 'Género',
+            'fecha_nacimiento' => 'Fecha nacimiento',
+            'sector' => 'Sector',
+            'direc_trabajo' => 'Dirección negocio',
+            'telefono_casa' => 'Tel. Casa',
+            'telefono_oficina' => 'Tel. Oficina',
+            'ing_economico' => 'Ingreso económico',
+            'egre_economico' => 'Egreso económico',
+            'otros_ing' => 'Otros ingresos',
+            'dui' => 'DUI',
+            'lugar_expe' => 'Lugar expedición',
+            'estado_civil' => 'Estado civil',
+            'nit' => 'NIT',
+            'nombre_conyugue' => 'Cónyuge',
+            'id_departamento' => 'Departamento',
+            'id_municipio' => 'Municipio',
+            'lugar_nacimiento' => 'Lugar nacimiento',
+            'persona_dependiente' => 'Persona dependiente',
+            'fecha_expedicion' => 'Fecha expedición',
+            'nacionalidad' => 'Nacionalidad',
+            'act_economica' => 'Actividad económica',
+            'ocupacion' => 'Ocupación',
+            'puede_firmar' => 'Puede firmar',
+            'nrc' => 'NRC',
+        ];
+
+        $textoBitacora = "Cliente actualizado:\n";
+        $textoBitacora .= "- Nombre completo: {$cliente->nombre} {$cliente->apellido}\n";
+
+        foreach ($campos as $campo => $nombreCampo) {
+            $valorAnterior = $clienteAnterior->$campo ?? '';
+            $valorNuevo = $cliente->$campo ?? '';
+
+            // Si es campo de IDs, convertir a nombre para mostrar
+            if ($campo == 'id_departamento') {
+                $valorAnterior = obtenerNombreDepartamento($valorAnterior);
+                $valorNuevo = obtenerNombreDepartamento($valorNuevo);
+            } elseif ($campo == 'id_municipio') {
+                $valorAnterior = obtenerNombreMunicipio($valorAnterior);
+                $valorNuevo = obtenerNombreMunicipio($valorNuevo);
+            }
+
+            // Comparar y mostrar en bitácora
+            if ($valorAnterior != $valorNuevo) {
+                if (empty($valorAnterior)) {
+                    $textoBitacora .= "- {$nombreCampo}: '{$valorNuevo}'\n";
+                } else {
+                    $textoBitacora .= "- {$nombreCampo}: '{$valorAnterior}' → '{$valorNuevo}'\n";
+                }
+            }
+        }
+
+        // Guardar en bitácora solo si hay cambios reales (más que solo el nombre completo)
+        if (strlen(trim($textoBitacora)) > strlen("Cliente actualizado:\n- Nombre completo: {$cliente->nombre} {$cliente->apellido}\n")) {
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'CLIENTES',
+                'accion' => 'ACTUALIZACIÓN DE CLIENTE',
+                'datos' => $textoBitacora,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => null
+            ]);
+        }
+
+        // Manejo de relación centro/grupo con nombres en bitácora
         if ($request->filled('id_centroeditar') && $request->filled('id_grupoeditar')) {
-
-            // Verifica que no exista ya la relación
             $yaExisteRelacion = \App\Models\Centros_Grupos_Clientes::where('cliente_id', $cliente->id)
                 ->where('centro_id', $request->id_centroeditar)
                 ->where('grupo_id', $request->id_grupoeditar)
                 ->exists();
 
-            if (!$yaExisteRelacion && $request->filled('id_centroeditar') && $request->filled('id_grupoeditar')) {
+            if (!$yaExisteRelacion) {
                 \App\Models\Centros_Grupos_Clientes::create([
                     'cliente_id' => $cliente->id,
                     'centro_id' => $request->id_centroeditar,
                     'grupo_id' => $request->id_grupoeditar
+                ]);
+
+                // Obtener nombres para bitácora
+                $nombreCentro = obtenerNombreCentro($request->id_centroeditar);
+                $nombreGrupo = obtenerNombreGrupo($request->id_grupoeditar);
+
+                // Guardar acción de relación centro/grupo en bitácora
+                $textoRelacion = "Relación agregada:\n";
+                $textoRelacion .= "- Cliente: {$cliente->nombre} {$cliente->apellido}\n";
+                $textoRelacion .= "- Centro: {$nombreCentro}\n";
+                $textoRelacion .= "- Grupo: {$nombreGrupo}\n";
+
+                Bitacora::create([
+                    'usuario' => Auth::user()->name,
+                    'tabla_afectada' => 'CENTROS_GRUPOS_CLIENTES',
+                    'accion' => 'RELACIÓN AGREGADA',
+                    'datos' => $textoRelacion,
+                    'fecha' => Carbon::now(),
+                    'id_asesor' => Auth::user()->id,
+                    'comentarios' => null
                 ]);
             }
         }
@@ -143,25 +281,53 @@ class ClientesController extends Controller
     }
 
     public function eliminarDelGrupo(Request $request)
-{
-    $clienteId = $request->input('cliente_id');
-    $grupoId = $request->input('grupo_id');
-    $centroId = $request->input('centro_id');
-    // Validar o buscar si existe la relación
-    $registro = Centros_Grupos_Clientes::where('cliente_id', $clienteId)
-                ->where('grupo_id', $grupoId)
-                ->where('centro_id', $centroId)
-                ->first();
+    {
+        $clienteId = $request->input('cliente_id');
+        $grupoId = $request->input('grupo_id');
+        $centroId = $request->input('centro_id');
 
-    if ($registro) {
-        $registro->delete(); // elimina la relación del grupo
+        // Buscar la relación que se quiere eliminar
+        $registro = Centros_Grupos_Clientes::where('cliente_id', $clienteId)
+            ->where('grupo_id', $grupoId)
+            ->where('centro_id', $centroId)
+            ->first();
+
+        if (!$registro) {
+            return response()->json(['error' => 'No se encontró la relación.'], 404);
+        }
+
+        // Obtener nombres para la bitácora
+        $cliente = Clientes::find($clienteId);
+        $grupo = Grupos::find($grupoId);
+        $centro = Centros::find($centroId);
+
+        $nombreCliente = $cliente ? "{$cliente->nombre} {$cliente->apellido}" : 'Cliente desconocido';
+        $nombreGrupo = $grupo ? $grupo->nombre : 'Grupo desconocido';
+        $nombreCentro = $centro ? $centro->nombre : 'Centro desconocido';
+
+        // Construir texto plano para bitácora
+        $textoBitacora = "";
+        $textoBitacora .= "Eliminación de cliente del grupo\n";
+        $textoBitacora .= "Cliente: {$nombreCliente}\n";
+        $textoBitacora .= "Grupo: {$nombreGrupo}\n";
+        $textoBitacora .= "Centro: {$nombreCentro}\n";
+        $textoBitacora .= "-------------------------\n";
+
+        // Guardar en bitácora antes de eliminar
+        Bitacora::create([
+            'usuario' => Auth::user()->name,
+            'tabla_afectada' => 'CENTROS_GRUPOS_CLIENTES',
+            'accion' => 'ELIMINACIÓN DE RELACIÓN CLIENTE-GRUPO-CENTRO',
+            'datos' => $textoBitacora,
+            'fecha' => Carbon::now(),
+            'id_asesor' => Auth::user()->id,
+        ]);
+
+        // Eliminar la relación
+        $registro->delete();
 
         return response()->json(['success' => 'Cliente eliminado correctamente del grupo.']);
     }
-
-    return response()->json(['error' => 'No se encontró la relación.'], 404);
-}
-
 }
 
 // $cliente = Clientes::find($id);

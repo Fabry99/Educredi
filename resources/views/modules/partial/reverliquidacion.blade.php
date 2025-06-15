@@ -1,7 +1,7 @@
 @include('modules.modals.modalreversionprestamo');
 <div class="container">
     <div class="main-content">
-        <h1>Reversion de liquidación</h1>
+        <h1>Reversión de liquidación</h1>
 
         @if ($errors->any())
             @foreach ($errors->all() as $error)
@@ -21,7 +21,7 @@
             <span id="alert-notification-message"></span>
         </div>
 
-        <div class="section">
+        <div class="section" style="height: auto; margin-top: 50px">
             <div class="section-container">
                 <div class="form-reversion">
                     <label for="codigo">Codigo de Prestamo:</label>
@@ -33,7 +33,15 @@
                     <input type="text" value="" id="monto" name="monto" class="form-control" readonly>
                 </div>
             </div>
-            <div class="section-container2">
+            <div class="informacion" style=" width: 100%; margin-top: 50px">
+                <label for="total" style="margin-left: 40px; ">¿Por qué se va a
+                    Revertir?</label>
+                <div class="" style="width: 100%; margin: 5px 0px 0px 40px ">
+                    <textarea id="motivo" name="motivo" class="form-control" rows="3"
+                        style="width: 90%;height: 100px; resize: vertical; background: #f1f1f1"></textarea>
+                </div>
+            </div>
+            <div class="section-container2" style="margin-bottom: 30px">
 
                 <a href="" id="btn-abrirmodalreversion">Realizar la Reversión</a>
             </div>

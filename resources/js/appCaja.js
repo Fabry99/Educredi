@@ -213,8 +213,29 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (currentValue === '') {
                             $(this).text(originalValue);
                         }
-                    });
+                    })
+                        .on('keydown', function (e) {
+                            if (e.key === "Enter" || e.keyCode === 13) {
+                                e.preventDefault();  // Evita el salto de línea
+                            } else {
+                                // Permitir teclas especiales
+                                const teclasEspeciales = [8, 9, 27, 37, 38, 39, 40, 46];
 
+                                const esNumero = (e.key >= '0' && e.key <= '9');
+                                const esPunto = e.key === '.';
+
+                                if (!esNumero && !esPunto && !teclasEspeciales.includes(e.keyCode)) {
+                                    e.preventDefault();
+                                }
+
+                                if (esPunto) {
+                                    const texto = $(this).text();
+                                    if (texto.includes('.')) {
+                                        e.preventDefault();
+                                    }
+                                }
+                            }
+                        });
                     tablaBody.append(fila);
                 });
 
@@ -782,7 +803,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const saldoPendiente = parseFloat(c.saldo) || 0;
 
-  
+
                 const tasaInteresAnual = parseFloat(c.tasa_interes) || 0;
                 const tasaInteresMensual = tasaInteresAnual / 12 / 100; // porcentaje mensual en decimal
 

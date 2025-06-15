@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     $('#modaleditarcentro').fadeIn();
                 },
                 error: function () {
-                    alert('Error al obtener los datos del cliente.');
+                    mostrarAlerta('Error al obtener los datos del cliente.','error');
                 }
             });
         });
@@ -116,9 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     nombrecentro: nombreCentro,
                 },
                 success: function (response) {
-                    $('#custom-alert-message').text(response.success);
-                    $('#custom-alert').removeClass('alert-error').addClass('alert-success');
-                    $('#custom-alert').fadeIn();
+                    mostrarAlerta('Centro Actualizado','success');
 
                     setTimeout(function () {
                         $('#custom-alert').fadeOut();
@@ -128,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     $('#modaleditarcentro').fadeOut();
                 },
                 error: function (xhr, status, error) {
-                    alert('Error al actualizar el centro.');
+                    mostrarAlerta('Error al actualizar el centro.','error');
                 }
             });
         });
@@ -242,9 +240,7 @@ function cargarGruposPorCentro(centroID) {
                         $('#tablaclientesgrupos tbody').empty();
 
                         // Mostrar alerta de éxito
-                        $('#custom-alert-message').text(response.success); // Mostrar el mensaje de éxito
-                        $('#custom-alert').removeClass('alert-error').addClass('alert-success'); // Asegúrate de tener las clases de estilo
-                        $('#custom-alert').fadeIn(); // Mostrar la alerta
+                        mostrarAlerta('Grupo Eliminado con Exito...', 'success');
 
                         setTimeout(function () {
                             $('#custom-alert').fadeOut(); // Ocultar la alerta
@@ -253,7 +249,7 @@ function cargarGruposPorCentro(centroID) {
 
                     },
                     error: function (xhr, status, error) {
-                        alert('Error al eliminar el grupo. Por favor, inténtalo de nuevo.');
+                        mostrarAlerta('Error al eliminar el grupo. Por favor, inténtalo de nuevo.','error');
                     }
                 });
             });
@@ -295,7 +291,7 @@ function cargarGruposPorCentro(centroID) {
 
         },
         error: function () {
-            alert('Error al cargar los grupos.');
+            mostrarAlerta('Error al cargar los grupos.','error');
         }
     });
 }
@@ -336,7 +332,7 @@ $('#tablaGrupos tbody').on('click', 'tr', function (event) {
 
         },
         error: function (error) {
-            alert('No se pudieron cargar los clientes para este grupo.');
+            mostrarAlerta('No se pudieron cargar los clientes para este grupo.','error');
         }
     });
 
@@ -372,9 +368,7 @@ $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
             $('#tablaclientesgrupos tbody').empty();
 
             // Muestra la alerta de éxito
-            $('#custom-alert-message').text(data.success);
-            $('#custom-alert').removeClass('alert-error').addClass('alert-success');
-            $('#custom-alert').fadeIn().delay(3000).fadeOut();
+            mostrarAlerta('Cliente Eliminado...', 'success')
 
             // Cierra el modal
             $('#modalmostrarcliente').fadeOut();
@@ -386,9 +380,7 @@ $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
             }, 1200); // Esperamos a que se vea la alerta
         })
         .catch(error => {
-            $('#custom-alert-message').text('Hubo un error al eliminar el cliente.');
-            $('#custom-alert').removeClass('alert-success').addClass('alert-error');
-            $('#custom-alert').fadeIn().delay(5000).fadeOut();
+            mostrarAlerta('Hubo un error al eliminar el cliente.','error');
         });
 
 });
@@ -521,12 +513,12 @@ $(document).ready(function () {
                     data: $(this).serialize(),
                     success: function (response) {
                         // Aquí puedes hacer algo con la respuesta, como mostrar un mensaje de éxito
-                        alert('Cliente actualizado correctamente');
+                        mostrarAlerta('Cliente actualizado correctamente','success');
                         $('#modaleditarcliente').fadeOut(); // Cierra el modal
                         location.reload(); // Recarga la página para reflejar los cambios
                     },
                     error: function () {
-                        alert('Error al actualizar el cliente.');
+                        mostrarAlerta('Error al actualizar el cliente.','error');
                     }
                 });
             });
@@ -768,3 +760,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+function mostrarAlerta(mensaje, tipo) {
+    const alerta = document.getElementById('alert-notification');
+    const mensajeAlerta = document.getElementById('alert-notification-message');
+
+    // Limpiar cualquier contenido o clase previa
+    mensajeAlerta.textContent = mensaje;
+    alerta.classList.remove('error_notification', 'success_notification'); // Limpiar clases anteriores
+
+    // Asignar la clase correcta según el tipo
+    if (tipo === "error") {
+        alerta.classList.add('error_notification'); // Clase de error (rojo)
+    } else if (tipo === "success") {
+        alerta.classList.add('success_notification'); // Clase de éxito (verde)
+    }
+
+    // Mostrar la alerta y aplicar animación
+    alerta.style.display = 'block';
+    setTimeout(() => {
+        alerta.classList.add('show'); // Aplica la animación de mostrar
+    }, 10);
+
+    // Ocultar la alerta después de 4 segundos
+    setTimeout(function () {
+        alerta.classList.remove('show'); // Eliminar la animación de mostrar
+        setTimeout(function () {
+            alerta.style.display = 'none'; // Ocultar la alerta completamente
+        }, 500);  // Tiempo para que la animación termine
+    }, 4000);  // La alerta se oculta después de 4 segundos
+}

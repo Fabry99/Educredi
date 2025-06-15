@@ -29,6 +29,10 @@
         </form>
     </div>
 </div>
+<script>
+    const esAdministrador = {{ Auth::check() && Auth::user()->rol === 'administrador' ? 'true' : 'false' }};
+</script>
+
 
 <!-- Estilos CSS -->
 <style>

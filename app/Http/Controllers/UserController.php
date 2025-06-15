@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bitacora;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -18,8 +21,10 @@ class UserController extends Controller
             'actividad' => 'required|in:activo,inactivo',
             'nacimiento' => 'required|date',
         ]);
+
         try {
-            User::create([
+            // Crear usuario
+            $usuario = User::create([
                 'name' => $request->nombre,
                 'last_name' => $request->apellido,
                 'fecha_nacimiento' => $request->nacimiento,
@@ -28,9 +33,31 @@ class UserController extends Controller
                 'rol' => $request->rol,
                 'estado' => $request->actividad,
             ]);
+
+            // Crear texto plano para la bitácora (sin contraseña)
+            $textoBitacora = "";
+            $textoBitacora .= "Usuario creado:\n";
+            $textoBitacora .= "- Nombre: {$request->nombre} {$request->apellido}\n";
+            $textoBitacora .= "- Correo: {$request->correo}\n";
+            $textoBitacora .= "- Rol: {$request->rol}\n";
+            $textoBitacora .= "- Estado: {$request->actividad}\n";
+            $textoBitacora .= "- Fecha de nacimiento: {$request->nacimiento}\n";
+            $textoBitacora .= "-------------------------\n";
+
+            // Guardar en la bitácora
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'USUARIOS',
+                'accion' => 'CREACIÓN DE USUARIO',
+                'datos' => $textoBitacora,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => null
+            ]);
+
             return redirect()->back()->with('success', 'Usuario creado correctamente');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error al crear el usuario ');
+            return redirect()->back()->with('error', 'Error al crear el usuario');
         }
     }
 
@@ -60,13 +87,34 @@ class UserController extends Controller
             'nacimientoupdate' => 'required|date',
         ]);
 
-        // Obtener el ID
         $id = $request->id;
-
-        // Buscar usuario
         $user = User::findOrFail($id);
 
-        // Preparar datos
+        $cambios = "";
+
+        if ($user->name !== $request->nombreupdate) {
+            $cambios .= "- Nombre: {$user->name} → {$request->nombreupdate}\n";
+        }
+        if ($user->last_name !== $request->apellidoupdate) {
+            $cambios .= "- Apellido: {$user->last_name} → {$request->apellidoupdate}\n";
+        }
+        if ($user->email !== $request->correoupdate) {
+            $cambios .= "- Correo: {$user->email} → {$request->correoupdate}\n";
+        }
+        if ($user->rol !== $request->rolupdate) {
+            $cambios .= "- Rol: {$user->rol} → {$request->rolupdate}\n";
+        }
+        if ($user->estado !== $request->actividadupdate) {
+            $cambios .= "- Estado: {$user->estado} → {$request->actividadupdate}\n";
+        }
+        if ($user->fecha_nacimiento !== $request->nacimientoupdate) {
+            $cambios .= "- Fecha de nacimiento: {$user->fecha_nacimiento} → {$request->nacimientoupdate}\n";
+        }
+        if ($request->filled('passwordupdate')) {
+            $cambios .= "- Contraseña actualizada\n";
+        }
+
+        // Preparar datos actualizados
         $data = [
             'name' => $request->nombreupdate,
             'last_name' => $request->apellidoupdate,
@@ -76,13 +124,24 @@ class UserController extends Controller
             'estado' => $request->actividadupdate,
         ];
 
-        // Solo actualizar la contraseña si se envía
         if ($request->filled('passwordupdate')) {
             $data['password'] = bcrypt($request->passwordupdate);
         }
 
-        // Actualizar usuario
         $user->update($data);
+
+        // Guardar en la bitácora solo si hubo cambios
+        if ($cambios !== "") {
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'USUARIOS',
+                'accion' => 'ACTUALIZACIÓN DE USUARIO',
+                'datos' => "Cambios realizados al usuario {$user->name} {$user->last_name}:\n" . $cambios,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => null
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Usuario actualizado con éxito');
     }

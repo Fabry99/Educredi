@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bitacora;
 use App\Models\Centros;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,9 +22,25 @@ class CentroController extends Controller
 
         try {
             // Insertar el centro
-            Centros::create([
+            $centro = Centros::create([
                 'nombre' => $request->nombre,
                 'id_asesor' => Auth::user()->id, // ID del asesor autenticado
+            ]);
+
+            // Crear texto plano para la bitácora
+            $textoBitacora = "";
+            $textoBitacora .= "Centro creado: {$centro->nombre}\n";
+            $textoBitacora .= "-------------------------\n";
+
+            // Guardar en la bitácora
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'CENTROS',
+                'accion' => 'CREACIÓN DE CENTRO',
+                'datos' => $textoBitacora,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => null // opcional
             ]);
 
             // Mensaje de éxito
@@ -35,16 +53,36 @@ class CentroController extends Controller
 
     public function eliminar($id)
     {
-        
+        // Buscar el centro por su ID
         $centro = Centros::find($id);
 
         if (!$centro) {
-            return redirect()->back()->with('error', 'Hubo un problema al Eliminiar el centro.');
+            return redirect()->back()->with('error', 'Hubo un problema al eliminar el centro.');
         }
-    
+
+        // Guardar nombre antes de eliminar
+        $nombreCentro = $centro->nombre;
+
+        // Texto plano para la bitácora
+        $textoBitacora = "";
+        $textoBitacora .= "Centro eliminado: {$nombreCentro}\n";
+        $textoBitacora .= "-------------------------\n";
+
+        // Guardar en la bitácora
+        Bitacora::create([
+            'usuario' => Auth::user()->name,
+            'tabla_afectada' => 'CENTROS',
+            'accion' => 'ELIMINACIÓN DE CENTRO',
+            'datos' => $textoBitacora,
+            'fecha' => Carbon::now(),
+            'id_asesor' => Auth::user()->id,
+            'comentarios' => null // o algún comentario si lo tienes
+        ]);
+
+        // Eliminar el centro
         $centro->delete();
-    
-        return redirect()->back()->with('success', 'Centro Eliminado Correctamente.');
+
+        return redirect()->back()->with('success', 'Centro eliminado correctamente.');
     }
     public function obtenercentro($id)
     {
@@ -60,27 +98,47 @@ class CentroController extends Controller
         return response()->json(['error' => 'Cliente no encontrado'], 404);
     }
     public function actualizarCentro(Request $request, $id)
-{
-    // Validar los datos recibidos
-    $request->validate([
-        'nombrecentro' => 'required|string|max:255',
-    ]);
+    {
+        // Validar los datos recibidos
+        $request->validate([
+            'nombrecentro' => 'required|string|max:255',
+        ]);
 
-    // Obtener el centro a actualizar
-    $centro = Centros::find($id);
+        // Obtener el centro a actualizar
+        $centro = Centros::find($id);
 
-    if ($centro) {
-        // Actualizar los datos del centro
-        $centro->nombre = $request->input('nombrecentro');
-        $centro->save();
+        if ($centro) {
+            // Guardar el nombre anterior
+            $nombreAnterior = $centro->nombre;
 
-        // Retornar una respuesta JSON con los datos actualizados
-        return response()->json(['success' => 'Centro Actualizado con éxito.']);
+            // Guardar el nuevo nombre
+            $nuevoNombre = $request->input('nombrecentro');
+
+            // Actualizar los datos del centro
+            $centro->nombre = $nuevoNombre;
+            $centro->save();
+
+            // Construir texto plano para la bitácora
+            $textoBitacora = "";
+            $textoBitacora .= "Centro actualizado:\n";
+            $textoBitacora .= "Nombre anterior: {$nombreAnterior}\n";
+            $textoBitacora .= "Nuevo nombre: {$nuevoNombre}\n";
+            $textoBitacora .= "-------------------------\n";
+
+            // Guardar en la bitácora
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'CENTROS',
+                'accion' => 'ACTUALIZACIÓN DE CENTRO',
+                'datos' => $textoBitacora,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => null // puedes agregar un campo de comentario si lo deseas
+            ]);
+
+            return response()->json(['success' => 'Centro Actualizado con éxito.']);
+        }
+
+        return response()->json(['error' => 'Ocurrió un error'], 404);
     }
-
-    // Si no se encuentra el centro, retornar un error
-    return response()->json(['error' => 'Ocurrio un error'], 404);
-}
-    
-    
 }

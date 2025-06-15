@@ -679,6 +679,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const linea = document.getElementById('linea')?.value || '';
             const garantiaId = obtenerGarantiaSeleccionada();
             const asesor = document.getElementById('asesor')?.value || '';
+            const asesorNombre = document.getElementById('asesor')?.selectedOptions[0]?.text || '';
+            const sucursalNombre = document.getElementById('sucursal')?.selectedOptions[0]?.text || '';
+            const supervisorNombre = document.getElementById('supervisor')?.selectedOptions[0]?.text || '';
+
 
             // Validar que se seleccionó una garantía
             if (!garantiaId) {
@@ -715,6 +719,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         centroId: centroId,
                         formapago: detalleCalculo.formapago || formapago,
                         asesor: asesor,
+                        nombre_asesor: asesorNombre,
+                        nombre_supervisor: supervisorNombre,
+                        nombre_sucursal: sucursalNombre,
 
 
 
@@ -831,6 +838,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         //Codigo para desembolso de prestamo Individual
+
+        const asesorSelect = document.getElementById('asesorind');
+        const sucursalSelect = document.getElementById('sucursalind');
+        const supervisorSelect = document.getElementById('supervisorind');
+
+        // Función para obtener el texto seleccionado, ignorando "Seleccionar:"
+        function obtenerTextoSeleccionado(select) {
+            if (!select) return '';
+            if (select.value === "" || select.selectedOptions.length === 0) return '';
+            const texto = select.selectedOptions[0].text.trim();
+            return texto === "Seleccionar:" ? '' : texto;
+        }
         const inputInteres_ind = document.getElementById('tasainteresind');  // Campo de tasa de interés
         const selectLinea_ind = document.getElementById('lineaind');
         const select_sucursal = document.getElementById('sucursalind');
@@ -851,6 +870,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectBanco = document.getElementById('bancoind');
         const selectformapago = document.getElementById('formapagoind');
         const btn_prestamoindividual = document.getElementById('btnAceptarPrestamo');
+
+
+
+
         const diasPorTipoPagoInd = {
             'diario': 1,
             'semanal': 7,
@@ -894,6 +917,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const textoTipoPagoIndi = select_tipoPago.options[select_tipoPago.selectedIndex]?.text?.trim().toLowerCase();
                 const cantDiasSelectind = diasPorTipoPagoInd[textoTipoPagoIndi];
 
+                const asesorNombre = obtenerTextoSeleccionado(asesorSelect);
+                const sucursalNombre = obtenerTextoSeleccionado(sucursalSelect);
+                const supervisorNombre = obtenerTextoSeleccionado(supervisorSelect);
+
                 const datosPrestamo = {
                     id_cliente: clienteId,
                     nombre: clienteNombre,
@@ -922,6 +949,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     iva: iva,
                     cantDiasSelect: cantDiasSelectind,
                     textoTipoPagoIndi: textoTipoPagoIndi,
+                    nombre_asesor: asesorNombre,
+                    nombre_sucursal: sucursalNombre,
+                    nombre_supervisor: supervisorNombre,
 
                 };
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
@@ -1296,35 +1326,81 @@ document.addEventListener('DOMContentLoaded', function () {
     const fecha_vencimiento = document.getElementById('fecha_vencimiento');
     const btnAceptar = document.getElementById('btnAceptar');
     const inputPassword = document.getElementById('password');
+    const motivo = document.getElementById('motivo');
 
 
     if (btnreversionprestamo) {
-        btnreversionprestamo.addEventListener("click", function (event) {
+        btnreversionprestamo.addEventListener("click", async function (event) {
             event.preventDefault();
-            if (modalreversionprestamo) {
-                modalreversionprestamo.style.display = "block";
 
-                btnAceptar.addEventListener('click', async function (event) {
-                    event.preventDefault();
+            const codigoCliente = id_cliente.value.trim();
+            const motivoTexto = motivo.value.trim(); // ← asegúrate que exista este input en tu HTML
+            const fecha_aperturaenviar = fecha_apertura.value.trim();
+            const fecha_vencimientoenviar = fecha_vencimiento.value.trim();
 
-                    const SpecialPassword = inputPassword.value.trim();
-                    const codigoCliente = id_cliente.value.trim();
-                    const fecha_aperturaenviar = fecha_apertura.value.trim();
-                    const fecha_vencimientoenviar = fecha_vencimiento.value.trim();
+            // 🚫 Validar campos requeridos
+            if (codigoCliente === '') {
+                mostrarAlerta("Por favor ingrese el código del cliente", "error");
+                return;
+            }
 
-                    if (SpecialPassword === '') {
-                        mostrarAlerta("Por Favor Ingrese una Contraseña Correcta", "error");
-                        return;
-                    } else if (codigoCliente === '') {
-                        mostrarAlerta("Por favor ingrese el código de cliente", "error");
-                        return;
+            if (motivoTexto === '') {
+                mostrarAlerta("Por favor ingrese el motivo de la reversión", "error");
+                return;
+            }
+
+            if (esAdministrador) {
+                // 🔓 Admin: eliminar directamente
+                const confirmacion = confirm("¿Está seguro de eliminar el préstamo del cliente?");
+                if (!confirmacion) return;
+
+                try {
+                    const deleteResponse = await fetch(`/eliminar/desembolsoprestamo`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            codigoCliente,
+                            fecha_apertura: fecha_aperturaenviar,
+                            fecha_vencimiento: fecha_vencimientoenviar,
+                            motivo: motivoTexto
+                        })
+                    });
+
+                    const deleteData = await deleteResponse.json();
+
+                    if (deleteData.success) {
+                        mostrarAlerta("Cliente eliminado con éxito", "success");
+                        setTimeout(() => location.reload(), 1000);
                     } else {
-                        // 🔒 Desactivar botón y mostrar alerta de procesamiento
-                        btnAceptar.disabled = true;
-                        btnAceptar.style.display = 'none';
-                        mostrarAlerta("Procesando eliminación...", "info");
+                        mostrarAlerta("Error al eliminar cliente", "error");
+                    }
+                } catch (error) {
+                    mostrarAlerta("Error en el servidor o en la solicitud", "error");
+                }
+
+            } else {
+                // 🔐 No administrador: abrir modal para contraseña
+                if (modalreversionprestamo) {
+                    modalreversionprestamo.style.display = "block";
+
+                    btnAceptar.addEventListener('click', async function (event) {
+                        event.preventDefault();
+
+                        const SpecialPassword = inputPassword.value.trim();
+
+                        if (SpecialPassword === '') {
+                            mostrarAlerta("Por favor ingrese una contraseña", "error");
+                            return;
+                        }
 
                         try {
+                            btnAceptar.disabled = true;
+                            btnAceptar.style.display = 'none';
+                            mostrarAlerta("Procesando eliminación...", "info");
+
                             const response = await fetch('/validar/password', {
                                 method: 'POST',
                                 headers: {
@@ -1346,7 +1422,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                     body: JSON.stringify({
                                         codigoCliente,
                                         fecha_apertura: fecha_aperturaenviar,
-                                        fecha_vencimiento: fecha_vencimientoenviar
+                                        fecha_vencimiento: fecha_vencimientoenviar,
+                                        motivo: motivoTexto
                                     })
                                 });
 
@@ -1354,9 +1431,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                                 if (deleteData.success) {
                                     mostrarAlerta("Cliente eliminado con éxito", "success");
-                                    setTimeout(() => {
-                                        location.reload();
-                                    }, 1000);
+                                    setTimeout(() => location.reload(), 1000);
                                 } else {
                                     mostrarAlerta("Error al eliminar cliente", "error");
                                 }
@@ -1366,15 +1441,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         } catch (error) {
                             mostrarAlerta("Error en el servidor o en la solicitud", "error");
                         } finally {
-                            // 🔓 Reactivar el botón al final del proceso
                             btnAceptar.disabled = false;
                             btnAceptar.style.display = 'block';
                         }
-                    }
-                }, { once: true }); // Prevenir múltiples ejecuciones
+                    }, { once: true }); // Solo una vez
+                }
             }
-
-
         });
 
         //Funcion para mostrar el saldo de prestamo al escribir el codigo del cliente

@@ -33,19 +33,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Centros::observe(BitacoraObserver::class); 
-        Clientes::observe(BitacoraObserver::class);
-        Grupos::observe(BitacoraObserver::class);
-        saldoprestamo::observe(BitacoraObserver::class);
-        // debeser::observe(BitacoraObserver::class);
-        Centros_Grupos_Clientes::observe(BitacoraObserver::class);
-        Asesores::observe(BitacoraObserver::class);
-        Supervisores::observe(BitacoraObserver::class);
-        User::observe(BitacoraObserver::class);
-        Colector::observe(BitacoraObserver::class);
-        Formapago::observe(BitacoraObserver::class);
-        Sucursales::observe(BitacoraObserver::class);
-        Supervisores::observe(BitacoraObserver::class);
-        Tipopago::observe(BitacoraObserver::class);
+        // Centros::observe(BitacoraObserver::class); 
+        // Clientes::observe(BitacoraObserver::class);
+        // Grupos::observe(BitacoraObserver::class);
+        // saldoprestamo::observe(BitacoraObserver::class);
+        // // debeser::observe(BitacoraObserver::class);
+        // Centros_Grupos_Clientes::observe(BitacoraObserver::class);
+        // Asesores::observe(BitacoraObserver::class);
+        // Supervisores::observe(BitacoraObserver::class);
+        // User::observe(BitacoraObserver::class);
+        // Colector::observe(BitacoraObserver::class);
+        // Formapago::observe(BitacoraObserver::class);
+        // Sucursales::observe(BitacoraObserver::class);
+        // Supervisores::observe(BitacoraObserver::class);
+        // Tipopago::observe(BitacoraObserver::class);
     }
 }

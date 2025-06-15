@@ -17,6 +17,7 @@ class Bitacora extends Model
         'datos',
         'fecha',
         'id_asesor',
+        'comentarios'
     ];
 
 

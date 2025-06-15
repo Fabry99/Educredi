@@ -10,6 +10,7 @@ use App\Http\Controllers\DesemsolsoprestamoController;
 use App\Http\Controllers\GruposController;
 use App\Http\Controllers\MovimientocajaController;
 use App\Http\Controllers\pdfController;
+use App\Http\Controllers\ReversionCuotaController;
 use App\Http\Controllers\TransferenciacarteraController;
 use App\Http\Controllers\UserController;
 use App\Models\Grupos;
@@ -116,6 +117,12 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
 
     Route::post('/caja/obtenerconteocuotas', [MovimientocajaController::class, 'obtenerConteoCuotas']);
     Route::post('/caja/obtenerEstadoCuenta', [MovimientocajaController::class, 'obtenerEstadoCuenta']);
+
+    // Rutas para reversion de cuota del usuario caja
+    Route::get('/caja/reversion/cuota',[ReversionCuotaController::class, 'reversionCuota'])->name('reversion');
+    Route::post('/caja/consultar/cuotas', [ReversionCuotaController::class, 'consultarCuotas']);
+    Route::post('/caja/revertircuota', [ReversionCuotaController::class, 'eliminarcuota']);
+    Route::post('/caja/validar', [ReversionCuotaController::class, 'validarPassword']);
 });
 
 

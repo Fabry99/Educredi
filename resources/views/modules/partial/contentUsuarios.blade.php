@@ -52,7 +52,7 @@
                             <td hidden>{{$item->id}}</td>
                             <td>{{ $item->name }} {{ $item->last_name }}</td>
                             <td>{{ $item->email }}</td>
-                            <td>
+                            <td style="text-align: center">
                                 {{ $item->fecha_nacimiento == '0000-00-00' || !$item->fecha_nacimiento ? '-' : \Carbon\Carbon::parse($item->fecha_nacimiento)->format('d/m/Y') }}
                             </td>
                             <td>{{ $item->rol }}</td>

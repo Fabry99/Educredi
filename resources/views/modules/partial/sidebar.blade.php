@@ -75,6 +75,9 @@
                     {{-- <li class="menu-item menu-item-static"><a href="{{ route('mov_caja') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-caja.svg') }}" alt=""><span>Caja</span></a>
                     </li> --}}
+                    <li class="menu-item menu-item-static" style="font-size: 15px;"><a href="{{ route('reversion') }}" class="menu-link"><img style="align-self: center;"
+                                src="{{ asset('img/icon_reversioncaja.svg') }}" alt="" ><span>Revertir movimientos <br> de caja<span></a>
+                    </li>
                 @break
 
                 @case('contador')

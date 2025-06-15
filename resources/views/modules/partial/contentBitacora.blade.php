@@ -32,35 +32,38 @@
                         <th>Tabla Afectada</th>
                         <th>Acción Realizada</th>
                         <th>Datos Afectados</th>
+                        <th>Comentarios</th>
                         <th>Fecha y Hora</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($bitacora as $item)
                         @php
-                            // Decodificar el JSON de la columna 'datos'
-                            $datos = json_decode($item->datos, true);
+                            // No decodificamos 'datos' como JSON, lo mostramos tal cual está.
 
-                            // Formatear fechas si existen
+                            // Si quieres seguir mostrando created_at y updated_at desde el JSON decodificado,
+                            // puedes hacerlo así (opcional):
+                            $datosJson = json_decode($item->datos, true);
+
                             $created_at = '';
                             $updated_at = '';
 
-                            if (!empty($datos['created_at'])) {
-                                $created_at = \Carbon\Carbon::parse($datos['created_at'])
+                            if (!empty($datosJson['created_at'])) {
+                                $created_at = \Carbon\Carbon::parse($datosJson['created_at'])
                                     ->timezone('America/Guatemala')
                                     ->format('d/m/Y H:i:s');
-                            } elseif (!empty($datos['cambios']['created_at'])) {
-                                $created_at = \Carbon\Carbon::parse($datos['cambios']['created_at'])
+                            } elseif (!empty($datosJson['cambios']['created_at'])) {
+                                $created_at = \Carbon\Carbon::parse($datosJson['cambios']['created_at'])
                                     ->timezone('America/Guatemala')
                                     ->format('d/m/Y H:i:s');
                             }
 
-                            if (!empty($datos['updated_at'])) {
-                                $updated_at = \Carbon\Carbon::parse($datos['updated_at'])
+                            if (!empty($datosJson['updated_at'])) {
+                                $updated_at = \Carbon\Carbon::parse($datosJson['updated_at'])
                                     ->timezone('America/Guatemala')
                                     ->format('d/m/Y H:i:s');
-                            } elseif (!empty($datos['cambios']['updated_at'])) {
-                                $updated_at = \Carbon\Carbon::parse($datos['cambios']['updated_at'])
+                            } elseif (!empty($datosJson['cambios']['updated_at'])) {
+                                $updated_at = \Carbon\Carbon::parse($datosJson['cambios']['updated_at'])
                                     ->timezone('America/Guatemala')
                                     ->format('d/m/Y H:i:s');
                             }
@@ -72,33 +75,15 @@
                                 {{ strtoupper(optional($item->user)->last_name ?? '') }}</td>
                             <td>{{ strtoupper($item->tabla_afectada) }}</td>
                             <td>{{ $item->accion }}</td>
+
+                            {{-- Mostrar el texto plano de 'datos' respetando saltos de línea --}}
+                            <td style="white-space: pre-wrap;">{{ $item->datos }}</td>
                             <td>
-                                <ul>
-                                    @foreach ($datos as $campo => $valor)
-                                        @if (is_array($valor))
-                                            <li>
-                                                <strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
-                                                <ul>
-                                                    @foreach ($valor as $subCampo => $subValor)
-                                                        <li><strong>{{ ucfirst(str_replace('_', ' ', $subCampo)) }}:</strong>
-                                                            {{ $subValor }}</li>
-                                                    @endforeach
-                                                </ul>
-                                            </li>
-                                        @else
-                                            <li><strong>{{ ucfirst(str_replace('_', ' ', $campo)) }}:</strong>
-                                                {{ $valor }}</li>
-                                        @endif
-                                    @endforeach
-
-                                    @if (!empty($created_at))
-                                        <li><strong>Fecha de Creación:</strong> {{ $created_at }}</li>
-                                    @endif
-
-                                    @if (!empty($updated_at))
-                                        <li><strong>Fecha de Actualización:</strong> {{ $updated_at }}</li>
-                                    @endif
-                                </ul>
+                                @if (empty($item->comentarios))
+                                    <span style="color: #999;">Sin comentarios</span>
+                                @else
+                                    <span style="color: #000;">{{ $item->comentarios }}</span>
+                                @endif
                             </td>
 
                             <td>
