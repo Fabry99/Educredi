@@ -318,7 +318,7 @@ class DesembolsoprestamoController extends Controller
                 'centro' => $centro_id,
                 'sucursal' => $sucursal,
                 'supervisor' => $id_supervisor,
-                'segu_d' => $manejo,
+                'segu_d' => $microseguro,
                 'id_aprobadopor' => $id_aprobado,
                 'tip_pago' => $id_formapago,
                 'asesor' => $asesor,

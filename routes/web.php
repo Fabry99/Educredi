@@ -5,6 +5,7 @@ use App\Http\Controllers\AsesoresController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CentroController;
 use App\Http\Controllers\ClientesController;
+use App\Http\Controllers\ControlPrestamoController;
 use App\Http\Controllers\DesembolsoprestamoController;
 use App\Http\Controllers\DesemsolsoprestamoController;
 use App\Http\Controllers\GruposController;
@@ -119,10 +120,17 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::post('/caja/obtenerEstadoCuenta', [MovimientocajaController::class, 'obtenerEstadoCuenta']);
 
     // Rutas para reversion de cuota del usuario caja
-    Route::get('/caja/reversion/cuota',[ReversionCuotaController::class, 'reversionCuota'])->name('reversion');
+    Route::get('/caja/reversion/cuota', [ReversionCuotaController::class, 'reversionCuota'])->name('reversion');
     Route::post('/caja/consultar/cuotas', [ReversionCuotaController::class, 'consultarCuotas']);
     Route::post('/caja/revertircuota', [ReversionCuotaController::class, 'eliminarcuota']);
     Route::post('/caja/validar', [ReversionCuotaController::class, 'validarPassword']);
+
+    //Rutas para Control de Prestamos
+    Route::get('/caja/control/prestamos', [ControlPrestamoController::class, 'controlprestamos'])->name('control');
+    Route::get('/buscar-clientes', [ControlPrestamoController::class, 'buscarClientes']);
+    Route::get('/datos-cliente', [ControlPrestamoController::class, 'datosCliente']);
+    Route::get('/consulta-avanzada', [ControlPrestamoController::class, 'consultaAvanzada']);
+
 });
 
 

@@ -72,6 +72,9 @@
                     <li class="menu-item menu-item-static"><a href="{{ route('grupos') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-grupo.svg') }}" alt=""><span>Grupos</span></a>
                     </li>
+                    <li class="menu-item menu-item-static"><a href="{{ route('control') }}" class="menu-link"><img style="align-self: center"
+                                src="{{ asset('img/icon_controlprestamos.svg') }}" alt=""><span>Control de Préstamos</span></a>
+                    </li>
                     {{-- <li class="menu-item menu-item-static"><a href="{{ route('mov_caja') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-caja.svg') }}" alt=""><span>Caja</span></a>
                     </li> --}}
