@@ -8,6 +8,8 @@ use App\Models\Centros;
 use App\Models\Centros_Grupos_Clientes;
 use App\Models\Clientes;
 use App\Models\Grupos;
+use App\Models\HistorialPagos;
+use App\Models\HistorialPrestamos;
 use App\Models\saldoprestamo;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7\Response;
@@ -81,70 +83,88 @@ class TransferenciacarteraController extends Controller
     }
 
     public function transferirCartera(Request $request)
-{
+    {
 
-    $request->validate([
-        'ids_clientes' => 'required|array|min:1',
-        'id_asesorReceptor' => 'required|integer'
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-        $asesorEmisor = $request->input('nombre_asesoremisor');
-        $nombre_centro = $request->input('nombre_centro');
-        $nombre_grupo = $request->input('nombre_grupo');
-        $asesorReceptor = $request->input('asesorreceptor');
-        $motivo = $request->input('comentarios', null);
-
-        // Obtener préstamos a transferir
-        $prestamos = saldoprestamo::whereIn('id', $request->ids_clientes)->get();
-
-        // Actualizar asesor para cada préstamo
-        foreach ($prestamos as $prestamo) {
-            $prestamo->asesor = $request->id_asesorReceptor;
-            $prestamo->save();
-        }
-
-        // Preparar texto bitácora
-        $textoBitacora = "";
-        $textoBitacora .= "Asesor que transfiere: {$asesorEmisor}\n";
-        $textoBitacora .= "Centro: {$nombre_centro}\n";
-        $textoBitacora .= "Grupo: {$nombre_grupo}\n";
-        $textoBitacora .= "Asesor que recibe: {$asesorReceptor}\n";
-        $textoBitacora .= "Clientes transferidos:\n";
-
-        foreach ($prestamos as $p) {
-            $cliente = Clientes::find($p->id_cliente);
-            $nombre = $cliente ? "{$cliente->nombre} {$cliente->apellido}" : "Desconocido";
-
-            $textoBitacora .= "- {$nombre} | Monto: $" . number_format($p->MONTO, 2) . " | Cuota: $" . number_format($p->CUOTA, 2) . "\n";
-        }
-
-        $textoBitacora .= "-------------------------\n";
-
-        // Guardar en la bitácora
-        Bitacora::create([
-            'usuario' => Auth::user()->name,
-            'tabla_afectada' => 'Historial Prestamos',
-            'accion' => 'TRANSFERENCIA DE CARTERA',
-            'datos' => $textoBitacora,
-            'fecha' => Carbon::now(),
-            'id_asesor' => Auth::user()->id,
-            'comentarios' => $motivo
+        $request->validate([
+            'prestamos' => 'required|array|min:1',
+            'id_asesorReceptor' => 'required|integer',
         ]);
 
-        DB::commit(); 
+        DB::beginTransaction();
 
-        return response()->json(['mensaje' => 'Transferencia completada']);
-    } catch (\Exception $e) {
-        DB::rollBack(); 
+        try {
+            $asesorEmisor = $request->input('nombre_asesoremisor');
+            $nombre_centro = $request->input('nombre_centro');
+            $nombre_grupo = $request->input('nombre_grupo');
+            $asesorReceptor = $request->input('asesorreceptor');
+            $motivo = $request->input('comentarios', null);
 
+            $idsPrestamos = collect($request->input('prestamos'))->pluck('id')->toArray();
 
-        return response()->json([
-            'mensaje' => 'Ocurrió un error al transferir la cartera',
-            'error' => $e->getMessage()
-        ], 500);
+            $prestamos = saldoprestamo::whereIn('id', $idsPrestamos)->get();
+
+            foreach ($prestamos as $prestamo) {
+
+                $idCliente = $prestamo->id_cliente;
+                $fechaApertura = $prestamo->FECHAAPERTURA ?? null;
+                $fechaVencimiento = $prestamo->FECHAVENCIMIENTO ?? null;
+                $groupSolid = $prestamo->groupsolid ?? null;
+
+             
+
+                // Actualizar asesor en saldoprestamo
+                $prestamo->asesor = $request->id_asesorReceptor;
+                $prestamo->save();
+
+                // Buscar en historialprestamos
+                $historial = HistorialPrestamos::where('id_cliente', $idCliente)
+                    ->where('fecha_apertura', $fechaApertura)
+                    ->where('fecha_vencimiento', $fechaVencimiento)
+                    ->where('grupo', $groupSolid)
+                    ->first();
+
+                if ($historial) {
+
+                    $historial->asesor = $request->id_asesorReceptor;
+                    $historial->save();
+
+                } else {
+                }
+            }
+
+            // Bitácora
+            $textoBitacora = "";
+            $textoBitacora .= "Asesor que transfiere: {$asesorEmisor}\n";
+            $textoBitacora .= "Centro: {$nombre_centro}\n";
+            $textoBitacora .= "Grupo: {$nombre_grupo}\n";
+            $textoBitacora .= "Asesor que recibe: {$asesorReceptor}\n";
+            $textoBitacora .= "Clientes transferidos:\n";
+
+            foreach ($prestamos as $p) {
+                $cliente = Clientes::find($p->id_cliente);
+                $nombre = $cliente ? "{$cliente->nombre} {$cliente->apellido}" : "Desconocido";
+
+                $textoBitacora .= "- {$nombre} | Monto: $" . number_format($p->MONTO, 2) . " | Cuota: $" . number_format($p->CUOTA, 2) . "\n";
+            }
+
+            $textoBitacora .= "-------------------------\n";
+
+            Bitacora::create([
+                'usuario' => Auth::user()->name,
+                'tabla_afectada' => 'Historial Prestamos',
+                'accion' => 'TRANSFERENCIA DE CARTERA',
+                'datos' => $textoBitacora,
+                'fecha' => Carbon::now(),
+                'id_asesor' => Auth::user()->id,
+                'comentarios' => $motivo
+            ]);
+
+            DB::commit();
+
+            return response()->json(['mensaje' => 'Transferencia completada']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+        }
     }
-}
 }

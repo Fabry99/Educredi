@@ -1,3 +1,4 @@
+@include('modules.modals.modalarchivinfored');
 <header>
     <nav class="navbar">
         <div class="contenerdor-navbar">
@@ -81,6 +82,18 @@
                     <li class="menu-item menu-item-static" style="font-size: 15px;"><a href="{{ route('reversion') }}" class="menu-link"><img style="align-self: center;"
                                 src="{{ asset('img/icon_reversioncaja.svg') }}" alt="" ><span>Revertir movimientos <br> de caja<span></a>
                     </li>
+                    <li class="menu-item menu-item-dropdown">
+                        <a href="javascript:void(0);" class="menu-link"><img src="{{ asset('img/icon_reportes.svg') }}"
+                                alt=""><span>Reportes</span> <span class="arrow">></span></a>
+
+                        <ul class="sub-menu">
+                            <li><a href="" id="archivoinfored" class="sub-menu-link">Archivo de INFORED</a></li>
+                            <li><a href="{{ route('creditos') }}" class="sub-menu-link">Desembolso de préstamos</a></li>
+                            <li><a href="{{ route('cambiardatos') }}" class="sub-menu-link">Cambiar datos de prestamo</a></li>
+
+                        </ul>
+                    </li>
+
                 @break
 
                 @case('contador')

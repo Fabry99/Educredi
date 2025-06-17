@@ -8,6 +8,7 @@ use App\Models\Sucursales;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AsesoresController extends Controller
@@ -110,5 +111,13 @@ class AsesoresController extends Controller
         }
 
         return response()->json(['message' => 'Asesor actualizado correctamente']);
+    }
+
+    public function obtenerAsesores()
+    {
+        $asesor = DB::table('asesores')
+            ->get();
+
+        return response()->json($asesor);
     }
 }

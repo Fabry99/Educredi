@@ -827,12 +827,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         } else {
                             mostrarAlerta('Error al guardar el préstamo.', "error");
                             btn.disabled = false; // vuelve a habilitar botón
+                            btnAceptar.style.display = 'block';
 
                         }
                     })
                     .catch(error => {
                         mostrarAlerta('Error al enviar:', "error");
                         btn.disabled = false; // vuelve a habilitar botón
+                        btnAceptar.style.display = 'block';
                     });
             }
         });

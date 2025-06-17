@@ -1119,7 +1119,8 @@ trait ValidatesAttributes
     public function getQueryColumn($parameters, $attribute)
     {
         return isset($parameters[1]) && $parameters[1] !== 'NULL'
-            ? $parameters[1] : $this->guessColumnForQuery($attribute);
+            ? $parameters[1]
+            : $this->guessColumnForQuery($attribute);
     }
 
     /**
@@ -1447,6 +1448,33 @@ trait ValidatesAttributes
         });
 
         return in_array($value, $otherValues);
+    }
+
+    /**
+     * Validate that an array has at least one of the given keys.
+     *
+     * @param  string  $attribute
+     * @param  mixed  $value
+     * @param  array<int, int|string>  $parameters
+     * @return bool
+     */
+    public function validateInArrayKeys($attribute, $value, $parameters)
+    {
+        if (! is_array($value)) {
+            return false;
+        }
+
+        if (empty($parameters)) {
+            return false;
+        }
+
+        foreach ($parameters as $param) {
+            if (Arr::exists($value, $param)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

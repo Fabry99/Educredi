@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     $('#modaleditarcentro').fadeIn();
                 },
                 error: function () {
-                    mostrarAlerta('Error al obtener los datos del cliente.','error');
+                    mostrarAlerta('Error al obtener los datos del cliente.', 'error');
                 }
             });
         });
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     nombrecentro: nombreCentro,
                 },
                 success: function (response) {
-                    mostrarAlerta('Centro Actualizado','success');
+                    mostrarAlerta('Centro Actualizado', 'success');
 
                     setTimeout(function () {
                         $('#custom-alert').fadeOut();
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     $('#modaleditarcentro').fadeOut();
                 },
                 error: function (xhr, status, error) {
-                    mostrarAlerta('Error al actualizar el centro.','error');
+                    mostrarAlerta('Error al actualizar el centro.', 'error');
                 }
             });
         });
@@ -249,7 +249,7 @@ function cargarGruposPorCentro(centroID) {
 
                     },
                     error: function (xhr, status, error) {
-                        mostrarAlerta('Error al eliminar el grupo. Por favor, inténtalo de nuevo.','error');
+                        mostrarAlerta('Error al eliminar el grupo. Por favor, inténtalo de nuevo.', 'error');
                     }
                 });
             });
@@ -291,7 +291,7 @@ function cargarGruposPorCentro(centroID) {
 
         },
         error: function () {
-            mostrarAlerta('Error al cargar los grupos.','error');
+            mostrarAlerta('Error al cargar los grupos.', 'error');
         }
     });
 }
@@ -303,7 +303,7 @@ $('#tablaGrupos tbody').on('click', 'tr', function (event) {
     }
     const grupoId = $(this).data('id'); // Obtiene el id
     const nombreGrupo = $(this).data('nombre'); // Obtiene el nombre
-    $('#modalmostrarcliente h2').text('Clientes del '  + nombreGrupo + ' del Centro: ' + nombreCentroSeleccionado);
+    $('#modalmostrarcliente h2').text('Clientes del ' + nombreGrupo + ' del Centro: ' + nombreCentroSeleccionado);
 
     // Mostrar el modal
     $('#modalmostrarcliente').fadeIn();
@@ -332,7 +332,7 @@ $('#tablaGrupos tbody').on('click', 'tr', function (event) {
 
         },
         error: function (error) {
-            mostrarAlerta('No se pudieron cargar los clientes para este grupo.','error');
+            mostrarAlerta('No se pudieron cargar los clientes para este grupo.', 'error');
         }
     });
 
@@ -380,7 +380,7 @@ $('#tablaclientesgrupos').on('click', '.eliminar-cliente', function () {
             }, 1200); // Esperamos a que se vea la alerta
         })
         .catch(error => {
-            mostrarAlerta('Hubo un error al eliminar el cliente.','error');
+            mostrarAlerta('Hubo un error al eliminar el cliente.', 'error');
         });
 
 });
@@ -513,12 +513,12 @@ $(document).ready(function () {
                     data: $(this).serialize(),
                     success: function (response) {
                         // Aquí puedes hacer algo con la respuesta, como mostrar un mensaje de éxito
-                        mostrarAlerta('Cliente actualizado correctamente','success');
+                        mostrarAlerta('Cliente actualizado correctamente', 'success');
                         $('#modaleditarcliente').fadeOut(); // Cierra el modal
                         location.reload(); // Recarga la página para reflejar los cambios
                     },
                     error: function () {
-                        mostrarAlerta('Error al actualizar el cliente.','error');
+                        mostrarAlerta('Error al actualizar el cliente.', 'error');
                     }
                 });
             });
@@ -760,6 +760,128 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+
+const btnarchivoinforedmodal = document.getElementById('archivoinfored');
+const btn_descargarinfored = document.getElementById('btn-infored');
+const nombrearchivo = document.getElementById('nombrearchivo');
+const fechadesde = document.getElementById('fechadesde');
+const fechaHasta = document.getElementById('fechaHasta');
+const asesor = document.getElementById('asesorinfored');
+btnarchivoinforedmodal.addEventListener('click', function (event) {
+    event.preventDefault();
+    $('#modalinfored').fadeIn('show');
+
+    fetch('/obtener-asesores')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('asesorinfored');
+            select.innerHTML = '<option value="" disabled selected>Seleccionar un Asesor</option>';
+
+            data.forEach(asesor => {
+                const option = document.createElement('option');
+                option.value = asesor.id;
+                option.textContent = asesor.nombre;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => mostrarAlerta('Error al obtener asesores:', 'error'));
+
+    if (btn_descargarinfored) {
+        btn_descargarinfored.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            // Validaciones básicas
+            if (nombrearchivo.value === '') {
+                mostrarAlerta('Por favor, ingrese un nombre para el archivo', 'error');
+                return;
+            }
+            if (fechadesde.value === '') {
+                mostrarAlerta('Por favor, seleccione una fecha de inicio', 'error');
+                return;
+            }
+            if (fechaHasta.value === '') {
+                mostrarAlerta('Por favor, seleccione una fecha de finalización', 'error');
+                return;
+            }
+
+            // Mostrar estado de carga
+            btn_descargarinfored.disabled = true;
+            btn_descargarinfored.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+
+            // Crear formulario dinámico
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/reporte/infored';
+
+            // Token CSRF
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
+            form.appendChild(csrfToken);
+
+            // Función helper para agregar campos
+            const addField = (name, value) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                form.appendChild(input);
+            };
+
+            // Agregar campos del formulario
+            addField('nombre_archivo', nombrearchivo.value);
+            addField('fechadesde', fechadesde.value);
+            addField('fechaHasta', fechaHasta.value);
+            if (asesor.value) addField('Asesor', asesor.value);
+
+            // Configurar para descargar en nueva pestaña
+            form.target = '_blank';
+            document.body.appendChild(form);
+            form.submit();
+
+            // Limpieza después de enviar
+            setTimeout(() => {
+                document.body.removeChild(form);
+                btn_descargarinfored.disabled = false;
+                btn_descargarinfored.innerHTML = '<i class="fas fa-download"></i> Descargar';
+
+                // Recargar la página después de 2 segundos
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }, 1000);
+        });
+    }
+
+    // Función para mostrar alertas
+    function mostrarAlerta(mensaje, tipo) {
+        // Implementa tu función de alerta según tu framework (Swal, Toast, etc.)
+        alert(tipo.toUpperCase() + ': ' + mensaje);
+    }
+
+});
+
+// Cerrar el modal al presionar la tecla ESC
+window.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") { // Si se presiona la tecla ESC
+        document.querySelectorAll("#modalinfored").forEach((modal) => {
+            limpiarmodalinfored();
+            cerrarModal(modal);
+        });
+    }
+});
+
+function limpiarmodalinfored() {
+    document.getElementById('nombrearchivo').value = '';
+    document.getElementById('fechadesde').value = '';
+    document.getElementById('fechaHasta').value = '';
+    document.getElementById('asesorinfored').value = ''; // Si es select, dejar en vacío o seleccionar opción default
+}
+
+
+
 function mostrarAlerta(mensaje, tipo) {
     const alerta = document.getElementById('alert-notification');
     const mensajeAlerta = document.getElementById('alert-notification-message');

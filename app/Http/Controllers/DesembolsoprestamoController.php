@@ -103,7 +103,6 @@ class DesembolsoprestamoController extends Controller
     {
 
 
-
         $datosAInsertar = [];
         $datosSaldoprestamo = [];
         $datosParaPDF = [];
@@ -148,6 +147,7 @@ class DesembolsoprestamoController extends Controller
             $microseguro = $prestamo['detalleCalculo']['microseguro'];
             $interes = $prestamo['detalleCalculo']['calculosIntermedios']['interes'];
             $garantia_id = $prestamo['detalleCalculo']['garantia_id'];
+            $linea = $prestamo['detalleCalculo']['linea'];
             $id_colector = $prestamo['detalleCalculo']['id_colector'];
             $grupo_id = $prestamo['detalleCalculo']['grupoId'];
             $centro_id = $prestamo['detalleCalculo']['centroId'];
@@ -345,6 +345,7 @@ class DesembolsoprestamoController extends Controller
                 'grupo' => $grupo_id,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'linea' => $linea,
 
             ];
         }
@@ -504,14 +505,14 @@ class DesembolsoprestamoController extends Controller
 
     public function eliminarDesembolso(Request $request)
     {
-        
+
         DB::beginTransaction();
 
         try {
             $fechaApertura = $request->input('fecha_apertura');
             $fechaVencimiento = $request->input('fecha_vencimiento');
             $codigoCliente = $request->input('codigoCliente');
-            $motivo =$request->input('motivo');
+            $motivo = $request->input('motivo');
 
             // Obtener datos del cliente para bitácora
             $clienteDatos = DB::table('clientes')
@@ -615,6 +616,7 @@ class DesembolsoprestamoController extends Controller
 
     public function almacenarPrestamoIndividual(Request $request)
     {
+    
         DB::beginTransaction();
 
         try {
@@ -661,6 +663,8 @@ class DesembolsoprestamoController extends Controller
                 'grupo' => 1, // Asignar el grupo por defecto
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'linea' => $request->input('linea'),
+
             ];
 
 

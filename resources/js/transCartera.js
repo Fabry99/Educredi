@@ -230,112 +230,101 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     btnGuardarTransferencia.addEventListener('click', function (event) {
-    event.preventDefault();
+        event.preventDefault();
 
-    const tabla = $('#tablaTransCartera').DataTable();
+        const tabla = $('#tablaTransCartera').DataTable();
 
-    const idsSeleccionados = [];
+        const prestamosSeleccionados = [];
 
-    const asesorCarteraSelect = document.getElementById('asesorcartera');
-    const centroSelect = document.getElementById('centro_id');
-    const grupoSelect = document.getElementById('grupo_id');
-    const asesorRecibeSelect = document.getElementById('asesorRecibe');
+        const asesorCarteraSelect = document.getElementById('asesorcartera');
+        const centroSelect = document.getElementById('centro_id');
+        const grupoSelect = document.getElementById('grupo_id');
+        const asesorRecibeSelect = document.getElementById('asesorRecibe');
 
 
-    if (!asesorCarteraSelect) {
-        console.error("No se encontró select asesorcartera");
-        mostrarAlerta("Error interno: select asesorcartera no encontrado", "error");
-        return;
-    }
-    if (!centroSelect) {
-        console.error("No se encontró select centro_id");
-        mostrarAlerta("Error interno: select centro_id no encontrado", "error");
-        return;
-    }
-    if (!grupoSelect) {
-        console.error("No se encontró select grupo_id");
-        mostrarAlerta("Error interno: select grupo_id no encontrado", "error");
-        return;
-    }
-    if (!asesorRecibeSelect) {
-        console.error("No se encontró select asesorRecibe");
-        mostrarAlerta("Error interno: select asesorRecibe no encontrado", "error");
-        return;
-    }
-
-    const asesorCarteraTexto = asesorCarteraSelect.options[asesorCarteraSelect.selectedIndex]?.text || '';
-    const centroTexto = centroSelect.options[centroSelect.selectedIndex]?.text || '';
-    const grupoTexto = grupoSelect.options[grupoSelect.selectedIndex]?.text || '';
-    const asesorRecibeTexto = asesorRecibeSelect.options[asesorRecibeSelect.selectedIndex]?.text || '';
-
-  
-
-    tabla.rows().every(function () {
-        const row = this.node();
-        if (!row) {
-            console.warn("Fila sin nodo DOM");
+        if (!asesorCarteraSelect) {
+            console.error("No se encontró select asesorcartera");
+            mostrarAlerta("Error interno: select asesorcartera no encontrado", "error");
             return;
         }
-        const checkbox = row.querySelector('.select_row');
-        if (!checkbox) {
-            console.warn("No se encontró checkbox .select_row en la fila", row);
+        if (!centroSelect) {
+            console.error("No se encontró select centro_id");
+            mostrarAlerta("Error interno: select centro_id no encontrado", "error");
             return;
         }
-        if (checkbox.checked) {
-            const data = this.data();
-            const id = data[1];
-            idsSeleccionados.push(id);
+        if (!grupoSelect) {
+            console.error("No se encontró select grupo_id");
+            mostrarAlerta("Error interno: select grupo_id no encontrado", "error");
+            return;
         }
-    });
+        if (!asesorRecibeSelect) {
+            console.error("No se encontró select asesorRecibe");
+            mostrarAlerta("Error interno: select asesorRecibe no encontrado", "error");
+            return;
+        }
+
+        const asesorCarteraTexto = asesorCarteraSelect.options[asesorCarteraSelect.selectedIndex]?.text || '';
+        const centroTexto = centroSelect.options[centroSelect.selectedIndex]?.text || '';
+        const grupoTexto = grupoSelect.options[grupoSelect.selectedIndex]?.text || '';
+        const asesorRecibeTexto = asesorRecibeSelect.options[asesorRecibeSelect.selectedIndex]?.text || '';
 
 
-    if (idsSeleccionados.length > 0 && asesorRecibeSelect.value !== '') {
-        mostrarAlerta("Hola", "success");
 
-        const datos = {
-            ids_clientes: idsSeleccionados,
-            id_asesorReceptor: asesorRecibeSelect.value,
-            nombre_asesoremisor: asesorCarteraTexto,
-            nombre_centro: centroTexto,
-            nombre_grupo: grupoTexto,
-            asesorreceptor: asesorRecibeTexto
-        };
-
-
-        fetch('/transferencia/transferircartera', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(datos)
-        })
-        .then(response => {
-            if (!response.ok) throw new Error("Error en la transferencia");
-            return response.json();
-        })
-        .then(data => {
-            mostrarAlerta("Transferencia realizada con éxito", "success");
-            setTimeout(() => {
-                location.reload();
-            }, 1000);
-        })
-        .catch(error => {
-            console.error("Error en fetch:", error);
-            mostrarAlerta("Ocurrió un error en la transferencia", "error");
+        tabla.rows().every(function () {
+            const row = this.node();
+            if (!row) return;
+            const checkbox = row.querySelector('.select_row');
+            if (checkbox && checkbox.checked) {
+                const data = this.data();
+                const id = data[1];
+                const fecha = data[4];
+                prestamosSeleccionados.push({ id, fecha });
+            }
         });
 
-    } else {
-        if (idsSeleccionados.length === 0) {
-            console.warn("No se seleccionaron clientes");
-            mostrarAlerta("Debe seleccionar al menos un Cliente.", "error");
+
+        if (prestamosSeleccionados.length > 0 && asesorRecibeSelect.value !== '') {
+            const datos = {
+                prestamos: prestamosSeleccionados,
+                id_asesorReceptor: asesorRecibeSelect.value,
+                nombre_asesoremisor: asesorCarteraTexto,
+                nombre_centro: centroTexto,
+                nombre_grupo: grupoTexto,
+                asesorreceptor: asesorRecibeTexto
+            };
+
+            fetch('/transferencia/transferircartera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(datos)
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en la transferencia");
+                    return response.json();
+                })
+                .then(data => {
+                    mostrarAlerta("Transferencia realizada con éxito", "success");
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                })
+                .catch(error => {
+                    console.error("Error en fetch:", error);
+                    mostrarAlerta("Ocurrió un error en la transferencia", "error");
+                });
+
+        } else {
+            if (prestamosSeleccionados.length === 0) {
+                mostrarAlerta("Debe seleccionar al menos un Cliente.", "error");
+            }
+            if (asesorRecibeSelect.value === '') {
+                mostrarAlerta("Por Favor Seleccione un Receptor", "error");
+            }
         }
-        if (asesorRecibeSelect.value === '') {
-            console.warn("No se seleccionó asesor receptor");
-            mostrarAlerta("Por Favor Seleccione un Receptor", "error");
-        }
-    }
-});
+    });
 
 
 

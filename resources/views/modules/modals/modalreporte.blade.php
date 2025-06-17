@@ -1,5 +1,5 @@
 <!-- resources/views/components/modal-reporte.blade.php -->
-<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="modalreporte" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
 <!-- Contenido del Modal -->
     <div class="modal-content">
         <span class="close-btn1">&times;</span>

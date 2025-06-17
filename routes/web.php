@@ -11,6 +11,7 @@ use App\Http\Controllers\DesemsolsoprestamoController;
 use App\Http\Controllers\GruposController;
 use App\Http\Controllers\MovimientocajaController;
 use App\Http\Controllers\pdfController;
+use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ReversionCuotaController;
 use App\Http\Controllers\TransferenciacarteraController;
 use App\Http\Controllers\UserController;
@@ -24,11 +25,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest', 'prevent.back.history')->group(function () {
     Route::get('/', [AuthController::class, 'login'])->name('login');
     Route::post('/loggear', [AuthController::class, 'loggear'])->name('loggear');
-
-    // Route::get('/vista-pdf', function () {
-    //     // $prestamos = []; // Simula o pasa tus datos reales
-    //     return view('PDF.comprobantePago');
-    // });
 });
 
 
@@ -116,6 +112,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/generar-pdf', [DesembolsoprestamoController::class, 'generarPDFPrestamoGrupal'])->name('generar.pdf');
     Route::post('/pdf/estadoCuenta', [pdfController::class, 'estadoCuenta']);
 
+
     Route::post('/caja/obtenerconteocuotas', [MovimientocajaController::class, 'obtenerConteoCuotas']);
     Route::post('/caja/obtenerEstadoCuenta', [MovimientocajaController::class, 'obtenerEstadoCuenta']);
 
@@ -131,6 +128,12 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/datos-cliente', [ControlPrestamoController::class, 'datosCliente']);
     Route::get('/consulta-avanzada', [ControlPrestamoController::class, 'consultaAvanzada']);
 
+    Route::get('/obtener-asesores', [AsesoresController::class, 'obtenerAsesores'])->name('obtenerAsesores');
+
+    //Generar Reportes
+    Route::post('/reporte/infored', [ReportesController::class, 'ReporteINFORED'])->name('ReporteINFORED');
+    // Ruta para descargar el archivo temporal (asegúrate de que esta esté definida)
+  
 });
 
 

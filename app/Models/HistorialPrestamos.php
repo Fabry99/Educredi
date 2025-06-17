@@ -23,5 +23,6 @@ class HistorialPrestamos extends Model
         'grupo',
         'created_at',
         'updated_at',
+        'linea',
     ];
 }
