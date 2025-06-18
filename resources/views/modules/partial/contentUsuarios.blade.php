@@ -6,8 +6,8 @@
         <div class="container mt-4">
             <h1>Usuarios</h1>
             <div class="btn-clientes">
-                <a href="" id="openModalBtnnuevousuario" style="width: 170px"><img src="{{ asset('img/icon-clientes.svg') }}"
-                        alt=""><span>Agregar Usuario</span></a>
+                <a href="" id="openModalBtnnuevousuario" style="width: 170px"><img
+                        src="{{ asset('img/icon-clientes.svg') }}" alt=""><span>Agregar Usuario</span></a>
 
 
             </div>
@@ -29,6 +29,10 @@
                 style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px;">
                 <span id="custom-alert-message"></span>
             </div>
+            <div id="alert-notification" class="alert"
+                style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
+                <span id="alert-notification-message"></span>
+            </div>
 
             <table id="tablaUsuarios" class="table table-striped table1" style="width:100%">
 
@@ -49,7 +53,7 @@
                 <tbody>
                     @foreach ($usuarios as $item)
                         <tr>
-                            <td hidden>{{$item->id}}</td>
+                            <td hidden>{{ $item->id }}</td>
                             <td>{{ $item->name }} {{ $item->last_name }}</td>
                             <td>{{ $item->email }}</td>
                             <td style="text-align: center">

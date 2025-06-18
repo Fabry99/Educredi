@@ -5,6 +5,7 @@ use App\Http\Controllers\AsesoresController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CentroController;
 use App\Http\Controllers\ClientesController;
+use App\Http\Controllers\colocacionprestamoController;
 use App\Http\Controllers\ControlPrestamoController;
 use App\Http\Controllers\DesembolsoprestamoController;
 use App\Http\Controllers\DesemsolsoprestamoController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\TransferenciacarteraController;
 use App\Http\Controllers\UserController;
 use App\Models\Grupos;
 use App\Models\Municipios;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
@@ -129,11 +131,26 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/consulta-avanzada', [ControlPrestamoController::class, 'consultaAvanzada']);
 
     Route::get('/obtener-asesores', [AsesoresController::class, 'obtenerAsesores'])->name('obtenerAsesores');
+    Route::get('/obtener-informacion', [colocacionprestamoController::class, 'obtenerinformacion'])->name('obtenerinformacion');
+    Route::post('/obtener-grupo', [colocacionprestamoController::class, 'obtenergrupo'])->name('obtenergrupo');
 
     //Generar Reportes
     Route::post('/reporte/infored', [ReportesController::class, 'ReporteINFORED'])->name('ReporteINFORED');
+    Route::post('/generar/reporte/colocacion', [colocacionprestamoController::class, 'pdfcolocacion'])->name('pdfcolocacion');
+
+    Route::get('/probar-pdf', function () {
+        $datos = [
+            'titulo' => 'PDF de prueba rápida',
+            'contenido' => 'Este PDF fue generado sin controlador, solo desde la ruta.'
+        ];
+
+        $pdf = Pdf::loadView('PDF.colocacionprestamos', $datos);
+
+        return $pdf->stream('prueba.pdf'); // Muestra el PDF en el navegador
+        // return $pdf->download('prueba.pdf'); // Fuerza descarga
+    });
     // Ruta para descargar el archivo temporal (asegúrate de que esta esté definida)
-  
+
 });
 
 

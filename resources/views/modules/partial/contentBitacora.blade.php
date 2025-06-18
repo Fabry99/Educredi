@@ -23,7 +23,10 @@
                 style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px;">
                 <span id="custom-alert-message"></span>
             </div>
-
+            <div id="alert-notification" class="alert"
+                style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
+                <span id="alert-notification-message"></span>
+            </div>
             <table id="tablaBitacora" class="table table-striped table1" style="width:100%">
                 <thead>
                     <tr>

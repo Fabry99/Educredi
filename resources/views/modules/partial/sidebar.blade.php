@@ -1,4 +1,5 @@
 @include('modules.modals.modalarchivinfored');
+@include('modules.modals.modalcolocacionprestamomes');
 <header>
     <nav class="navbar">
         <div class="contenerdor-navbar">
@@ -88,7 +89,7 @@
 
                         <ul class="sub-menu">
                             <li><a href="" id="archivoinfored" class="sub-menu-link">Archivo de INFORED</a></li>
-                            <li><a href="{{ route('creditos') }}" class="sub-menu-link">Desembolso de préstamos</a></li>
+                            <li><a href="" class="sub-menu-link" id="btn_colocacionprestamos">Colocación de préstamos por mes</a></li>
                             <li><a href="{{ route('cambiardatos') }}" class="sub-menu-link">Cambiar datos de prestamo</a></li>
 
                         </ul>

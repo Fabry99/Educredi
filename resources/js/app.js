@@ -1,5 +1,5 @@
 import './bootstrap';
-import $, { error, event } from 'jquery'; // Importar jQuery
+import $, { data, error, event } from 'jquery'; // Importar jQuery
 import 'datatables.net-dt';
 import 'datatables.net-colreorder';
 import 'datatables.net-keytable-dt';
@@ -879,6 +879,160 @@ function limpiarmodalinfored() {
     document.getElementById('fechaHasta').value = '';
     document.getElementById('asesorinfored').value = ''; // Si es select, dejar en vacío o seleccionar opción default
 }
+
+const btn_abrirmodalcolocacionprestamos = document.getElementById('btn_colocacionprestamos');
+
+btn_abrirmodalcolocacionprestamos.addEventListener('click', function (event) {
+    event.preventDefault();
+
+    $('#modalcolocacionprestamo').fadeIn('show');
+
+    fetch('/obtener-informacion')
+        .then(response => response.json())
+        .then(data => {
+            const asesor = data[0];
+            const sucursal = data[1];
+            const supervisor = data[2];
+            const centro = data[3];
+            const select = document.getElementById('asesorcolocacion');
+            select.innerHTML = '<option value="" selected>TODOS</option>';
+            const selectsucursal = document.getElementById('sucursalcolocacion');
+            selectsucursal.innerHTML = '<option value="" selected>TODOS</option>';
+            const selectsupervisor = document.getElementById('supervisorcolocacion');
+            selectsupervisor.innerHTML = '<option value="" selected>TODOS</option>';
+            const selectcentro = document.getElementById('centrocolocacion');
+            selectcentro.innerHTML = '<option value="" selected>TODOS</option>';
+
+            asesor.forEach(asesores => {
+                const option = document.createElement('option');
+                option.value = asesores.id;
+                option.textContent = asesores.nombre;
+                select.appendChild(option);
+            });
+            sucursal.forEach(sucursales => {
+                const optionsu = document.createElement('option');
+                optionsu.value = sucursales.id;
+                optionsu.textContent = sucursales.nombre;
+                selectsucursal.appendChild(optionsu);
+            });
+            supervisor.forEach(supervisores => {
+                const optionsu = document.createElement('option');
+                optionsu.value = supervisores.id;
+                optionsu.textContent = supervisores.nombre;
+                selectsupervisor.appendChild(optionsu);
+            });
+            centro.forEach(centros => {
+                const optionsu = document.createElement('option');
+                optionsu.value = centros.id;
+                optionsu.textContent = centros.nombre;
+                selectcentro.appendChild(optionsu);
+            });
+
+            selectcentro.addEventListener('change', function () {
+                const centroId = this.value;
+                if (centroId !== '') {
+
+                    fetch('/obtener-grupo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ id: centroId })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            const selectgrupos = document.getElementById('grupocolocacion');
+                            selectgrupos.innerHTML = '<option value="" selected>TODOS</option>';
+
+                            data.forEach(grupos => {
+                                const option = document.createElement('option');
+                                option.value = grupos.id;
+                                option.textContent = grupos.nombre;
+                                selectgrupos.appendChild(option);
+                            });
+
+                        })
+                        .catch(error => {
+                            console.error('Error al consultar centro:', error);
+                            mostrarAlerta('Error al consultar centro', 'error');
+                        });
+                }
+
+            });
+
+        }).catch(error => mostrarAlerta('Error al obtener los datos', 'error'));
+
+    const btn_colocacionreporte = document.getElementById('btn-colocacionreporte');
+
+    btn_colocacionreporte.addEventListener('click', function (event) {
+        event.preventDefault();
+        const sucursalcolo = document.getElementById('sucursalcolocacion');
+        const supervisorcolo = document.getElementById('supervisorcolocacion');
+        const asesorcolo = document.getElementById('asesorcolocacion');
+        const centrocolo = document.getElementById('centrocolocacion');
+        const grupocolo = document.getElementById('grupocolocacion');
+        const fechadesdecolo = document.getElementById('fechadesdecolocacion');
+        const fechahastacolo = document.getElementById('fechaHastacolocacion');
+        const checksaldo0 = document.getElementById('saldo0');
+
+        const incluirHasta = checksaldo0.checked;
+
+        fetch('/generar/reporte/colocacion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                sucursal: sucursalcolo.value,
+                supervisor: supervisorcolo.value,
+                asesor: asesorcolo.value,
+                centro: centrocolo.value,
+                grupo: grupocolo.value,
+                fecha_desde: fechadesdecolo.value,
+                fecha_hasta: fechahastacolo.value,
+                saldo0: incluirHasta
+            })
+        })
+            .then(response => {
+                if (!response.ok) throw new Error("Error en la respuesta del servidor");
+                return response.json(); // ahora es JSON porque tu servidor devuelve JSON
+            })
+            .then(data => {
+                if (data.status !== "success") throw new Error(data.message || "Error en servidor");
+
+                // base64 del PDF
+                const pdfBase64 = data.pdf;
+
+                // Convertir base64 a Blob
+                const byteCharacters = atob(pdfBase64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+                const pdfURL = URL.createObjectURL(blob);
+                const pdfWindow = window.open("");
+                pdfWindow.document.write(`
+        <html>
+            <head><title>Comprobante de Pago</title></head>
+            <body style="margin:0">
+                <embed width="100%" height="100%" src="${pdfURL}" type="application/pdf">
+            </body>
+        </html>
+    `);
+
+                mostrarAlerta('PDF generado correctamente.', 'success');
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(error => {
+                mostrarAlerta('Error al generar el PDF: ' + error.message, 'error');
+            });
+    })
+})
 
 
 

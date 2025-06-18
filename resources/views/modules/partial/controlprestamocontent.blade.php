@@ -19,6 +19,7 @@
             style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
             <span id="alert-notification-message"></span>
         </div>
+        
 
         <div class="section"
             style="height: auto; width: 1050px; margin-top:40px; margin-left: -10px; background: #c1c0c0">

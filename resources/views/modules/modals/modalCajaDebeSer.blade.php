@@ -46,7 +46,6 @@
 </div>
 <script>
     const esAdministrador = {{ Auth::check() && Auth::user()->rol === 'administrador' ? 'true' : 'false' }};
-    console.log(esAdministrador); // Verifica si es administrador
 </script>
 
 <!-- Estilos CSS -->
