@@ -1,5 +1,6 @@
 @include('modules.modals.modalarchivinfored');
 @include('modules.modals.modalcolocacionprestamomes');
+@include('modules.modals.modalmutuoacuerdogrupal');
 <header>
     <nav class="navbar">
         <div class="contenerdor-navbar">
@@ -90,7 +91,7 @@
                         <ul class="sub-menu">
                             <li><a href="" id="archivoinfored" class="sub-menu-link">Archivo de INFORED</a></li>
                             <li><a href="" class="sub-menu-link" id="btn_colocacionprestamos">Colocación de préstamos por mes</a></li>
-                            <li><a href="{{ route('cambiardatos') }}" class="sub-menu-link">Cambiar datos de prestamo</a></li>
+                            <li><a href="" class="sub-menu-link" id="btn_mutuogrupal">Mutuo Acuerdo Grupal</a></li>
 
                         </ul>
                     </li>

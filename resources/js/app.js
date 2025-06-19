@@ -954,8 +954,7 @@ btn_abrirmodalcolocacionprestamos.addEventListener('click', function (event) {
 
                         })
                         .catch(error => {
-                            console.error('Error al consultar centro:', error);
-                            mostrarAlerta('Error al consultar centro', 'error');
+                            mostrarAlerta('Error al Obtener los Grupos', 'error');
                         });
                 }
 
@@ -1032,6 +1031,267 @@ btn_abrirmodalcolocacionprestamos.addEventListener('click', function (event) {
                 mostrarAlerta('Error al generar el PDF: ' + error.message, 'error');
             });
     })
+});
+
+const btn_mutuogrupal = document.getElementById('btn_mutuogrupal');
+btn_mutuogrupal.addEventListener('click', function (event) {
+    event.preventDefault();
+    $('#modalmutuacuerdogrupal').fadeIn('show');
+
+    fetch('/obtener-informacion')
+        .then(response => response.json())
+        .then(data => {
+            const centro = data[3];
+            const selectcentro = document.getElementById('centromutuogrupal');
+            selectcentro.innerHTML = '<option value="" disabled selected>Seleccionar</option>';
+
+            centro.forEach(centros => {
+                const optionsu = document.createElement('option');
+                optionsu.value = centros.id;
+                optionsu.textContent = centros.nombre;
+                selectcentro.appendChild(optionsu);
+            });
+
+            selectcentro.addEventListener('change', function () {
+                const centroId = this.value;
+
+                if (centroId !== '') {
+                    fetch('/obtener-grupo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ id: centroId })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            const selectgrupos = document.getElementById('grupomutuogrupal');
+                            selectgrupos.innerHTML = '<option value="" disabled selected>Seleccionar</option>';
+
+                            data.forEach(grupos => {
+                                const option = document.createElement('option');
+                                option.value = grupos.id;
+                                option.textContent = grupos.nombre;
+                                selectgrupos.appendChild(option);
+                            });
+
+
+                            selectgrupos.addEventListener('change', function () {
+                                const id_grupo = this.value
+                                const id_centro = document.getElementById('centromutuogrupal');
+
+                                if (id_grupo !== '') {
+                                    fetch('/obtener/mutuo/prestamos', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                        },
+                                        body: JSON.stringify({
+                                            id_grupo: id_grupo,
+                                            id_centro: id_centro.value
+                                        })
+                                    })
+                                        .then(respuesta => respuesta.json())
+                                        .then(data => {
+                                            const tabla = document.getElementById('tabla_montos');
+                                            tabla.innerHTML = '';
+                                            let filaSeleccionada = null;
+                                            if (data.length === 0) {
+                                                // Si no hay datos, mostrar fila "Sin resultado"
+                                                const fila = document.createElement('tr');
+                                                const celda = document.createElement('td');
+                                                celda.colSpan = 2; // ocupa ambas columnas
+                                                celda.style.textAlign = 'center';
+                                                celda.style.padding = '10px';
+                                                celda.textContent = 'Sin resultado';
+                                                fila.appendChild(celda);
+                                                tabla.appendChild(fila);
+                                            } else {
+
+                                            }
+                                            data.forEach(llenartabla => {
+                                                const fila = document.createElement('tr');
+                                                fila.style.textAlign = 'center';
+
+                                                // Atributos de datos
+                                                fila.setAttribute('data-fecha-apertura', llenartabla.fecha_apertura);
+                                                fila.setAttribute('data-fecha-vencimiento', llenartabla.fecha_vencimiento);
+                                                fila.setAttribute('data-monto-total', llenartabla.monto_total);
+
+                                                // Celdas
+                                                const celdaFecha = document.createElement('td');
+                                                celdaFecha.style.padding = '5px';
+
+                                                // Mostrar fecha_apertura o "Sin resultado"
+                                                celdaFecha.textContent = llenartabla.fecha_apertura ? llenartabla.fecha_apertura : 'Sin resultado';
+
+                                                const celdaMonto = document.createElement('td');
+                                                celdaMonto.style.padding = '5px';
+                                                celdaMonto.style.borderLeft = '1px solid black';
+
+                                                // Mostrar monto_total formateado o "Sin resultado"
+                                                if (typeof llenartabla.monto_total === 'number') {
+                                                    celdaMonto.textContent = `$${llenartabla.monto_total.toFixed(2)}`;
+                                                } else {
+                                                    celdaMonto.textContent = 'Sin resultado';
+                                                }
+
+                                                fila.appendChild(celdaFecha);
+                                                fila.appendChild(celdaMonto);
+                                                tabla.appendChild(fila);
+
+                                                // Evento clic para seleccionar fila (igual que antes)
+                                                fila.addEventListener('click', function () {
+                                                    if (filaSeleccionada) {
+                                                        filaSeleccionada.classList.remove('fila-seleccionada');
+                                                    }
+                                                    this.classList.add('fila-seleccionada');
+                                                    filaSeleccionada = this;
+
+                                                    const fechaApertura = this.getAttribute('data-fecha-apertura');
+                                                    const fechaVencimiento = this.getAttribute('data-fecha-vencimiento');
+                                                    const montoTotal = this.getAttribute('data-monto-total');
+
+                                                });
+                                            });
+                                            const btn_mutuogrupal = document.getElementById('btn-mutuogrupal');
+
+                                            btn_mutuogrupal.addEventListener('click', function (event) {
+                                                event.preventDefault();
+                                                const tipomutuo = document.getElementById('tipomutuo');
+                                                const deptomutuo = document.getElementById('deptomutuo');
+                                                const municipioMutuo = document.getElementById('municipiomutuo');
+                                                const centromutuogrupal = document.getElementById('centromutuogrupal');
+                                                const grupomutuogrupal = document.getElementById('grupomutuogrupal');
+                                                const textocentro = centromutuogrupal.options[centromutuogrupal.selectedIndex].text;
+                                                const textogrupo = grupomutuogrupal.options[grupomutuogrupal.selectedIndex].text;
+                                                const textoDepto = deptomutuo.options[deptomutuo.selectedIndex].text;
+                                                const textoMunicipio = municipioMutuo.options[municipiomutuo.selectedIndex].text;
+
+                                                const fechamutuocreado = document.getElementById('fechamutuogrupal');
+
+                                                if (!filaSeleccionada) {
+                                                    mostrarAlerta('Por favor, selecciona una fila en la tabla antes de continuar.', 'error');
+                                                    return;
+                                                }
+                                                if (tipomutuo.value === '') {
+                                                    mostrarAlerta('Por Favor, Seleccione un Tipo de Mutuo', 'error');
+                                                    return;
+                                                }
+                                                if (deptomutuo.value === '') {
+                                                    mostrarAlerta('Por Favor, Seleccione un Departamento', 'error');
+                                                    return;
+                                                }
+                                                if (municipiomutuo.value === '') {
+                                                    mostrarAlerta('Por Favor, Seleccione un Municipio', 'error');
+                                                    return;
+                                                }
+                                                fetch('/generar/mutuo/grupal', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                                    },
+                                                    body: JSON.stringify({
+                                                        centro: textocentro,
+                                                        grupo: textogrupo,
+                                                        tipomutuo: tipomutuo.value,  // normalmente id o value
+                                                        deptomutuo: textoDepto,      // texto visible seleccionado
+                                                        municipiomutuo: textoMunicipio,
+                                                        fechamutuocreado: fechamutuocreado.value,
+                                                        filaSeleccionada: {
+                                                            fecha_apertura: filaSeleccionada.getAttribute('data-fecha-apertura'),
+                                                            fecha_vencimiento: filaSeleccionada.getAttribute('data-fecha-vencimiento'),
+                                                            monto_total: filaSeleccionada.getAttribute('data-monto-total')
+                                                        }
+                                                    })
+                                                }).then(response => {
+                                                    const disposition = response.headers.get('Content-Disposition');
+                                                    let filename = 'Mutuo_Grupal.docx'; // valor por defecto
+
+                                                    if (disposition && disposition.indexOf('filename=') !== -1) {
+                                                        const match = disposition.match(/filename="?([^"]+)"?/);
+                                                        if (match.length > 1) {
+                                                            filename = match[1];
+                                                        }
+                                                    }
+
+                                                    return response.blob().then(blob => {
+                                                        const url = window.URL.createObjectURL(blob);
+                                                        const a = document.createElement('a');
+                                                        a.href = url;
+                                                        a.download = filename; // ✅ usar el nombre dinámico
+                                                        document.body.appendChild(a);
+                                                        a.click();
+                                                        a.remove();
+                                                        mostrarAlerta('PDF generado correctamente.', 'success');
+                                                        setTimeout(() => location.reload(), 1000);
+                                                    });
+                                                })
+                                            })
+                                        })
+                                        .catch(error => {
+                                            mostrarAlerta('No se Pudo Obtener la Información', 'error');
+                                        });
+                                }
+                            })
+
+                        })
+                        .catch(error => {
+                            mostrarAlerta('Error al consultar centro', 'error');
+                        });
+
+                }
+            })
+        }).catch(error => mostrarAlerta('Error al obtener los datos', 'error'));
+
+    fetch('/obtener_departamento')
+        .then(response => response.json())
+        .then(data => {
+            const selectdepto = document.getElementById('deptomutuo');
+            selectdepto.innerHTML = '<option value="" disabled selected>Seleccionar</option>';
+
+            data.forEach(departamento => {
+                const option = document.createElement('option');
+                option.value = departamento.id;
+                option.textContent = departamento.nombre;
+                selectdepto.appendChild(option);
+            });
+
+            selectdepto.addEventListener('change', function () {
+                const id_departamento = this.value;
+                if (id_departamento !== '') {
+                    fetch('/obtener/municipios', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ id_departamento: id_departamento })
+                    })
+                        .then(respuesta => respuesta.json())
+                        .then(data => {
+                            const selectmunicipio = document.getElementById('municipiomutuo');
+                            selectmunicipio.innerHTML = '<option value="" disabled selected>Seleccionar</option>'
+
+                            data.forEach(municipio => {
+                                const option = document.createElement('option');
+                                option.value = municipio.id;
+                                option.textContent = municipio.nombre;
+                                selectmunicipio.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            mostrarAlerta('Error al Obtener los Municipios', 'error');
+                        });
+                }
+            })
+        });
+
+
+
 })
 
 

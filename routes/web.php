@@ -16,6 +16,7 @@ use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ReversionCuotaController;
 use App\Http\Controllers\TransferenciacarteraController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WordController;
 use App\Models\Grupos;
 use App\Models\Municipios;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -133,10 +134,14 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/obtener-asesores', [AsesoresController::class, 'obtenerAsesores'])->name('obtenerAsesores');
     Route::get('/obtener-informacion', [colocacionprestamoController::class, 'obtenerinformacion'])->name('obtenerinformacion');
     Route::post('/obtener-grupo', [colocacionprestamoController::class, 'obtenergrupo'])->name('obtenergrupo');
+    Route::post('/obtener/municipios', [pdfController::class, 'obtenermunicipio'])->name('obtenermunicipio');
+    Route::get('/obtener_departamento', [pdfController::class, 'obtenerdepartamento'])->name('obtenerdepartamento');
+    Route::post('/obtener/mutuo/prestamos', [pdfController::class, 'obtenerprestamos'])->name('obtenerprestamos');
 
     //Generar Reportes
     Route::post('/reporte/infored', [ReportesController::class, 'ReporteINFORED'])->name('ReporteINFORED');
     Route::post('/generar/reporte/colocacion', [colocacionprestamoController::class, 'pdfcolocacion'])->name('pdfcolocacion');
+    Route::post('/generar/mutuo/grupal', [pdfController::class, 'pdfmutuogrupal'])->name('pdfmutuogrupal');
 
     Route::get('/probar-pdf', function () {
         $datos = [
@@ -149,8 +154,9 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
         return $pdf->stream('prueba.pdf'); // Muestra el PDF en el navegador
         // return $pdf->download('prueba.pdf'); // Fuerza descarga
     });
-    // Ruta para descargar el archivo temporal (asegúrate de que esta esté definida)
 
+
+    Route::get('/test-word', [WordController::class, 'test']);
 });
 
 
