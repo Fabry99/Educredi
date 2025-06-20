@@ -566,7 +566,6 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .catch(error => {
                 ocultarAlertaInfo();
-                console.error('Error al guardar:', error);
                 mostrarAlerta('Error al procesar el pago.', 'error');
                 btn.prop('disabled', false);
             });

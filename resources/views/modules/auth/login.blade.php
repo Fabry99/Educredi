@@ -7,13 +7,13 @@
 
 @section('contenido')
     <div class="container">
-        <h1 class="hola">EDUCREDI RURAL S.A DE C.V</h1>
+        <h1 class="">EDUCREDI RURAL S.A DE C.V</h1>
     </div>
 
     <div class="container-login">
         <div class="login">
             <div class="login-image">
-                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="User Icon">
+                <img src="{{ asset('img/logoeducredi.jpeg') }}" alt="User Icon" ">
             </div>
             <div class="login-form">
                 <div class="titulo_login">

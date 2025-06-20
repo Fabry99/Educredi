@@ -9,6 +9,9 @@
 
 @section('sidebar')
     @include('modules.partial.sidebar')
+    @if ($rol === 'administrador')
+        @vite('resources/css/cssAdministracion.css')
+    @endif
 @endsection
 
 @section('contenido')
@@ -18,7 +21,7 @@
         @break
 
         @case('administrador')
-            @include('modules.partial.prueba_administrador')
+            @include('modules.partial.contentUsuarios')
         @break
 
         @case('caja')
@@ -30,6 +33,9 @@
 @endsection
 @section('js')
     @vite('resources/js/app.js')
+    @if ($rol === 'administrador')
+        @vite('resources/js/appAdmin.js')
+    @endif
     @vite('resources/js/notifications.js')
 
     @if ($rol === 'caja')

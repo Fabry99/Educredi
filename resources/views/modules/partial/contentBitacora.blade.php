@@ -31,12 +31,12 @@
                 <thead>
                     <tr>
                         <th hidden>ID</th>
-                        <th>Usuario</th>
-                        <th>Tabla Afectada</th>
-                        <th>Acción Realizada</th>
-                        <th>Datos Afectados</th>
-                        <th>Comentarios</th>
-                        <th>Fecha y Hora</th>
+                        <th style="width: 300px;text-align: center">Usuario</th>
+                        <th style="width: 150px">Tabla Afectada</th>
+                        <th style="width: 150px">Acción Realizada</th>
+                        <th style="text-align: center">Datos Afectados</th>
+                        <th style="width: 200px">Comentarios</th>
+                        <th style="text-align: center">Fecha y Hora</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,7 +76,7 @@
                             <td hidden>{{ $item->id }}</td>
                             <td>{{ strtoupper(optional($item->user)->name ?? '') }}
                                 {{ strtoupper(optional($item->user)->last_name ?? '') }}</td>
-                            <td>{{ strtoupper($item->tabla_afectada) }}</td>
+                            <td style="text-align: center">{{ strtoupper($item->tabla_afectada) }}</td>
                             <td>{{ $item->accion }}</td>
 
                             {{-- Mostrar el texto plano de 'datos' respetando saltos de línea --}}
@@ -89,7 +89,7 @@
                                 @endif
                             </td>
 
-                            <td>
+                            <td style="text-align: center">
                                 {{ $created_at ?: ($updated_at ?: \Carbon\Carbon::parse($item->fecha)->timezone('America/Guatemala')->format('d/m/Y H:i:s')) }}
                             </td>
                         </tr>

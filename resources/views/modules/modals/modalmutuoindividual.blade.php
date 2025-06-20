@@ -47,7 +47,7 @@
 
 
                 <span style="margin-left: 20px;">Tipo de Mutuo a Emitir:</span>
-                <select name="Grupo" id="tipomutuo" style="width: 300px" required>
+                <select name="Grupo" id="tipomutuoindi" style="width: 300px" required>
                     <option value="1">MUTUO INDIVIDUAL</option>
                 </select>
             </div>

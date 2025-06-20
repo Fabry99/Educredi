@@ -131,11 +131,6 @@ class AuthController extends Controller
 
   
 
-    // public function mov_caja()
-    // {
-    //     $rol = Auth::user()->rol;
-    //     return view('modules.dashboard.caja')->with('rol', $rol);
-    // }
 
     public function contador()
     {

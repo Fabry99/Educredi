@@ -42,6 +42,7 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::put('/admin/usuarios-update/', [UserController::class, 'updateuser'])
         ->name('user.update');
     Route::get('/admin/clientes', [AdministradorController::class, 'clientesadmin'])->name('admin.clientes');
+    Route::post('/admin/actualizar/llave', [AdministradorController::class, 'actualziarllave'])->name('actualziarllave');
 
 
 

@@ -50,13 +50,13 @@
 
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Centro</th>
-                        <th>Asesor</th>
-                        <th>Grupos Asignados</th>
-                        <th>Fecha Creación</th>
+                        <th style="text-align: center">ID</th>
+                        <th style="text-align: center">Centro</th>
+                        <th style="width: 300px;text-align: center">Asesor</th>
+                        <th style="width: 100px;text-align: center">Grupos Asignados</th>
+                        <th style="text-align: center; width: 200px">Fecha Creación</th>
                         @if (Auth::check() && Auth::user()->rol === 'administrador')
-                            <th>Botones</th>
+                            <th style="text-align: center">Botones</th>
                         @endif
 
                     </tr>
@@ -64,7 +64,7 @@
                 <tbody>
                     @foreach ($centros as $centros)
                         <tr>
-                            <td>{{ $centros->id }}</td>
+                            <td style="text-align: center">{{ $centros->id }}</td>
                             <td>{{ $centros->nombre }}</td>
                             <td>{{ $centros->asesor->name }}</td> <!-- Muestra directamente el ID del asesor -->
                             <!-- Aquí obtenemos la cantidad de grupos desde $contar -->
@@ -73,9 +73,9 @@
                                 $cantidadGrupos = $grupo ? $grupo->grupos_count : 0;
                             @endphp
 
-                            <td>{{ $cantidadGrupos }}</td> <!-- Mostramos el conteo de grupos -->
+                            <td style="text-align: center">{{ $cantidadGrupos }}</td> <!-- Mostramos el conteo de grupos -->
 
-                            <td>{{ $centros->created_at->format('d/m/Y H:i') }}</td>
+                            <td style="text-align: center">{{ $centros->created_at->format('d/m/Y H:i') }}</td>
 
                             @if (Auth::check() && Auth::user()->rol === 'administrador')
                                 <!-- Mostrar el botón de eliminar solo si el conteo de grupos es 0 -->

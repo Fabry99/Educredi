@@ -15,24 +15,24 @@
             <div class="modal-ge" style="margin-top: 45px;">
                 <div class="input-group">
                     <label for="nombre" class="label1">
-                        <input type="nombre" id="nombre" name="nombre" placeholder="Nombre:">
+                        <input type="nombre" id="nombreing" name="nombre" placeholder="Nombre:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="apellido" class="label1">
-                        <input type="apellido" id="apellido" name="apellido" placeholder="Apellidos:">
+                        <input type="apellido" id="apellidoing" name="apellido" placeholder="Apellidos:">
                     </label>
                 </div>
             </div>
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="direccion" class="label1">
-                        <input type="text" id="direccion" name="direccion" placeholder="Dirección:">
+                        <input type="text" id="direccioning" name="direccion" placeholder="Dirección:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="teloficina" class="label1">
-                        <input type="text" id="teloficina" name="teloficina" placeholder="Telefono Oficina:"
+                        <input type="text" id="teloficinaing" name="teloficina" placeholder="Telefono Oficina:"
                             pattern="\d{8}" title="El teléfono debe tener exactamente 8 dígitos">
                     </label>
                 </div>
@@ -40,25 +40,25 @@
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="dir_negocio" class="label1">
-                        <input type="text" id="dir_negocio" name="dir_negocio" placeholder="Dirección Negocio:">
+                        <input type="text" id="dir_negocioing" name="dir_negocio" placeholder="Dirección Negocio:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="sector" class="label1">
-                        <input type="text" id="sector" name="sector" placeholder="Sector:">
+                        <input type="text" id="sectoring" name="sector" placeholder="Sector:">
                     </label>
                 </div>
             </div>
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="actividadeconomica" class="label1">
-                        <input type="nombre" id="actividadeconomica" name="actividadeconomica"
+                        <input type="nombre" id="actividadeconomicaing" name="actividadeconomica"
                             placeholder="Actividad Economica:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="NIT" class="label1">
-                        <input type="text" id="NIT" name="NIT" placeholder="NIT: 1234-567891-234-5"
+                        <input type="text" id="NITing" name="NIT" placeholder="NIT: 1234-567891-234-5"
                             pattern="\d{4}-\d{6}-\d{3}-\d{1}"
                             title="Formato: 4 dígitos - 6 dígitos - 3 dígitos - 1 dígito (Ej: 1234-567891-234-5)">
                     </label>
@@ -83,11 +83,11 @@
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="ocupacion" class="label1">
-                        <input type="text" id="ocupacion" name="ocupacion" placeholder="Ocupación:">
+                        <input type="text" id="ocupacioning" name="ocupacion" placeholder="Ocupación:">
                     </label>
                 </div>
                 <div class="input-group select" style="margin-left: 20px;">
-                    <select id="firma" name="firma">
+                    <select id="firmaing" name="firma">
                         <option value="" disabled selected>Puede Firmar ?</option>
                         <option value="si">Si</option>
                         <option value="no">No</option>
@@ -100,36 +100,36 @@
 
                 <div class="input-group">
                     <label for="dui" class="label2">
-                        <input type="text" id="dui" name="dui" placeholder="DUI: 12345678-9"
+                        <input type="text" id="duiing" name="dui" placeholder="DUI: 12345678-9"
                             pattern="\d{8}-\d{1}" title="Formato: 8 dígitos - 1 dígito (Ej: 12345678-9)" required>
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="expedida" class="label2">
-                        <input type="text" id="expedida" name="expedida" placeholder="Expedida En:">
+                        <input type="text" id="expedidaing" name="expedida" placeholder="Expedida En:">
                     </label>
                 </div>
 
                 <div class="input-group">
                     <label for="expedicion" class="label2" style="font-size: 12px">Fecha Expedición:
-                        <input type="date" id="expedicion" name="expedicion" required>
+                        <input type="date" id="expedicioning" name="expedicion" required>
                     </label>
                 </div>
             </div>
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="lugarnacimiento" class="label2">
-                        <input type="text" id="lugarnacimiento" name="lugarnacimiento"
+                        <input type="text" id="lugarnacimientoing" name="lugarnacimiento"
                             placeholder="Lugar de Nacimiento:">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="nacionalidad" class="label2">
-                        <input type="text" id="nacionalidad" name="nacionalidad" placeholder="Nacionalidad:">
+                        <input type="text" id="nacionalidading" name="nacionalidad" placeholder="Nacionalidad:">
                     </label>
                 </div>
                 <div class="input-group select" style="margin-left: 20px;">
-                    <select id="genero" name="genero">
+                    <select id="generoing" name="genero">
                         <option value="" disabled selected>Genero:</option>
                         <option value="masculino">masculino</option>
                         <option value="femenino">femenino</option>
@@ -142,18 +142,18 @@
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="fecha_nacimiento" class="label2" style="font-size: 12px">Fecha Nacimiento:
-                        <input type="date" id="fecha_nacimiento" name="fecha_nacimiento"
+                        <input type="date" id="fecha_nacimientoing" name="fecha_nacimiento"
                             placeholder="F.Nacimiento:" required>
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="telcasa" class="label2">
-                        <input type="text" id="telcasa" name="telcasa" placeholder="Tel.Casa:" pattern="\d{8}"
+                        <input type="text" id="telcasaing" name="telcasa" placeholder="Tel.Casa:" pattern="\d{8}"
                             title="El teléfono debe tener exactamente 8 dígitos">
                     </label>
                 </div>
                 <div class="input-group select" style="margin-left: 20px;">
-                    <select id="estado_civil" name="estado_civil" required>
+                    <select id="estado_civiling" name="estado_civil" required>
                         <option value="" disabled selected>Estado Civil:</option>
                         <option value="soltero">soltero</option>
                         <option value="casado">casado</option>
@@ -168,20 +168,20 @@
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="nrc" class="label2">
-                        <input type="text" id="nrc" name="nrc" placeholder="NRC:" pattern="\d{22}"
+                        <input type="text" id="nrcing" name="nrc" placeholder="NRC:" pattern="\d{22}"
                             title="Ingrese el Código de 22 Dígitos">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="perdependiente" class="label2">
-                        <input type="text" id="perdependiente" name="perdependiente"
+                        <input type="text" id="perdependienteing" name="perdependiente"
                             placeholder="Personas Dependientes:" min="1" max="20"
                             title="Se Debe Agregar la Cantidad de Personas Dependientes">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="conyugue" class="label2">
-                        <input type="text" id="conyugue" name="conyugue" placeholder="Conyugue:">
+                        <input type="text" id="conyugueing" name="conyugue" placeholder="Conyugue:">
                     </label>
                 </div>
 
@@ -189,20 +189,20 @@
             <div class="modal-ge">
                 <div class="input-group">
                     <label for="sueldo" class="label2">
-                        <input type="number" id="sueldo" name="sueldo" placeholder="Sueldo: 0.0"
+                        <input type="number" id="sueldoing" name="sueldo" placeholder="Sueldo: 0.0"
                             step="0.01" min="0">
 
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="otroingreso" class="label2">
-                        <input type="text" id="otroingreso" name="otroingreso" placeholder="Otr.Ingreso: 0.0"
+                        <input type="text" id="otroingresoing" name="otroingreso" placeholder="Otr.Ingreso: 0.0"
                             step="0.01" min="0">
                     </label>
                 </div>
                 <div class="input-group">
                     <label for="egreso" class="label2">
-                        <input type="number" id="egreso" name="egreso" placeholder="Egreso: 0.0"
+                        <input type="number" id="egresoing" name="egreso" placeholder="Egreso: 0.0"
                             step="0.01" min="0">
                     </label>
                 </div>
@@ -262,7 +262,7 @@
 
         // Aplicar a los campos correspondientes
         const fechaNacimientoInput = document.getElementById("fecha_nacimiento");
-        const expedicionInput = document.getElementById("expedicion");
+        const expedicionInput = document.getElementById("expedicioning");
 
         if (fechaNacimientoInput) {
             fechaNacimientoInput.setAttribute("max", formatDate(maxBirthDate));
