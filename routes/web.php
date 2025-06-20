@@ -11,6 +11,7 @@ use App\Http\Controllers\DesembolsoprestamoController;
 use App\Http\Controllers\DesemsolsoprestamoController;
 use App\Http\Controllers\GruposController;
 use App\Http\Controllers\MovimientocajaController;
+use App\Http\Controllers\mutuoIndividualController;
 use App\Http\Controllers\pdfController;
 use App\Http\Controllers\ReportesController;
 use App\Http\Controllers\ReversionCuotaController;
@@ -137,11 +138,13 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::post('/obtener/municipios', [pdfController::class, 'obtenermunicipio'])->name('obtenermunicipio');
     Route::get('/obtener_departamento', [pdfController::class, 'obtenerdepartamento'])->name('obtenerdepartamento');
     Route::post('/obtener/mutuo/prestamos', [pdfController::class, 'obtenerprestamos'])->name('obtenerprestamos');
+    Route::get('/obtener/datos/cliente/{id}', [mutuoIndividualController::class, 'obtenerdatosclientes'])->name('obtenerdatosclientes');
 
     //Generar Reportes
     Route::post('/reporte/infored', [ReportesController::class, 'ReporteINFORED'])->name('ReporteINFORED');
     Route::post('/generar/reporte/colocacion', [colocacionprestamoController::class, 'pdfcolocacion'])->name('pdfcolocacion');
     Route::post('/generar/mutuo/grupal', [pdfController::class, 'pdfmutuogrupal'])->name('pdfmutuogrupal');
+    Route::post('/generar/mutuo/individual', [mutuoIndividualController::class, 'pdfmutuoindi'])->name('pdfmutuoindi');
 
     Route::get('/probar-pdf', function () {
         $datos = [

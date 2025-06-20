@@ -629,6 +629,7 @@ class ComposerStaticInitd4377e6545ed479afa8857522bc4840a
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
         'App\\Http\\Controllers\\WordController' => __DIR__ . '/../..' . '/app/Http/Controllers/WordController.php',
         'App\\Http\\Controllers\\colocacionprestamoController' => __DIR__ . '/../..' . '/app/Http/Controllers/colocacionprestamoController.php',
+        'App\\Http\\Controllers\\mutuoIndividualController' => __DIR__ . '/../..' . '/app/Http/Controllers/mutuoIndividualController.php',
         'App\\Http\\Middleware\\EnsureUserHasRole' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureUserHasRole.php',
         'App\\Http\\Middleware\\PreventBackHistory' => __DIR__ . '/../..' . '/app/Http/Middleware/PreventBackHistory.php',
         'App\\Http\\Middleware\\Roles' => __DIR__ . '/../..' . '/app/Http/Middleware/Roles.php',

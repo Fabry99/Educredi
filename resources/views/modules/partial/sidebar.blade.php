@@ -1,6 +1,7 @@
 @include('modules.modals.modalarchivinfored');
 @include('modules.modals.modalcolocacionprestamomes');
 @include('modules.modals.modalmutuoacuerdogrupal');
+@include('modules.modals.modalmutuoindividual');
 <header>
     <nav class="navbar">
         <div class="contenerdor-navbar">
@@ -59,13 +60,12 @@
                                     entre asesores</a></li>
                         </ul>
                     </li>
-                     {{-- <li class="menu-item menu-item-static"><a href="{{ route('caja') }}" class="menu-link"><img
+                    {{-- <li class="menu-item menu-item-static"><a href="{{ route('caja') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-caja.svg') }}" alt=""><span>Caja</span></a>
                     </li>
                     <li class="menu-item menu-item-static"><a href="{{ route('grupos') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-grupo.svg') }}" alt=""><span>Grupos</span></a>
                     </li> --}}
-                    
                 @break
 
                 @case('caja')
@@ -75,14 +75,16 @@
                     <li class="menu-item menu-item-static"><a href="{{ route('grupos') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-grupo.svg') }}" alt=""><span>Grupos</span></a>
                     </li>
-                    <li class="menu-item menu-item-static"><a href="{{ route('control') }}" class="menu-link"><img style="align-self: center"
-                                src="{{ asset('img/icon_controlprestamos.svg') }}" alt=""><span>Control de Préstamos</span></a>
+                    <li class="menu-item menu-item-static"><a href="{{ route('control') }}" class="menu-link"><img
+                                style="align-self: center" src="{{ asset('img/icon_controlprestamos.svg') }}"
+                                alt=""><span>Control de Préstamos</span></a>
                     </li>
                     {{-- <li class="menu-item menu-item-static"><a href="{{ route('mov_caja') }}" class="menu-link"><img
                                 src="{{ asset('img/icon-caja.svg') }}" alt=""><span>Caja</span></a>
                     </li> --}}
-                    <li class="menu-item menu-item-static" style="font-size: 15px;"><a href="{{ route('reversion') }}" class="menu-link"><img style="align-self: center;"
-                                src="{{ asset('img/icon_reversioncaja.svg') }}" alt="" ><span>Revertir movimientos <br> de caja<span></a>
+                    <li class="menu-item menu-item-static" style="font-size: 15px;"><a href="{{ route('reversion') }}"
+                            class="menu-link"><img style="align-self: center;" src="{{ asset('img/icon_reversioncaja.svg') }}"
+                                alt=""><span>Revertir movimientos <br> de caja<span></a>
                     </li>
                     <li class="menu-item menu-item-dropdown">
                         <a href="javascript:void(0);" class="menu-link"><img src="{{ asset('img/icon_reportes.svg') }}"
@@ -90,12 +92,14 @@
 
                         <ul class="sub-menu">
                             <li><a href="" id="archivoinfored" class="sub-menu-link">Archivo de INFORED</a></li>
-                            <li><a href="" class="sub-menu-link" id="btn_colocacionprestamos">Colocación de préstamos por mes</a></li>
+                            <li><a href="" class="sub-menu-link" id="btn_colocacionprestamos">Colocación de préstamos por
+                                    mes</a></li>
                             <li><a href="" class="sub-menu-link" id="btn_mutuogrupal">Mutuo Acuerdo Grupal</a></li>
+                            <li><a href="" class="sub-menu-link" id="btn_mutuoindividual">Mutuo Acuerdo Individual</a></li>
+
 
                         </ul>
                     </li>
-
                 @break
 
                 @case('contador')
@@ -109,7 +113,8 @@
                         <ul class="sub-menu">
                             <li><a href="{{ route('grupos') }}" class="sub-menu-link">Grupos</a></li>
                             <li><a href="{{ route('creditos') }}" class="sub-menu-link">Desembolso de préstamos</a></li>
-                            <li><a href="{{ route('cambiardatos') }}" class="sub-menu-link">Cambiar datos de prestamo</a></li>
+                            <li><a href="{{ route('cambiardatos') }}" class="sub-menu-link">Cambiar datos de prestamo</a>
+                            </li>
 
                         </ul>
                     </li>
@@ -126,7 +131,8 @@
                         <ul class="sub-menu">
                             <li><a href="{{ route('reverliquidacion') }}" class="sub-menu-link">Revertir desembolso de
                                     prestamo</a></li>
-                            <li><a href="{{ route('transferenciadecartera') }}" class="sub-menu-link">Transferencia de cartera
+                            <li><a href="{{ route('transferenciadecartera') }}" class="sub-menu-link">Transferencia de
+                                    cartera
                                     entre asesores</a></li>
                         </ul>
                     </li>

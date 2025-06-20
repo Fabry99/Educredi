@@ -863,15 +863,7 @@ btnarchivoinforedmodal.addEventListener('click', function (event) {
 
 });
 
-// Cerrar el modal al presionar la tecla ESC
-window.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") { // Si se presiona la tecla ESC
-        document.querySelectorAll("#modalinfored").forEach((modal) => {
-            limpiarmodalinfored();
-            cerrarModal(modal);
-        });
-    }
-});
+
 
 function limpiarmodalinfored() {
     document.getElementById('nombrearchivo').value = '';
@@ -1031,6 +1023,13 @@ btn_abrirmodalcolocacionprestamos.addEventListener('click', function (event) {
                 mostrarAlerta('Error al generar el PDF: ' + error.message, 'error');
             });
     })
+});
+window.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") { // Si se presiona la tecla ESC
+        document.querySelectorAll("#modalinfored").forEach((modal) => {
+            limpiarmodalinfored();
+        });
+    }
 });
 
 const btn_mutuogrupal = document.getElementById('btn_mutuogrupal');
@@ -1289,13 +1288,289 @@ btn_mutuogrupal.addEventListener('click', function (event) {
                 }
             })
         });
+});
+
+const btn_mutuoindividual = document.getElementById('btn_mutuoindividual');
+btn_mutuoindividual.addEventListener('click', function (event) {
+    event.preventDefault();
+    $('#modalmutuoindividual').fadeIn('show');
+
+    const inputBuscar = document.getElementById("buscarclientemutuo");
+    const contenedorResultados = document.getElementById("resultados-clientes");
+    let datosCliente = []; // Variable para almacenar los préstamos del cliente
+
+    // Evento para buscar clientes mientras se escribe
+    inputBuscar.addEventListener("input", function () {
+        const query = inputBuscar.value.trim();
+
+        if (query.length >= 2) {
+            fetch(`/buscar-clientes?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => mostrarResultados(data))
+                .catch(error => console.error('Error al buscar clientes:', error));
+        } else {
+            contenedorResultados.innerHTML = "";
+        }
+    });
+
+    // Función para mostrar resultados de búsqueda
+    function mostrarResultados(clientes) {
+        if (!clientes || clientes.length === 0) {
+            contenedorResultados.innerHTML = "<li>No se encontraron clientes</li>";
+            return;
+        }
+
+        let resultadoHTML = '';
+        clientes.forEach(cliente => {
+            resultadoHTML += `
+            <li data-id="${cliente.id}" class="item-resultado">
+                ${cliente.nombre} ${cliente.apellido}
+            </li>`;
+        });
+
+        contenedorResultados.innerHTML = resultadoHTML;
+    }
+
+    // Event delegation para manejar clics en los resultados
+    contenedorResultados.addEventListener("click", function (e) {
+        const itemCliente = e.target.closest(".item-resultado");
+
+        if (itemCliente) {
+            const clienteId = itemCliente.getAttribute("data-id");
+            const nombreCompleto = itemCliente.textContent.trim();
+
+            // Actualizar los campos en el formulario
+            document.getElementById("codigoclienteid").value = clienteId;
+            document.getElementById("nombremutuoind").value = nombreCompleto;
+
+            // También mantener el valor en el buscador si lo necesitas
+            inputBuscar.value = nombreCompleto;
+            contenedorResultados.innerHTML = "";
+
+            obtenerDatosDelCliente(clienteId);
+        }
+    });
+
+    function formatFecha(fecha) {
+        if (!fecha) return 'Fecha no disponible';
+        try {
+            const [anio, mes, dia] = fecha.split('-');
+            return `${dia.padStart(2, '0')}-${mes.padStart(2, '0')}-${anio}`;
+        } catch (e) {
+            console.error("Error formateando fecha:", fecha, e);
+            return fecha; // Devuelve la fecha sin formato si hay error
+        }
+    }
+
+    // Función para obtener datos adicionales del cliente
+    function obtenerDatosDelCliente(id) {
+        if (!id) {
+            console.error("No se proporcionó ID del cliente");
+            return;
+        }
+
+        fetch(`/obtener/datos/cliente/${id}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Error en la respuesta del servidor");
+                return response.json();
+            })
+            .then(data => {
+
+                const select = document.getElementById('fechaprestamomutuo');
+                select.innerHTML = '<option value="">Seleccione un Préstamo</option>';
+
+                if (!data || data.length === 0) {
+                    mostrarAlerta('Este Cliente no Tiene Préstamos Individuales', 'error');
+                    limpiarCampos();
+                    return;
+                }
+
+                // Agregar un ID único a cada préstamo si no lo tiene
+                data.forEach((prestamo, index) => {
+                    if (!prestamo.id) {
+                        prestamo.id = index + 1; // Asignamos un ID temporal basado en el índice
+                    }
+                });
+
+                // Almacenar los datos en el select
+                select._prestamosData = data;
+                // Llenar el dropdown
+                data.forEach(prestamo => {
+                    const option = document.createElement('option');
+                    option.value = prestamo.id;
+                    option.setAttribute('data-fecha-apertura', prestamo.fecha_apertura);
+                    option.setAttribute('data-fecha-vencimiento', prestamo.fecha_vencimiento);
+                    option.textContent = `Apertura: ${formatFecha(prestamo.fecha_apertura)} - Venc: ${formatFecha(prestamo.fecha_vencimiento)}`;
+                    select.appendChild(option);
+                });
 
 
+                // Configurar el evento change
+                if (!select._changeListenerAdded) {
+                    select.addEventListener('change', function () {
+                        const prestamoId = parseInt(this.value);
+                        const prestamosData = this._prestamosData || [];
+                        const prestamoSeleccionado = prestamosData.find(p => p.id === prestamoId);
 
-})
+                   
 
+                        if (prestamoSeleccionado) {
+                            document.getElementById('montoprestamomutuo').value = prestamoSeleccionado.monto || '';
+                            document.getElementById("deptomutuo").value = prestamoSeleccionado.departamento_id || '';
+                            document.getElementById("municipiomutuo").value = prestamoSeleccionado.municipio_id || '';
+                        } else {
+                            limpiarCampos();
+                        }
+                    });
+                    select._changeListenerAdded = true;
+                }
 
+                // Seleccionar el primer préstamo por defecto
+                if (data.length > 0) {
+                    select.value = data[0].id;
+                    document.getElementById('montoprestamomutuo').value = data[0].monto || '';
+                    document.getElementById("deptomutuo").value = data[0].departamento_id || '';
+                    document.getElementById("municipiomutuo").value = data[0].municipio_id || '';
+                }
+            })
+            .catch(error => {
+                console.error("Error al obtener datos del cliente:", error);
+                mostrarAlerta("Error al cargar los datos del cliente", "error");
+                limpiarCampos();
+            });
+    }
 
+    function limpiarCampos() {
+        document.getElementById('montoprestamomutuo').value = '';
+        document.getElementById('deptomutuo').value = '';
+        document.getElementById('municipiomutuo').value = '';
+    }
+
+    fetch('/obtener_departamento')
+        .then(response => response.json())
+        .then(data => {
+            const selectdepto = document.getElementById('deptomutuoind');
+            selectdepto.innerHTML = '<option value="" disabled selected>Seleccionar</option>';
+
+            data.forEach(departamento => {
+                const option = document.createElement('option');
+                option.value = departamento.id;
+                option.textContent = departamento.nombre;
+                selectdepto.appendChild(option);
+            });
+
+            selectdepto.addEventListener('change', function () {
+                const id_departamento = this.value;
+                if (id_departamento !== '') {
+                    fetch('/obtener/municipios', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({ id_departamento: id_departamento })
+                    })
+                        .then(respuesta => respuesta.json())
+                        .then(data => {
+                            const selectmunicipio = document.getElementById('municipiomutuoind');
+                            selectmunicipio.innerHTML = '<option value="" disabled selected>Seleccionar</option>'
+
+                            data.forEach(municipio => {
+                                const option = document.createElement('option');
+                                option.value = municipio.id;
+                                option.textContent = municipio.nombre;
+                                selectmunicipio.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            mostrarAlerta('Error al Obtener los Municipios', 'error');
+                        });
+                }
+            })
+        });
+    const btn_mutuoindi = document.getElementById('btn-mutuoindi');
+    btn_mutuoindi.addEventListener('click', function (event) {
+        event.preventDefault();
+        const id_cliente = document.getElementById('codigoclienteid').value;
+        const nombrecliente = document.getElementById('nombremutuoind').value;
+        const montoprestamo = document.getElementById('montoprestamomutuo').value;
+        const deptoSelect = document.getElementById("deptomutuoind");
+        const municipioSelect = document.getElementById("municipiomutuoind");
+
+        const id_deptomutuoind = deptoSelect.value;
+        const id_municipiomutuoind = municipioSelect.value;
+
+        const textoDepto = deptoSelect.options[deptoSelect.selectedIndex].text;
+        const textoMunicipio = municipioSelect.options[municipioSelect.selectedIndex].text;
+        const fechamutuoindi = document.getElementById('fechamutuoindi').value;
+
+        // FECHAS seleccionadas desde el select
+        const selectFechas = document.getElementById("fechaprestamomutuo");
+        const selectedOption = selectFechas.options[selectFechas.selectedIndex];
+
+        const fecha_apertura = selectedOption.getAttribute('data-fecha-apertura');
+        const fecha_vencimiento = selectedOption.getAttribute('data-fecha-vencimiento');
+
+        if (selectFechas == '') {
+            mostrarAlerta('Por Favor Seleccione una Fecha de Prestamo', 'error');
+            return
+        }
+        if (deptomutuoind == '') {
+            mostrarAlerta('Por Favor Seleccione un Departamento', 'error');
+            return
+        }
+        if (municipiomutuoind == '') {
+            mostrarAlerta('Por Favor Seleccione un Municipio', 'error');
+            return
+        }
+
+        fetch('/generar/mutuo/individual', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                id_cliente: id_cliente,
+                nombrecliente: nombrecliente,
+                montoprestamo: montoprestamo,
+                id_deptomutuoind: id_deptomutuoind,
+                id_municipiomutuoind: id_municipiomutuoind,
+                textoDepto: textoDepto,
+                textoMunicipio: textoMunicipio,
+                fecha_generada: fechamutuoindi,
+                fecha_apertura: fecha_apertura,
+                fecha_vencimiento: fecha_vencimiento,
+            })
+        })
+            .then(response => {
+                const disposition = response.headers.get('Content-Disposition');
+                let filename = 'Mutuo.docx'; // valor por defecto
+
+                if (disposition && disposition.indexOf('filename=') !== -1) {
+                    const match = disposition.match(/filename="?([^"]+)"?/);
+                    if (match.length > 1) {
+                        filename = match[1];
+                    }
+                }
+
+                return response.blob().then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    mostrarAlerta('PDF generado correctamente.', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                });
+            })
+            .catch(error => {
+                mostrarAlerta('No se Pudo Obtener la Información', 'error');
+            });
+    })
+});
 function mostrarAlerta(mensaje, tipo) {
     const alerta = document.getElementById('alert-notification');
     const mensajeAlerta = document.getElementById('alert-notification-message');

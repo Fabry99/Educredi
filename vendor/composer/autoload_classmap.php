@@ -25,6 +25,7 @@ return array(
     'App\\Http\\Controllers\\UserController' => $baseDir . '/app/Http/Controllers/UserController.php',
     'App\\Http\\Controllers\\WordController' => $baseDir . '/app/Http/Controllers/WordController.php',
     'App\\Http\\Controllers\\colocacionprestamoController' => $baseDir . '/app/Http/Controllers/colocacionprestamoController.php',
+    'App\\Http\\Controllers\\mutuoIndividualController' => $baseDir . '/app/Http/Controllers/mutuoIndividualController.php',
     'App\\Http\\Middleware\\EnsureUserHasRole' => $baseDir . '/app/Http/Middleware/EnsureUserHasRole.php',
     'App\\Http\\Middleware\\PreventBackHistory' => $baseDir . '/app/Http/Middleware/PreventBackHistory.php',
     'App\\Http\\Middleware\\Roles' => $baseDir . '/app/Http/Middleware/Roles.php',
