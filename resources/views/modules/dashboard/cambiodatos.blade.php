@@ -16,4 +16,5 @@
 @endsection
 @section('js')
     @vite('resources/js/app.js')
+    @vite('resources/js/cambiardatos.js')
 @endsection
