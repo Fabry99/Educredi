@@ -1,83 +1,170 @@
+<link href="{{ Vite::asset('node_modules/datatables.net-dt/css/dataTables.dataTables.min.css') }}" rel="stylesheet">
 <div class="container">
     <div class="main-content">
-        <h1>Cambiar datos de préstamo.</h1>
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                <div class="notification custom_error">
+                    {{ $error }}
+                </div>
+            @endforeach
+        @endif
 
+        @if (session('success'))
+            <div class="notification custom_success">
+                {{ session('success') }}
+            </div>
+        @endif
         <div id="alert-notification" class="alert"
-            style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
+            style="display: none; position: fixed; top: 40px; right: 20px; z-index: 9999; padding: 15px; width: 80%; max-width: 400px; font-size: 16px; text-align: center; border-radius: 5px;">
             <span id="alert-notification-message"></span>
         </div>
-        <div class="fila">
-            <div class="columna">
-                <div class="container-select">
-                    <div class="titulo">
-                        <label for="asesor" class="label1">Asesor</label>
-                    </div>
-                    <select name="opciones" id="opciones">
-                        <option value="" disabled selected>Seleccione una opción</option>
-                        <option value="opcion1">Opcion 1</option>
-                        <option value="opcion2">Opcion 2</option>
+
+        <div class="contenedor">
+            <div class="tittle">
+                <h2 style="margin-bottom: 40px">Transferencia de cartera entre asesores</h2>
+            </div>
+            <div class="contain-option">
+                <div class="option">
+                    <span style="margin-left: 35px">Asesor:</span>
+                    <select name="asesorcartera" id="asesorcambiar">
+                        <option value="" disabled selected>Seleccionar:</option>
+                        @foreach ($asesor as $item)
+                            <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                        @endforeach
                     </select>
-                    <span class="titulo"></span>
-                    <i class="fa-solid fa-chevron-down icon"></i>
                 </div>
-                <div class="container-select">
-                    <div class="titulo">
-                        <label for="centro" class="label1">Centro</label>
-                    </div>
-                    <select name="opciones" id="opciones">
-                        <option value="" disabled selected>Seleccione una opción</option>
-                        <option value="opcion1">Opcion 1</option>
-                        <option value="opcion2">Opcion 2</option>
+                <div class="option">
+                    <span>Centro:</span>
+                    <select name="Centro" id="centro_idcambiar">
+                        <option value="" disabled selected>Seleccionar:</option>
+                        @foreach ($centro as $item)
+                            <option value="{{ $item->id }}">{{ $item->nombre }}</option>
+                        @endforeach
                     </select>
-                    <span class="titulo"></span>
-                    <i class="fa-solid fa-chevron-down icon"></i>
                 </div>
-                <div class="container-select">
-                    <div class="titulo">
-                        <label for="gruposolidario" class="label1">Grupo solidario</label>
-                    </div>
-                    <select name="opciones" id="opciones">
-                        <option value="" disabled selected>Seleccione una opción</option>
-                        <option value="opcion1">Opcion 1</option>
-                        <option value="opcion2">Opcion 2</option>
+                <div class="option">
+                    <span>Grupo:</span>
+                    <select name="Grupo" id="grupo_idcambiar" style="width:180px">
+                        <option value="" disabled selected>Seleccionar:</option>
                     </select>
-                    <span class="titulo"></span>
-                    <i class="fa-solid fa-chevron-down icon"></i>
                 </div>
-                <div class="fila">
-                    <div class="campos">
-                        <label for="apertura-actual" class="label1">Apertura actual</label>
-                        <label for="apertura-actual" class="label1">
-                            <input type="date" id="apertura" name="apertura" placeholder="/ /" required>
-                        </label>
-                    </div>
-                    <button class="btn-verificar">
-                        Verificar
+            </div>
+            <div class="contenedor-conteo">
+                <div class="option">
+                    <span>Apertura Actual</span>
+                    <select name="Fecha Apertura" id="selectfeapertura" style="width: 150px">
+                        <option value="" disabled selected>Seleccionar:</option>
+
+                    </select>
+                </div>
+
+                <div class="conteo">
+                    <span style="margin-left: -20px">Primer Pago:</span>
+                    <input type="text" placeholder="--/--/----" name="MONTO" id="fechaprimerpago"
+                        style="text-align: center; width: 120px;" readonly>
+                </div>
+                <div class="conteo">
+                    <span>Fecha Vencimiento</span>
+                    <input type="text" placeholder="--/--/----" name="MONTO" id="fechavencimiento"
+                        style="text-align: center; width: 120px;" readonly>
+                </div>
+            </div>
+            <div class="contenedor-conteo" style="margin-top: -20px; margin-bottom: 30px">
+
+            </div>
+            <div class="tabla">
+                <table id="tablacambiardatos" class="table table-striped table1" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>id</th>
+                            <th>Préstamo</th>
+                            <th>Nombre del cliente</th>
+                            <th>Monto</th>
+                            <th>Interes</th>
+                            <th>Apertura</th>
+                            <th>Vencimiento</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="contenedor-footer" style=" justify-content: end">
+
+                <div class="botones">
+                    <button type="submit" class="btn-guardar" id="btnGuardarTransferencia">
+                        <img src="{{ asset('img/aceptar.svg') }}" alt="">
                     </button>
                 </div>
             </div>
-            <div class="columna">
-                <div class="campos" style="margin-left: 200px">
-                    <label for="aperturaactual" class="label1">Apertura Actual</label>
-                    <label for="aperturaactual" class="label1">
-                        <input type="date" id="aperturaactual" name="aperturaactual" placeholder="/ /" required>
-                    </label>
-                    <label for="primerpago" class="label1">Primer Pago</label>
-                    <label for="primerpago" class="label1">
-                        <input type="date" id="primerpago" name="primerpago" placeholder="/ /" required>
-                    </label>
-                    <label for="vencimiento" class="label1">Vencimiento</label>
-                    <label for="vencimiento" class="label1">
-                        <input type="date" id="vencimiento" name="vencimiento" placeholder="/ /" required>
-                    </label>
-                    <button class="btn-verificar" style="margin-left: 60px; background: blue;">
-                        Aplicar cambios
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="campo-verificar">
-            <textarea rows="15" cols="60"></textarea>
         </div>
     </div>
-</div>
+    <style>
+        .table1 {
+            border-color: var(--verde-shadow);
+            box-shadow: 0 0 10px rgba(43, 255, 0, 0.341);
+        }
+
+        .table1 td:first-child,
+        .table1 th:first-child {
+            text-align: center;
+            /* Centrado horizontal */
+            vertical-align: middle;
+            /* Centrado vertical */
+        }
+
+        .table1 th:nth-child(3),
+        .table1 td:nth-child(3) {
+            width: 300px;
+            /* Ajusta el valor como necesites */
+        }
+
+        .table1 th:nth-child(2),
+        .table1 td:nth-child(2),
+        .table1 th:nth-child(4),
+        .table1 td:nth-child(4),
+        .table1 th:nth-child(5),
+        .table1 td:nth-child(5) {
+            text-align: center !important;
+        }
+
+
+        /* Hacer que el checkbox sea más grande */
+        .table1 input[type="checkbox"] {
+            transform: scale(1.5);
+            /* Aumentar tamaño del checkbox */
+            margin: 0;
+            /* Eliminar márgenes que pudieran alterar la alineación */
+            cursor: pointer;
+            /* Cambiar el cursor para hacerlo más intuitivo */
+        }
+
+        /* Asegurarse de que las filas y el encabezado tengan el mismo padding */
+        .table1 td,
+        .table1 th {
+            padding: 12px;
+            /* Ajusta según sea necesario */
+        }
+
+        /* Opcional: Para dar mayor control sobre el tamaño de la celda */
+        .table1 th {
+            width: 50px;
+            /* Ajusta el ancho del encabezado si es necesario */
+        }
+
+        .table1 td {
+            width: 50px;
+            /* Ajusta el ancho de las celdas si es necesario */
+        }
+
+        .selectable-row {
+            cursor: pointer;
+        }
+
+        .selectable-row.selected {
+            background-color: #3399FF;
+            color: white;
+        }
+    </style>

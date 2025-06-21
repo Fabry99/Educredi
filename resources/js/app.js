@@ -1574,47 +1574,47 @@ btn_mutuoindividual.addEventListener('click', function (event) {
 
 
 
-
-//codigo para la llave
 const btn_llave = document.getElementById('btn_llave');
 const passwordllave = document.getElementById('passwordllave');
 const btnAceptarllave = document.getElementById('btnAceptarllave');
-btn_llave.addEventListener('click', function (event) {
-    event.preventDefault();
-    $('#modalcambiollave').fadeIn();
 
-    btnAceptarllave.addEventListener('click', function (event) {
+if (btn_llave && passwordllave && btnAceptarllave) {
+    btn_llave.addEventListener('click', function (event) {
         event.preventDefault();
-        if (passwordllave.value === '') {
-            mostrarAlerta('Por Favor Complete Todos los Campos.', 'error');
-            return;
-        }
+        $('#modalcambiollave').fadeIn();
 
-        fetch('/admin/actualizar/llave', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                password: passwordllave.value
-            })
-        }).then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    mostrarAlerta('Contraseña Actualizada Correctamente', 'success');
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    mostrarAlerta('Ocurrio un Error al Actualizar la Contraseña', 'error');
-                }
-            })
-            .catch(error => {
-                mostrarAlerta('Error al procesar el pago.', 'error');
-            })
-    })
+        btnAceptarllave.addEventListener('click', function (event) {
+            event.preventDefault();
+            if (passwordllave.value === '') {
+                mostrarAlerta('Por Favor Complete Todos los Campos.', 'error');
+                return;
+            }
 
-})
-
+            fetch('/admin/actualizar/llave', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    password: passwordllave.value
+                })
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        mostrarAlerta('Contraseña Actualizada Correctamente', 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        mostrarAlerta('Ocurrio un Error al Actualizar la Contraseña', 'error');
+                    }
+                })
+                .catch(error => {
+                    mostrarAlerta('Error al procesar el pago.', 'error');
+                });
+        });
+    });
+}
+    
 
 function mostrarAlerta(mensaje, tipo) {
     const alerta = document.getElementById('alert-notification');

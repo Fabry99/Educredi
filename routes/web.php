@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdministradorController;
 use App\Http\Controllers\AsesoresController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\cambiardatosPrestamosController;
 use App\Http\Controllers\CentroController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\colocacionprestamoController;
@@ -107,6 +108,11 @@ Route::middleware('auth', 'prevent.back.history')->group(function () {
     Route::get('/trasferencia/obtenergrupos/{id_centro}', [TransferenciacarteraController::class, 'obtenerGrupos']);
     Route::get('/transferencia/obtenerPrestamos/{id_asesor}/{id_grupo}/{id_centro}', [TransferenciacarteraController::class, 'obtenerDatosTabla']);
     Route::post('/transferencia/transferircartera', [TransferenciacarteraController::class, 'transferirCartera']);
+
+    //Rutas para Cambiar Datos de Prestamos
+    Route::post('/obtener/clientes/tablas', [cambiardatosPrestamosController::class, 'obtenerClientes']);
+    Route::post('/procesar-datos-seleccionados', [cambiardatosPrestamosController::class, 'actualizarprestamo']);
+
 
     //Rutas para manejo de caja
     Route::post('/caja/obtenerPrestamos', [MovimientocajaController::class, 'obtenerPrestamos']);

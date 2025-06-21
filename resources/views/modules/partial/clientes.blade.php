@@ -6,8 +6,8 @@
         <div class="container mt-4">
             <h1>Clientes</h1>
             <div class="btn-clientes">
-                <a href="" id="openModalBtn"><img src="{{ asset('img/icon-clientes.svg') }}"
-                        alt=""><span>Agregar Cliente</span></a>
+                <a href="" id="openModalBtn" ><img src="{{ asset('img/icon-clientes.svg') }}"
+                        alt="" style=""><span>Agregar Cliente</span></a>
             </div>
             @if ($errors->any())
                 @foreach ($errors->all() as $error)
@@ -34,9 +34,9 @@
                         <th>Nombres</th>
                         <th>Apellidos</th>
                         <th>Genero</th>
-                        <th>Edad</th>
+                        <th style="width: 90px">Edad</th>
                         <th>Telefono</th>
-                        <th>DUI</th>
+                        <th style="width: 120px;text-align: center">DUI</th>
                         <th>Departamento</th>
                         <th>Municipio</th>
                         <th>Centro pert.</th>
@@ -47,7 +47,7 @@
                 <tbody>
                     @foreach ($clientes as $clientes)
                         <tr>
-                            <td>{{ $clientes->id }}</td>
+                            <td >{{ $clientes->id }}</td>
                             <td>{{ $clientes->nombre }}</td>
                             <td>{{ $clientes->apellido }}</td>
                             <td>{{ $clientes->genero }}</td>

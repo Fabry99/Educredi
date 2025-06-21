@@ -41,17 +41,16 @@ class colocacionprestamoController extends Controller
 
     public function pdfcolocacion(Request $request)
     {
-
         // Inputs
         $sucursal = $request->input('sucursal');
         $supervisor = $request->input('supervisor');
         $asesor = $request->input('asesor');
         $centro = $request->input('centro');
         $grupo = $request->input('grupo');
-        $fecha_desde = $request->input('fecha_desde');
-        $fecha_hasta = $request->input('fecha_hasta');
-        $saldo0 = $request->input('saldo0');
 
+        $fecha_desde = Carbon::parse($request->input('fecha_desde'))->startOfDay();
+        $fecha_hasta = Carbon::parse($request->input('fecha_hasta'))->endOfDay();
+        $saldo0 = $request->input('saldo0');
 
         $saldoprestamo = DB::table('saldoprestamo as sl')
             ->leftJoin('clientes as cl', 'sl.id_cliente', '=', 'cl.id')
@@ -60,23 +59,13 @@ class colocacionprestamoController extends Controller
             ->leftJoin('asesores as ss', 'sl.ASESOR', '=', 'ss.id')
             ->leftJoin('supervisores as sp', 'sl.supervisor', '=', 'sp.id')
             ->leftJoin('sucursales as sc', 'sl.SUCURSAL', '=', 'sc.id')
-            ->whereDate('sl.created_at', '>=', $fecha_desde)
-            ->whereDate('sl.created_at', '<=', $fecha_hasta)
-            ->when(!empty($centro), function ($query) use ($centro) {
-                return $query->where('sl.centro', $centro);
-            })
-            ->when(!empty($grupo), function ($query) use ($grupo) {
-                return $query->where('sl.groupsolid', $grupo);
-            })
-            ->when(!empty($asesor), function ($query) use ($asesor) {
-                return $query->where('sl.ASESOR', $asesor);
-            })
-            ->when(!empty($sucursal), function ($query) use ($sucursal) {
-                return $query->where('sl.SUCURSAL', $sucursal);
-            })
-            ->when(!empty($supervisor), function ($query) use ($supervisor) {
-                return $query->where('sl.supervisor', $supervisor);
-            })->select(
+            ->whereBetween('sl.created_at', [$fecha_desde, $fecha_hasta])
+            ->when(!empty($centro), fn($q) => $q->where('sl.centro', $centro))
+            ->when(!empty($grupo), fn($q) => $q->where('sl.groupsolid', $grupo))
+            ->when(!empty($asesor), fn($q) => $q->where('sl.ASESOR', $asesor))
+            ->when(!empty($sucursal), fn($q) => $q->where('sl.SUCURSAL', $sucursal))
+            ->when(!empty($supervisor), fn($q) => $q->where('sl.supervisor', $supervisor))
+            ->select(
                 'cl.nombre as nombre_cliente',
                 'cl.apellido',
                 'cr.nombre as nombre_centro',
@@ -96,55 +85,30 @@ class colocacionprestamoController extends Controller
             ->get();
 
 
-        // Obtener el primer préstamo
         $primerPrestamo = $saldoprestamo->first();
 
-        // Agrupar por centro y grupo
+        // ✅ Agrupado por fecha y dentro de cada fecha por centro y grupo
         $agrupado = $saldoprestamo->groupBy(function ($item) {
-            return $item->centro . '_' . $item->groupsolid;
+            return Carbon::parse($item->created_at)->format('Y-m-d');
+        })->map(function ($items) {
+            return $items->groupBy(function ($item) {
+                return $item->centro . '_' . $item->groupsolid;
+            });
         });
 
-        // Total por asesor y grupo
-        $totalesPorAsesorGrupo = $saldoprestamo->groupBy(function ($item) {
-            return $item->nombre_asesor . '_' . $item->groupsolid;
-        })->map(fn($items) => $items->sum('MONTO'))->toArray();
 
-        // Total del asesor en el mes actual
+        // Totales por asesor y grupo
+        $totalesPorAsesorGrupo = $saldoprestamo->groupBy(fn($item) => $item->nombre_asesor . '_' . $item->groupsolid)
+            ->map(fn($items) => $items->sum('MONTO'))->toArray();
+
+        // Totales y conteo por asesor del mes actual
         $inicioMes = Carbon::now()->startOfMonth()->toDateString();
         $finMes = Carbon::now()->endOfMonth()->toDateString();
 
-        if (!empty($asesor)) {
-            $totalDelMes = DB::table('saldoprestamo')
-                ->whereBetween('created_at', [$inicioMes, $finMes])
-                ->where('ASESOR', $asesor)
-                ->sum('MONTO');
-        } else {
-            $totalDelMes = DB::table('saldoprestamo as sl')
-                ->join('asesores as a', 'sl.ASESOR', '=', 'a.id')
-                ->whereBetween('sl.created_at', [$inicioMes, $finMes])
-                ->select('a.nombre as nombre_asesor', DB::raw('SUM(sl.MONTO) as total'))
-                ->groupBy('sl.ASESOR', 'a.nombre')
-                ->get();
-        }
-
-        // Total por asesor
-        if (is_numeric($totalDelMes)) {
-            $totalesPorAsesor = [];
-            if (!empty($asesor)) {
-                $asesorNombre = DB::table('asesores')->where('id', $asesor)->value('nombre');
-                $totalesPorAsesor[$asesorNombre] = $totalDelMes;
-            }
-        } else {
-            $totalesPorAsesor = [];
-            foreach ($totalDelMes as $item) {
-                $totalesPorAsesor[$item->nombre_asesor] = floatval($item->total);
-            }
-        }
         $totalesPorAsesor = [];
         $conteoPorAsesor = [];
 
         if (!empty($asesor)) {
-            // Si se seleccionó un asesor específico
             $totalDelMes = DB::table('saldoprestamo')
                 ->whereBetween('created_at', [$inicioMes, $finMes])
                 ->where('ASESOR', $asesor)
@@ -156,7 +120,6 @@ class colocacionprestamoController extends Controller
             $totalesPorAsesor[$asesorNombre] = $totalDelMes->total ?? 0;
             $conteoPorAsesor[$asesorNombre] = $totalDelMes->cantidad ?? 0;
         } else {
-            // Varios asesores
             $totalDelMes = DB::table('saldoprestamo as sl')
                 ->join('asesores as a', 'sl.ASESOR', '=', 'a.id')
                 ->whereBetween('sl.created_at', [$inicioMes, $finMes])
@@ -174,9 +137,7 @@ class colocacionprestamoController extends Controller
             }
         }
 
-
-
-        // Generar PDF
+        // PDF
         $pdf = Pdf::loadView('PDF.colocacionprestamos', [
             'prestamos' => $agrupado,
             'conteoPorAsesor' => $conteoPorAsesor,
@@ -190,19 +151,15 @@ class colocacionprestamoController extends Controller
             'fecha_desde' => $fecha_desde,
             'fecha_hasta' => $fecha_hasta,
             'primerPrestamo' => $primerPrestamo,
-            'saldo0' => $saldo0 === 'true' || $saldo0 === true ? true : false,
+            'saldo0' => $saldo0 === 'true' || $saldo0 === true,
         ])
             ->setPaper('a4', 'portrait')
             ->setOptions(['defaultFont' => 'sans-serif']);
 
-        // Codificar PDF en base64 para enviar al frontend
-        $pdfContent = $pdf->output();
-        $pdfBase64 = base64_encode($pdfContent);
-
         return response()->json([
             'status' => 'success',
-            'message' => 'Datos insertados correctamente',
-            'pdf' => $pdfBase64
+            'message' => 'PDF generado correctamente',
+            'pdf' => base64_encode($pdf->output())
         ]);
     }
 }

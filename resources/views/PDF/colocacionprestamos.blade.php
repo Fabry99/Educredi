@@ -121,37 +121,38 @@
             </thead>
         </table>
 
-        <!-- Información vertical a la izquierda -->
+        @foreach ($prestamos as $fecha => $grupos)
+            @foreach ($grupos as $grupoClave => $grupo)
+                @php
+                    $primerItem = $grupo[0]; // Primer elemento para usar datos comunes
+                    $coleccion = collect($grupo); // Para sumar montos, saldos, etc.
+                @endphp
 
-        @foreach ($prestamos as $grupo)
-            @foreach ($grupo as $item)
-                {{-- Encabezado: se imprime solo la primera vez del grupo --}}
-                @if ($loop->first)
-                    <div class="informacion-pres">
-                        <span style="margin-top:10px;">
-                            Sucursal: {{ $item->nombre_sucursales ?? 'N/A' }}
-                        </span>
-                        <span style="margin-left: 4%;">
-                            Supervisor: {{ $item->nombre_supervisor ?? 'N/A' }}
-                        </span>
-                    </div>
+                {{-- Info arriba igual que en tu código original --}}
+                <div class="informacion-pres">
+                    <span style="margin-top:10px;">
+                        Sucursal: {{ $primerItem->nombre_sucursales ?? 'N/A' }}
+                    </span>
+                    <span style="margin-left: 4%;">
+                        Supervisor: {{ $primerItem->nombre_supervisor ?? 'N/A' }}
+                    </span>
+                </div>
 
-                    <div class="informacion-pres">
-                        <span style="margin-left: 8%;">
-                            Asesor: {{ $item->nombre_asesor ?? 'N/A' }}
-                        </span>
-                        <span style="margin-left: 12%;">
-                            SFDM: {{ $item->nombre_centro ?? 'N/A' }}
-                        </span>
-                        <span style="margin-left: 16%;">
-                            Grupo: {{ $item->nombre_grupo ?? 'N/A' }}
-                        </span>
-                    </div>
-                @endif
+                <div class="informacion-pres">
+                    <span style="margin-left: 8%;">
+                        Asesor: {{ $primerItem->nombre_asesor ?? 'N/A' }}
+                    </span>
+                    <span style="margin-left: 12%;">
+                        SFDM: {{ $primerItem->nombre_centro ?? 'N/A' }}
+                    </span>
+                    <span style="margin-left: 16%;">
+                        Grupo: {{ $primerItem->nombre_grupo ?? 'N/A' }}
+                    </span>
+                </div>
 
                 <div style="text-align: left; margin-top: 50px">
                     <span style="font-weight: 600;">
-                        {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}
+                        {{ \Carbon\Carbon::parse($primerItem->created_at)->format('d/m/Y') }}
                     </span>
                 </div>
 
@@ -171,54 +172,54 @@
                     @endforeach
                     <tr>
                         <td colspan="2" style="font-weight: bold; text-align: left;">
-                            Total de: {{ \Carbon\Carbon::parse($grupo->first()->created_at)->format('d/m/Y') }}
+                            Total de: {{ \Carbon\Carbon::parse($primerItem->created_at)->format('d/m/Y') }}
                         </td>
-                        <td style="text-align: center;">${{ number_format($grupo->sum('MONTO'), 2) }}</td>
+                        <td style="text-align: center;">${{ number_format($coleccion->sum('MONTO'), 2) }}</td>
                         <td style="text-align: center;">
-                            ${{ number_format($saldo0 ? 0 : $item->SALDO, 2) }}
+                            ${{ number_format($saldo0 ? 0 : $coleccion->sum('SALDO'), 2) }}
                         </td>
-                        <td style="text-align: center;">{{ $grupo->count() }}</td>
+                        <td style="text-align: center;">{{ $coleccion->count() }}</td>
                         <td></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left; ">
                             <span style="margin-left: 50px">Total
-                                de: {{ !empty($item->nombre_grupo) ? $item->nombre_grupo : 'N/A' }} </span>
+                                de: {{ $primerItem->nombre_grupo ?? 'N/A' }} </span>
                         </td>
-                        <td style="text-align: center;">${{ number_format($grupo->sum('MONTO'), 2) }}</td>
+                        <td style="text-align: center;">${{ number_format($coleccion->sum('MONTO'), 2) }}</td>
                         <td style="text-align: center;">
-                            ${{ number_format($saldo0 ? 0 : $item->SALDO, 2) }}
+                            ${{ number_format($saldo0 ? 0 : $coleccion->sum('SALDO'), 2) }}
                         </td>
-                        <td style="text-align: center;">{{ $grupo->count() }}</td>
+                        <td style="text-align: center;">{{ $coleccion->count() }}</td>
                         <td></td>
                     </tr>
                     <tr>
                         <td colspan="2" style="text-align: left; ">
-                            <span style="margin-left: 50%">Total de:
-                                {{ !empty($item->nombre_centro) ? $item->nombre_centro : 'N/A' }}</span>
+                            <span style="margin-left: 50%">
+                                Total de: {{ $primerItem->nombre_centro ?? 'N/A' }}</span>
                         </td>
-                        <td style="text-align: center;">${{ number_format($grupo->sum('MONTO'), 2) }}</td>
+                        <td style="text-align: center;">${{ number_format($coleccion->sum('MONTO'), 2) }}</td>
                         <td style="text-align: center;">
-                            ${{ number_format($saldo0 ? 0 : $item->SALDO, 2) }}
+                            ${{ number_format($saldo0 ? 0 : $coleccion->sum('SALDO'), 2) }}
                         </td>
 
-                        <td style="text-align: center;">{{ $grupo->count() }}</td>
+                        <td style="text-align: center;">{{ $coleccion->count() }}</td>
                         <td></td>
                     </tr>
                     <tr style="margin-bottom: 20px">
                         <td colspan="2" style="text-align: left;">
                             <span style="margin-left: 25%">
-                                Total de: {{ $item->nombre_asesor ?? 'N/A' }}
+                                Total de: {{ $primerItem->nombre_asesor ?? 'N/A' }}
                             </span>
                         </td>
                         <td style="text-align: center;">
-                            ${{ number_format($totalesPorAsesor[$item->nombre_asesor] ?? 0, 2) }}
+                            ${{ number_format($totalesPorAsesor[$primerItem->nombre_asesor] ?? 0, 2) }}
                         </td>
                         <td style="text-align: center;">
-                            ${{ number_format($totalesPorAsesor[$item->nombre_asesor] ?? 0, 2) }}
+                            ${{ number_format($totalesPorAsesor[$primerItem->nombre_asesor] ?? 0, 2) }}
                         </td>
                         <td style="text-align: center;">
-                            {{ $conteoPorAsesor[$item->nombre_asesor] ?? 0 }}
+                            {{ $conteoPorAsesor[$primerItem->nombre_asesor] ?? 0 }}
 
                         </td>
                         <td></td>

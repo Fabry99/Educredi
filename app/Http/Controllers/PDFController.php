@@ -59,9 +59,9 @@ class PDFController extends Controller
 
     public function obtenerprestamos(Request $request)
     {
-
         $id_centro = $request->input('id_centro');
         $id_grupo = $request->input('id_grupo');
+
 
         $prestamos = DB::table('historial_prestamos')
             ->where('centro', $id_centro)
@@ -69,21 +69,20 @@ class PDFController extends Controller
             ->orderBy('fecha_apertura')
             ->get();
 
-        // Agrupar manualmente en PHP por fecha_apertura y fecha_vencimiento
-        $grupos = $prestamos->groupBy(function ($item) {
-            return $item->fecha_apertura . '|' . $item->fecha_vencimiento;
-        });
+
+        // Agrupar manualmente en PHP solo por fecha_apertura
+        $grupos = $prestamos->groupBy('fecha_apertura');
+
 
         $resultado = [];
-        foreach ($grupos as $clave => $items) {
-            [$fecha_apertura, $fecha_vencimiento] = explode('|', $clave);
+        foreach ($grupos as $fecha_apertura => $items) {
 
             // Calcular monto total del grupo
             $monto_total = $items->sum('monto'); // Asegúrate que el campo sea 'monto'
 
+
             $resultado[] = [
                 'fecha_apertura' => $fecha_apertura,
-                'fecha_vencimiento' => $fecha_vencimiento,
                 'monto_total' => $monto_total,
                 'prestamos' => $items
             ];
@@ -93,8 +92,12 @@ class PDFController extends Controller
         return response()->json($resultado);
     }
 
+
+
     public function pdfmutuogrupal(Request $request)
     {
+
+
         $tipomutuo = $request->input('tipomutuo');
         $deptomutuo = $request->input('deptomutuo');
         $municipiomutuo = $request->input('municipiomutuo');
@@ -105,21 +108,29 @@ class PDFController extends Controller
         $filaSeleccionada = $request->input('filaSeleccionada', []);
 
         $fecha_apertura = $filaSeleccionada['fecha_apertura'] ?? null;
-        $fecha_vencimiento = $filaSeleccionada['fecha_vencimiento'] ?? null;
         $monto_total = $filaSeleccionada['monto_total'] ?? 0;
 
-        // Consulta clientes relacionados
+
+        $hayPrestamos = DB::table('historial_prestamos')
+            ->where('fecha_apertura', $fecha_apertura)
+            ->exists();
+
+
+        // Obtener la fecha de vencimiento si es necesario
+        $fecha_vencimiento = DB::table('historial_prestamos')
+            ->where('fecha_apertura', $fecha_apertura)
+            ->value('fecha_vencimiento');
+
+
         $clientes = DB::table('historial_prestamos as sl')
             ->join('clientes as cl', 'sl.id_cliente', '=', 'cl.id')
             ->join('departamentos as dp', 'cl.id_departamento', '=', 'dp.id')
             ->join('municipios as mn', 'cl.id_municipio', '=', 'mn.id')
-            ->leftJoin('debeser as deb', function ($join) use ($fecha_apertura, $fecha_vencimiento) {
+            ->leftJoin('debeser as deb', function ($join) use ($fecha_apertura) {
                 $join->on('deb.id_cliente', '=', 'sl.id_cliente')
-                    ->where('deb.fecha_apertura', $fecha_apertura)
-                    ->where('deb.fecha_vencimiento', $fecha_vencimiento);
+                    ->where('deb.fecha_apertura', $fecha_apertura);
             })
             ->where('sl.fecha_apertura', $fecha_apertura)
-            ->where('sl.fecha_vencimiento', $fecha_vencimiento)
             ->select(
                 'cl.id',
                 'cl.nombre',
@@ -129,7 +140,7 @@ class PDFController extends Controller
                 'cl.dui',
                 'sl.interes',
                 'sl.plazo',
-                DB::raw('MIN(deb.dias) as dias'), // <- Esto agrupa y solo te da un valor de días
+                DB::raw('MIN(deb.dias) as dias'),
                 'sl.cuota',
                 'dp.nombre as nombre_departamento',
                 'mn.nombre as nombre_municipio'
@@ -625,7 +636,7 @@ class PDFController extends Controller
         $nuevoTextrun->addText("Que para todos los efectos judiciales y extrajudiciales a la que pudiere dar lugar la presente obligación señalan como domicilio especial los tribunales de la Ciudad de Sonsonate, a cuya jurisdicción se someten expresamente.- Yo, el Notario DOY FE: Que las firmas puestas por las comparecientes se encuentran al documento que antecede la presente acta notarial SON AUTENTICAS por haber sido puestas a mi presencia y de su propio puño y letra por todos los comparecientes a quienes  expliqué los efectos legales de la presente ACTA NOTARIAL que consta de dos hojas útiles y leídas que se las hube íntegramente en un solo acto sin interrupción, la cual se encuentra redactada conforme su voluntad, la ratifican y para constancia firman conmigo. DE TODO DOY FE.- ");
 
         // Guardar y devolver el documento
-        $filename = 'Mutuo Grupal ' . strtoupper(str_replace(' ', '_', $centro)) . ' '  .'.docx';
+        $filename = 'Mutuo Grupal ' . strtoupper(str_replace(' ', '_', $centro)) . ' '  . '.docx';
         $temp_file = tempnam(sys_get_temp_dir(), $filename);
         $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
         $objWriter->save($temp_file);

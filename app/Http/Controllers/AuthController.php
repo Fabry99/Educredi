@@ -129,22 +129,22 @@ class AuthController extends Controller
     }
 
 
-  
+
 
 
     public function contador()
     {
         $rol = Auth::user()->rol;
         $departamentos = Departamentos::all();
-       
+
         $centros = Centros::all();
         $grupo = Grupos::all();
         $centros_grupos_clientes = Centros_Grupos_Clientes::with('clientes', 'grupos', 'centros')->get();
         $clientes = Clientes::with('departamento', 'municipio', 'Centros_Grupos_Clientes.grupos', 'Centros_Grupos_Clientes.centros')->get();
         // Recupera el cliente, lanza error si no se encuentra
         if ($rol == 'contador') {
-            return view('modules.dashboard.home', compact('rol', 'clientes', 'centros_grupos_clientes', 'centros', 'grupo','departamentos'));
-        }else{
+            return view('modules.dashboard.home', compact('rol', 'clientes', 'centros_grupos_clientes', 'centros', 'grupo', 'departamentos'));
+        } else {
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
     }
@@ -161,22 +161,22 @@ class AuthController extends Controller
 
         // Si el rol es 'contador', cargar la vista
         $centros = Centros::orderBy('id', 'DESC')->get();
-        
+
         $gruposPorCentro = Grupos::select('id_centros', DB::raw('count(*) as cantidad_grupos'))
             ->with('centro')  // Cargar la relación con el centro
             ->groupBy('id_centros')
             ->get();
         $contar = Centros::withCount('grupos')->get();
-  
-        
+
+
         $clientesPorCentroYGrupo = Centros_Grupos_Clientes::select(
             'centro_id',
             'grupo_id',
             DB::raw('COUNT(cliente_id) as clientes_count')
         )
-        ->with(['centros', 'grupos']) // Carga relaciones para usar los nombres
-        ->groupBy('centro_id', 'grupo_id')
-        ->get();
+            ->with(['centros', 'grupos']) // Carga relaciones para usar los nombres
+            ->groupBy('centro_id', 'grupo_id')
+            ->get();
 
         return view('modules.dashboard.grupos', compact('rol', 'centros', 'gruposPorCentro', 'clientesPorCentroYGrupo', 'contar'));
     }
@@ -187,7 +187,7 @@ class AuthController extends Controller
         $rol = Auth::user()->rol;
 
         // Verificar si el rol es 'contador'
-        if ($rol !== 'contador' && $rol !=='administrador')  {
+        if ($rol !== 'contador' && $rol !== 'administrador') {
             // Si no es contador, redirigir o mostrar un mensaje de error
             return redirect()->back()->with('error', 'No tienes acceso a esta sección.');
         }
@@ -196,11 +196,14 @@ class AuthController extends Controller
         return view('modules.dashboard.reversionliquidacion')->with('rol', $rol);
     }
 
-    
+
 
     public function cambiardatos()
     {
         $rol = Auth::user()->rol;
+        $asesor = Asesores::all();
+        $centro = Centros::all();
+
 
         // Verificar si el rol es 'contador'
         if ($rol !== 'contador') {
@@ -209,8 +212,6 @@ class AuthController extends Controller
         }
 
         // Si el rol es 'contador', cargar la vista
-        return view('modules.dashboard.cambiodatos')->with('rol', $rol);
+        return view('modules.dashboard.cambiodatos', compact('rol', 'asesor', 'centro'));
     }
-
-  
 }
