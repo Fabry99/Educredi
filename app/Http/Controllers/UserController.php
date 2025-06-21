@@ -7,11 +7,13 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
     public function nuevousuario(Request $request)
     {
+
         $request->validate([
             'nombre' => 'required|string|max:250',
             'apellido' => 'required|string|max:250',
@@ -23,6 +25,7 @@ class UserController extends Controller
         ]);
 
         try {
+
             // Crear usuario
             $usuario = User::create([
                 'name' => $request->nombre,
@@ -34,9 +37,9 @@ class UserController extends Controller
                 'estado' => $request->actividad,
             ]);
 
+
             // Crear texto plano para la bitácora (sin contraseña)
-            $textoBitacora = "";
-            $textoBitacora .= "Usuario creado:\n";
+            $textoBitacora = "Usuario creado:\n";
             $textoBitacora .= "- Nombre: {$request->nombre} {$request->apellido}\n";
             $textoBitacora .= "- Correo: {$request->correo}\n";
             $textoBitacora .= "- Rol: {$request->rol}\n";
@@ -55,8 +58,11 @@ class UserController extends Controller
                 'comentarios' => null
             ]);
 
+
             return redirect()->back()->with('success', 'Usuario creado correctamente');
         } catch (\Exception $e) {
+
+
             return redirect()->back()->with('error', 'Error al crear el usuario');
         }
     }

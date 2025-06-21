@@ -102,9 +102,9 @@ body::-webkit-scrollbar {
 }
 
 .login-image img {
-    min-height: 120px;
-    width: 120px;
-    border-radius: 70px;
+    min-height: 190px;
+    width: 190px;
+    border-radius: 95px;
     margin-top: 20px;
 }
 

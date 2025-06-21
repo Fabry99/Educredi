@@ -41,7 +41,7 @@
                         <th hidden>ID</th>
                         <th>Nombre</th>
                         <th>Correo</th>
-                        <th>Fecha de Nacimiento</th>
+                        <th style="width: 100px">Fecha de Nacimiento</th>
                         <th>Rol</th>
                         <th>Inicio de Sesión</th>
                         <th>Ultima Conexión</th>
@@ -60,14 +60,14 @@
                                 {{ $item->fecha_nacimiento == '0000-00-00' || !$item->fecha_nacimiento ? '-' : \Carbon\Carbon::parse($item->fecha_nacimiento)->format('d/m/Y') }}
                             </td>
                             <td>{{ $item->rol }}</td>
-                            <td>
+                            <td style="text-align: center">
                                 {{ optional($item->latestSession)->started_at
-                                    ? \Carbon\Carbon::parse($item->latestSession->started_at)->setTimezone('America/Guatemala')->format('Y-m-d H:i:s')
+                                    ? \Carbon\Carbon::parse($item->latestSession->started_at)->setTimezone('America/Guatemala')->format('d-m-Y H:i:s')
                                     : '-' }}
                             </td>
-                            <td>
+                            <td style="text-align: center">
                                 {{ optional($item->latestSession)->ended_at
-                                    ? \Carbon\Carbon::parse($item->latestSession->ended_at)->setTimezone('America/Guatemala')->format('Y-m-d H:i:s')
+                                    ? \Carbon\Carbon::parse($item->latestSession->ended_at)->setTimezone('America/Guatemala')->format('d-m-Y H:i:s')
                                     : '-' }}
                             </td>
                             <td>

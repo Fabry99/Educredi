@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ClientesController extends Controller
 {
@@ -122,6 +123,7 @@ class ClientesController extends Controller
 
     public function updateclient(Request $request)
     {
+
         $id = $request->id;
 
         $request->validate([
@@ -131,13 +133,26 @@ class ClientesController extends Controller
 
         $cliente = Clientes::findOrFail($id);
 
-        // Clonamos el estado anterior para comparar
         $clienteAnterior = $cliente->replicate();
 
-        // Actualizamos datos (excluyendo campos no relacionados y tokens)
-        $cliente->update($request->except(['id_centroeditar', 'id_grupoeditar', '_token', '_method', 'id']));
+        // Mapeamos los nombres correctos esperados por el modelo
+        $datosActualizar = $request->except([
+            'id_centroeditar',
+            'id_grupoeditar',
+            '_token',
+            '_method',
+            'id',
+            'id_departamentoeditcliente',
+            'id_municipioedit'
+        ]);
 
-        // Funciones para obtener nombre de departamento, municipio, centro y grupo
+        // Mapear manualmente a los nombres de columnas reales
+        $datosActualizar['id_departamento'] = $request->input('id_departamentoeditcliente');
+        $datosActualizar['id_municipio'] = $request->input('id_municipioedit');
+
+
+        $cliente->update($datosActualizar);
+
         function obtenerNombreDepartamento($id_departamento)
         {
             $dep = \App\Models\Departamentos::find($id_departamento);
@@ -162,7 +177,6 @@ class ClientesController extends Controller
             return $gru ? $gru->nombre : $id_grupo;
         }
 
-        // Mapeo de campos con nombres amigables
         $campos = [
             'nombre' => 'Nombre',
             'apellido' => 'Apellido',
@@ -200,7 +214,6 @@ class ClientesController extends Controller
             $valorAnterior = $clienteAnterior->$campo ?? '';
             $valorNuevo = $cliente->$campo ?? '';
 
-            // Si es campo de IDs, convertir a nombre para mostrar
             if ($campo == 'id_departamento') {
                 $valorAnterior = obtenerNombreDepartamento($valorAnterior);
                 $valorNuevo = obtenerNombreDepartamento($valorNuevo);
@@ -209,7 +222,7 @@ class ClientesController extends Controller
                 $valorNuevo = obtenerNombreMunicipio($valorNuevo);
             }
 
-            // Comparar y mostrar en bitácora
+
             if ($valorAnterior != $valorNuevo) {
                 if (empty($valorAnterior)) {
                     $textoBitacora .= "- {$nombreCampo}: '{$valorNuevo}'\n";
@@ -219,8 +232,10 @@ class ClientesController extends Controller
             }
         }
 
-        // Guardar en bitácora solo si hay cambios reales (más que solo el nombre completo)
-        if (strlen(trim($textoBitacora)) > strlen("Cliente actualizado:\n- Nombre completo: {$cliente->nombre} {$cliente->apellido}\n")) {
+        $logBitacora = trim($textoBitacora);
+  
+
+        if (strlen($logBitacora) > strlen("Cliente actualizado:\n- Nombre completo: {$cliente->nombre} {$cliente->apellido}\n")) {
             Bitacora::create([
                 'usuario' => Auth::user()->name,
                 'tabla_afectada' => 'CLIENTES',
@@ -230,14 +245,15 @@ class ClientesController extends Controller
                 'id_asesor' => Auth::user()->id,
                 'comentarios' => null
             ]);
+        } else {
         }
 
-        // Manejo de relación centro/grupo con nombres en bitácora
         if ($request->filled('id_centroeditar') && $request->filled('id_grupoeditar')) {
             $yaExisteRelacion = \App\Models\Centros_Grupos_Clientes::where('cliente_id', $cliente->id)
                 ->where('centro_id', $request->id_centroeditar)
                 ->where('grupo_id', $request->id_grupoeditar)
                 ->exists();
+
 
             if (!$yaExisteRelacion) {
                 \App\Models\Centros_Grupos_Clientes::create([
@@ -246,11 +262,9 @@ class ClientesController extends Controller
                     'grupo_id' => $request->id_grupoeditar
                 ]);
 
-                // Obtener nombres para bitácora
                 $nombreCentro = obtenerNombreCentro($request->id_centroeditar);
                 $nombreGrupo = obtenerNombreGrupo($request->id_grupoeditar);
 
-                // Guardar acción de relación centro/grupo en bitácora
                 $textoRelacion = "Relación agregada:\n";
                 $textoRelacion .= "- Cliente: {$cliente->nombre} {$cliente->apellido}\n";
                 $textoRelacion .= "- Centro: {$nombreCentro}\n";
@@ -265,6 +279,7 @@ class ClientesController extends Controller
                     'id_asesor' => Auth::user()->id,
                     'comentarios' => null
                 ]);
+
             }
         }
 
